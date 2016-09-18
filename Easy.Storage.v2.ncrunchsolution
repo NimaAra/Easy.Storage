@@ -1,0 +1,19 @@
+﻿<SolutionConfiguration>
+  <FileVersion>1</FileVersion>
+  <InferProjectReferencesUsingAssemblyNames>false</InferProjectReferencesUsingAssemblyNames>
+  <AllowParallelTestExecution>true</AllowParallelTestExecution>
+  <AllowTestsToRunInParallelWithThemselves>true</AllowTestsToRunInParallelWithThemselves>
+  <FrameworkUtilisationTypeForNUnit>UseDynamicAnalysis</FrameworkUtilisationTypeForNUnit>
+  <FrameworkUtilisationTypeForGallio>UseStaticAnalysis</FrameworkUtilisationTypeForGallio>
+  <FrameworkUtilisationTypeForMSpec>UseStaticAnalysis</FrameworkUtilisationTypeForMSpec>
+  <FrameworkUtilisationTypeForMSTest>UseStaticAnalysis</FrameworkUtilisationTypeForMSTest>
+  <FrameworkUtilisationTypeForXUnit2>UseDynamicAnalysis</FrameworkUtilisationTypeForXUnit2>
+  <NCrunchCacheStoragePath></NCrunchCacheStoragePath>
+  <MetricsExclusionList>
+..\Version.cs:Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj
+Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj\..
+Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj\..\
+Easy.Storage.Tests.Unit\Easy.Storage.Tests.Unit.csproj
+SqliteRollingConnection.cs:Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj
+</MetricsExclusionList>
+</SolutionConfiguration>
