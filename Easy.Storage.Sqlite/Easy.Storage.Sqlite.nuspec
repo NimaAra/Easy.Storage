@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Easy.Storage.Sqlite</id>
+    <version>$version$</version>
+    <title>Easy Storage Sqlite</title>
+    <authors>Nima Ara</authors>
+    <owners>Nima Ara</owners>
+    <projectUrl>https://github.com/NimaAra/Easy.Storage</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A fast and easy to use library for managing data with a SQLite database based on Dapper.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Easy Storage Database Micro ORM Dapper SQLite FTS</tags>
+  </metadata>
+</package>

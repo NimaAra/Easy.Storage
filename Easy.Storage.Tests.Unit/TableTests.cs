@@ -30,84 +30,76 @@
                 .Message.ShouldBe("The given key was not present in the dictionary.");
 
             var sqlQuery = table.GetSqlWithClause<SampleModel, string>(m => m.Text, "SELECT * FROM SampleModel;", true);
-            sqlQuery.ShouldBe(@"SELECT * FROM SampleModel
-AND
-    ([Text]  = @Value);");
+            sqlQuery.ShouldBe("SELECT * FROM SampleModel\r\nAND\r\n    ([Text]  = @Value);");
 
-            table.Select.ShouldBe(@"SELECT
-    [Id] AS Id,
-    [Text] AS Text,
-    [Int] AS Int,
-    [Decimal] AS Decimal,
-    [Double] AS Double,
-    [Float] AS Float,
-    [Flag] AS Flag,
-    [Binary] AS Binary,
-    [Key] AS Guid,
-    [DateTime] AS DateTime,
-    [DateTimeOffset] AS DateTimeOffset
-FROM [SampleModel]
-WHERE
-    1 = 1;");
+            table.Select.ShouldBe("SELECT\r\n"
+                    + "    [Id] AS Id,\r\n"
+                    + "    [Text] AS Text,\r\n"
+                    + "    [Int] AS Int,\r\n"
+                    + "    [Decimal] AS Decimal,\r\n"
+                    + "    [Double] AS Double,\r\n"
+                    + "    [Float] AS Float,\r\n"
+                    + "    [Flag] AS Flag,\r\n"
+                    + "    [Binary] AS Binary,\r\n"
+                    + "    [Key] AS Guid,\r\n"
+                    + "    [DateTime] AS DateTime,\r\n"
+                    + "    [DateTimeOffset] AS DateTimeOffset\r\n"
+                    + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
 
-            table.Insert.ShouldBe(@"INSERT INTO [SampleModel]
-(
-    [Text],
-    [Int],
-    [Decimal],
-    [Double],
-    [Float],
-    [Flag],
-    [Binary],
-    [Key],
-    [DateTime],
-    [DateTimeOffset]
-)
-VALUES
-(
-    @Text,
-    @Int,
-    @Decimal,
-    @Double,
-    @Float,
-    @Flag,
-    @Binary,
-    @Guid,
-    @DateTime,
-    @DateTimeOffset
-);");
+            table.Insert.ShouldBe("INSERT INTO [SampleModel]\r\n"
+                    + "(\r\n"
+                    + "    [Text],\r\n"
+                    + "    [Int],\r\n"
+                    + "    [Decimal],\r\n"
+                    + "    [Double],\r\n"
+                    + "    [Float],\r\n"
+                    + "    [Flag],\r\n"
+                    + "    [Binary],\r\n"
+                    + "    [Key],\r\n"
+                    + "    [DateTime],\r\n"
+                    + "    [DateTimeOffset]\r\n"
+                    + ")\r\n"
+                    + "VALUES\r\n"
+                    + "(\r\n"
+                    + "    @Text,\r\n"
+                    + "    @Int,\r\n"
+                    + "    @Decimal,\r\n"
+                    + "    @Double,\r\n"
+                    + "    @Float,\r\n"
+                    + "    @Flag,\r\n"
+                    + "    @Binary,\r\n"
+                    + "    @Guid,\r\n"
+                    + "    @DateTime,\r\n"
+                    + "    @DateTimeOffset\r\n"
+                    + ");");
 
-            table.UpdateDefault.ShouldBe(@"UPDATE [SampleModel] SET
-    [Text] = @Text,
-    [Int] = @Int,
-    [Decimal] = @Decimal,
-    [Double] = @Double,
-    [Float] = @Float,
-    [Flag] = @Flag,
-    [Binary] = @Binary,
-    [Key] = @Guid,
-    [DateTime] = @DateTime,
-    [DateTimeOffset] = @DateTimeOffset
-WHERE
-    [Id] = @Id;");
+            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
+                    + "    [Text] = @Text,\r\n"
+                    + "    [Int] = @Int,\r\n"
+                    + "    [Decimal] = @Decimal,\r\n"
+                    + "    [Double] = @Double,\r\n"
+                    + "    [Float] = @Float,\r\n"
+                    + "    [Flag] = @Flag,\r\n"
+                    + "    [Binary] = @Binary,\r\n"
+                    + "    [Key] = @Guid,\r\n"
+                    + "    [DateTime] = @DateTime,\r\n"
+                    + "    [DateTimeOffset] = @DateTimeOffset\r\n"
+                    + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateCustom.ShouldBe(@"UPDATE [SampleModel] SET
-    [Text] = @Text,
-    [Int] = @Int,
-    [Decimal] = @Decimal,
-    [Double] = @Double,
-    [Float] = @Float,
-    [Flag] = @Flag,
-    [Binary] = @Binary,
-    [Key] = @Guid,
-    [DateTime] = @DateTime,
-    [DateTimeOffset] = @DateTimeOffset
-WHERE
-    1 = 1;");
+            table.UpdateCustom.ShouldBe("UPDATE [SampleModel] SET\r\n"
+                    + "    [Text] = @Text,\r\n"
+                    + "    [Int] = @Int,\r\n"
+                    + "    [Decimal] = @Decimal,\r\n"
+                    + "    [Double] = @Double,\r\n"
+                    + "    [Float] = @Float,\r\n"
+                    + "    [Flag] = @Flag,\r\n"
+                    + "    [Binary] = @Binary,\r\n"
+                    + "    [Key] = @Guid,\r\n"
+                    + "    [DateTime] = @DateTime,\r\n"
+                    + "    [DateTimeOffset] = @DateTimeOffset\r\n"
+                    + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe(@"DELETE FROM [SampleModel]
-WHERE
-    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
         }
     }
 }

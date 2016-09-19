@@ -15,19 +15,18 @@
             var tableSql = SqliteSqlGenerator.Table<SampleModel>();
 
             tableSql.ShouldNotBeNullOrWhiteSpace();
-            tableSql.ShouldBe(@"CREATE TABLE IF NOT EXISTS [SampleModel] (
-    [Id] INTEGER PRIMARY KEY NOT NULL,
-    [Text] TEXT NOT NULL,
-    [Int] INTEGER NOT NULL,
-    [Decimal] REAL NOT NULL,
-    [Double] REAL NOT NULL,
-    [Float] REAL NOT NULL,
-    [Flag] INTEGER NOT NULL,
-    [Binary] BLOB NOT NULL,
-    [Key] TEXT NOT NULL,
-    [DateTime] TEXT NOT NULL,
-    [DateTimeOffset] TEXT NOT NULL
-);");
+            tableSql.ShouldBe("CREATE TABLE IF NOT EXISTS [SampleModel] (\r\n"
+                        + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
+                        + "    [Text] TEXT NOT NULL,\r\n"
+                        + "    [Int] INTEGER NOT NULL,\r\n"
+                        + "    [Decimal] REAL NOT NULL,\r\n"
+                        + "    [Double] REAL NOT NULL,\r\n"
+                        + "    [Float] REAL NOT NULL,\r\n"
+                        + "    [Flag] INTEGER NOT NULL,\r\n"
+                        + "    [Binary] BLOB NOT NULL,\r\n"
+                        + "    [Key] TEXT NOT NULL,\r\n"
+                        + "    [DateTime] TEXT NOT NULL,\r\n"
+                        + "    [DateTimeOffset] TEXT NOT NULL\r\n);");
         }
 
         [Test]
@@ -38,23 +37,19 @@
 
             var ftsTableSql = SqliteSqlGenerator.FtsTable<SampleModel>(m => m.Flag, m => m.Text, m => m.Guid);
             ftsTableSql.ShouldNotBeNullOrWhiteSpace();
-            ftsTableSql.ShouldBe(@"CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content='SampleModel', [Flag], [Text], [Key]);
-
-CREATE TRIGGER IF NOT EXISTS SampleModel_bu BEFORE UPDATE ON SampleModel BEGIN
-    DELETE FROM SampleModel_fts WHERE docId = old.rowId;
-END;
-
-CREATE TRIGGER IF NOT EXISTS SampleModel_bd BEFORE DELETE ON SampleModel BEGIN
-    DELETE FROM SampleModel_fts WHERE docId = old.rowId;
-END;
-
-CREATE TRIGGER IF NOT EXISTS SampleModel_au AFTER UPDATE ON SampleModel BEGIN
-    INSERT INTO SampleModel_fts (docId, [Flag], [Text], [Key]) VALUES (new.rowId, new.[Flag], new.[Text], new.[Key]);
-END;
-
-CREATE TRIGGER IF NOT EXISTS SampleModel_ai AFTER INSERT ON SampleModel BEGIN
-    INSERT INTO SampleModel_fts (docId, [Flag], [Text], [Key]) VALUES (new.rowId, new.[Flag], new.[Text], new.[Key]);
-END;");
+            ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content='SampleModel', [Flag], [Text], [Key]);\r\n\r\n"
+                        + "CREATE TRIGGER IF NOT EXISTS SampleModel_bu BEFORE UPDATE ON SampleModel BEGIN\r\n"
+                        + "    DELETE FROM SampleModel_fts WHERE docId = old.rowId;\r\n"
+                        + "END;\r\n\r\n"
+                        + "CREATE TRIGGER IF NOT EXISTS SampleModel_bd BEFORE DELETE ON SampleModel BEGIN\r\n"
+                        + "    DELETE FROM SampleModel_fts WHERE docId = old.rowId;\r\n"
+                        + "END;\r\n\r\n"
+                        + "CREATE TRIGGER IF NOT EXISTS SampleModel_au AFTER UPDATE ON SampleModel BEGIN\r\n"
+                        + "    INSERT INTO SampleModel_fts (docId, [Flag], [Text], [Key]) VALUES (new.rowId, new.[Flag], new.[Text], new.[Key]);\r\n"
+                        + "END;\r\n\r\n"
+                        + "CREATE TRIGGER IF NOT EXISTS SampleModel_ai AFTER INSERT ON SampleModel BEGIN\r\n"
+                        + "    INSERT INTO SampleModel_fts (docId, [Flag], [Text], [Key]) VALUES (new.rowId, new.[Flag], new.[Text], new.[Key]);\r\n"
+                        + "END;");
         }
     }
 }
