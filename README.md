@@ -7,4 +7,4 @@ ___
 # Details Coming soon...
 
 #### NuGets:
-* SQLite: https://www.nuget.org/packages/Easy.Storage.Sqlite/
+* **SQLite**: https://www.nuget.org/packages/Easy.Storage.Sqlite/
