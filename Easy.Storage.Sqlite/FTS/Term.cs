@@ -15,7 +15,7 @@
     /// <typeparam name="T">The type of the model representing the data.</typeparam>
     public sealed class Term<T> : ITerm<T>
     {
-        private const string AndClause = " AND ";
+        private const string AndClause = " "; // space instead of AND
         private const string OrClause = " OR ";
         private const string IntersectClause = "\r\nINTERSECT\r\n";
         private const string UnionClause = "\r\nUNION\r\n";

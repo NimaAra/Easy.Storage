@@ -43,7 +43,7 @@
             term.AndNot(Match.All, l => l.Message, "One", "Two");
             term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE docId NOT IN"
                 + "\r\n("
-                + "\r\n    SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" AND \"Two\"'"
+                + "\r\n    SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" \"Two\"'"
                 + "\r\n)");
         }
 
@@ -62,7 +62,7 @@
             var term = Term<Log>.All;
 
             term.And(Match.All, l => l.Message, "One", "Two");
-            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" AND \"Two\"'");
+            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" \"Two\"'");
         }
 
         [Test]
@@ -86,9 +86,9 @@
             term.And(Match.All, l => l.Message, "One", "Two")
                 .And(Match.All, l => l.Level, Level.Debug, Level.Error);
 
-            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" AND \"Two\"'"
+            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" \"Two\"'"
                 + "\r\nINTERSECT\r\n"
-                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" AND \"3\"'");
+                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" \"3\"'");
         }
 
         [Test]
@@ -112,9 +112,9 @@
             term.And(Match.All, l => l.Message, "One", "Two")
                 .Or(Match.All, l => l.Level, Level.Debug, Level.Error);
 
-            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" AND \"Two\"'"
+            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" \"Two\"'"
                 + "\r\nUNION\r\n"
-                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" AND \"3\"'");
+                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" \"3\"'");
         }
 
         [Test]
@@ -126,13 +126,13 @@
                 .Or(Match.All, l => l.Level, Level.Debug, Level.Error)
                 .OrNot(Match.All, l => l.Message, "Foo", "Bar");
 
-            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" AND \"Two\"'"
+            term.ToString().ShouldBe("SELECT docId FROM Log_fts WHERE [Message] MATCH '\"One\" \"Two\"'"
                 + "\r\nUNION\r\n"
-                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" AND \"3\"'"
+                + "SELECT docId FROM Log_fts WHERE [Level] MATCH '\"0\" \"3\"'"
                 + "\r\nUNION\r\n"
                 + "SELECT docId FROM Log_fts WHERE docId NOT IN"
                 + "\r\n("
-                + "\r\n    SELECT docId FROM Log_fts WHERE [Message] MATCH '\"Foo\" AND \"Bar\"'"
+                + "\r\n    SELECT docId FROM Log_fts WHERE [Message] MATCH '\"Foo\" \"Bar\"'"
                 + "\r\n)");
         }
 

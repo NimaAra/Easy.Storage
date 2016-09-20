@@ -299,6 +299,97 @@
             }
         }
 
+        [Test]
+        public async Task When_searching_for_records_in_a_table_for_all_of_the_supplied_keywords()
+        {
+            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                await Given_a_logTtable_and_an_ftsTable(db.Connection);
+
+                var logs = new[]
+                {
+                    new Log {Level = Level.Debug, Message = "John is playing football"},
+                    new Log {Level = Level.Info, Message = "Mary is playing football"},
+                    new Log {Level = Level.Warn, Message = "Someone is playing football"},
+                    new Log {Level = Level.Warn, Message = "John with Mary are playing football"},
+                    new Log {Level = Level.Warn, Message = "football is awesome"}
+                };
+
+                var repo = db.GetRepository<Log>();
+                await repo.InsertAsync(logs);
+
+                var term = Term<Log>.All.And(Match.All, l => l.Message, "John", "Mary", "football");
+
+                var result1 = (await db.SearchAsync(term)).ToArray();
+                result1.Length.ShouldBe(1);
+
+                result1[0].Level.ShouldBe(logs[3].Level);
+                result1[0].Message.ShouldBe(logs[3].Message);
+
+                term.Clear();
+                term.And(Match.All, l => l.Message, "play*", "football");
+
+                var result2 = (await db.SearchAsync(term)).ToArray();
+                result2.Length.ShouldBe(4);
+
+                result2[0].Level.ShouldBe(logs[0].Level);
+                result2[0].Message.ShouldBe(logs[0].Message);
+
+                result2[1].Level.ShouldBe(logs[1].Level);
+                result2[1].Message.ShouldBe(logs[1].Message);
+
+                result2[2].Level.ShouldBe(logs[2].Level);
+                result2[2].Message.ShouldBe(logs[2].Message);
+
+                result2[3].Level.ShouldBe(logs[3].Level);
+                result2[3].Message.ShouldBe(logs[3].Message);
+            }
+        }
+
+        [Test]
+        public async Task When_searching_for_records_in_a_table_for_any_of_the_supplied_keywords()
+        {
+            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                await Given_a_logTtable_and_an_ftsTable(db.Connection);
+
+                var logs = new[]
+                {
+                    new Log {Level = Level.Debug, Message = "John is playing football"},
+                    new Log {Level = Level.Info, Message = "Mary is playing football"},
+                    new Log {Level = Level.Warn, Message = "Someone is playing football"},
+                    new Log {Level = Level.Warn, Message = "John with Mary are playing football"},
+                    new Log {Level = Level.Warn, Message = "football is awesome"}
+                };
+
+                var repo = db.GetRepository<Log>();
+                await repo.InsertAsync(logs);
+
+                var term = Term<Log>.All.And(Match.Any, l => l.Message, "John", "Mary", "football");
+
+                var result1 = (await db.SearchAsync(term)).ToArray();
+                result1.Length.ShouldBe(5);
+
+                term.Clear();
+                term.And(Match.Any, l => l.Message, "someone", "mary", "awe*");
+
+                var result2 = (await db.SearchAsync(term)).ToArray();
+                result2.Length.ShouldBe(4);
+
+                result2[0].Level.ShouldBe(logs[1].Level);
+                result2[0].Message.ShouldBe(logs[1].Message);
+
+                result2[1].Level.ShouldBe(logs[2].Level);
+                result2[1].Message.ShouldBe(logs[2].Message);
+
+                result2[2].Level.ShouldBe(logs[3].Level);
+                result2[2].Message.ShouldBe(logs[3].Message);
+
+                result2[3].Level.ShouldBe(logs[4].Level);
+                result2[3].Message.ShouldBe(logs[4].Message);
+            }
+        }
+
         private static async Task Given_a_logTtable_and_an_ftsTable(IDbConnection connection)
         {
             var tableSql = SqliteSqlGenerator.Table<Log>();
