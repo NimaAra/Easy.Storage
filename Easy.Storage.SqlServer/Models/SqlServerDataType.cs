@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.SqlServer.Models
+﻿#pragma warning disable 1591
+namespace Easy.Storage.SqlServer.Models
 {
     /// <summary>
     /// Represents <c>SQL Server</c> data types.
