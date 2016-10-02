@@ -1,6 +1,7 @@
 ﻿namespace Easy.Storage.Tests.Unit.Sqlite
 {
     using System;
+    using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Sqlite;
@@ -14,7 +15,7 @@
     internal sealed class SqliteDatabaseTests : Context
     {
         [Test]
-        public async Task When_getting_sqlite_objects_of_a_table()
+        public async Task When_getting_objects_of_a_table()
         {
             using (var db = new SqliteDatabase("Data Source=:memory:"))
             {
@@ -89,7 +90,7 @@
         }
 
         [Test]
-        public async Task When_getting_sqlite_table_info_of_non_aliased_model()
+        public async Task When_getting_table_info_of_non_aliased_model()
         {
             using (var db = new SqliteDatabase("Data Source=:memory:"))
             {
@@ -103,23 +104,23 @@
 
                 Array.TrueForAll(tableInfo.Columns, i => i.TableName == "Person").ShouldBeTrue();
 
-                tableInfo.Columns[0].ColumnId.ShouldBe(0);
-                tableInfo.Columns[0].ColumnName.ShouldBe("Id");
-                tableInfo.Columns[0].ColumnTpe.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[0].Id.ShouldBe(0);
+                tableInfo.Columns[0].Name.ShouldBe("Id");
+                tableInfo.Columns[0].Type.ShouldBe(SqliteDataType.INTEGER);
                 tableInfo.Columns[0].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[0].IsPrimaryKey.ShouldBeTrue();
                 tableInfo.Columns[0].NotNull.ShouldBeTrue();
 
-                tableInfo.Columns[1].ColumnId.ShouldBe(1);
-                tableInfo.Columns[1].ColumnName.ShouldBe("Name");
-                tableInfo.Columns[1].ColumnTpe.ShouldBe(SqliteDataType.TEXT);
+                tableInfo.Columns[1].Id.ShouldBe(1);
+                tableInfo.Columns[1].Name.ShouldBe("Name");
+                tableInfo.Columns[1].Type.ShouldBe(SqliteDataType.TEXT);
                 tableInfo.Columns[1].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[1].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[1].NotNull.ShouldBeTrue();
 
-                tableInfo.Columns[2].ColumnId.ShouldBe(2);
-                tableInfo.Columns[2].ColumnName.ShouldBe("Age");
-                tableInfo.Columns[2].ColumnTpe.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[2].Id.ShouldBe(2);
+                tableInfo.Columns[2].Name.ShouldBe("Age");
+                tableInfo.Columns[2].Type.ShouldBe(SqliteDataType.INTEGER);
                 tableInfo.Columns[2].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[2].NotNull.ShouldBeTrue();
@@ -127,7 +128,7 @@
         }
 
         [Test]
-        public async Task When_getting_sqlite_table_info_of_aliased_model()
+        public async Task When_getting_table_info_of_aliased_model()
         {
             using (var db = new SqliteDatabase("Data Source=:memory:"))
             {
@@ -141,23 +142,23 @@
 
                 Array.TrueForAll(tableInfo.Columns, i => i.TableName == "Person").ShouldBeTrue();
 
-                tableInfo.Columns[0].ColumnId.ShouldBe(0);
-                tableInfo.Columns[0].ColumnName.ShouldBe("Id");
-                tableInfo.Columns[0].ColumnTpe.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[0].Id.ShouldBe(0);
+                tableInfo.Columns[0].Name.ShouldBe("Id");
+                tableInfo.Columns[0].Type.ShouldBe(SqliteDataType.INTEGER);
                 tableInfo.Columns[0].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[0].IsPrimaryKey.ShouldBeTrue();
                 tableInfo.Columns[0].NotNull.ShouldBeTrue();
 
-                tableInfo.Columns[1].ColumnId.ShouldBe(1);
-                tableInfo.Columns[1].ColumnName.ShouldBe("Name");
-                tableInfo.Columns[1].ColumnTpe.ShouldBe(SqliteDataType.TEXT);
+                tableInfo.Columns[1].Id.ShouldBe(1);
+                tableInfo.Columns[1].Name.ShouldBe("Name");
+                tableInfo.Columns[1].Type.ShouldBe(SqliteDataType.TEXT);
                 tableInfo.Columns[1].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[1].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[1].NotNull.ShouldBeTrue();
 
-                tableInfo.Columns[2].ColumnId.ShouldBe(2);
-                tableInfo.Columns[2].ColumnName.ShouldBe("Age");
-                tableInfo.Columns[2].ColumnTpe.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[2].Id.ShouldBe(2);
+                tableInfo.Columns[2].Name.ShouldBe("Age");
+                tableInfo.Columns[2].Type.ShouldBe(SqliteDataType.INTEGER);
                 tableInfo.Columns[2].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[2].NotNull.ShouldBeTrue();
@@ -165,14 +166,52 @@
         }
 
         [Test]
-        public void When_getting_sqlite_table_info_of_a_non_existing_table()
+        public void When_getting_table_info_of_a_non_existing_table()
         {
             using (var db = new SqliteDatabase("Data Source=:memory:"))
             {
-                var ex = Should.Throw<InvalidOperationException>(() => db.GetTableInfoAsync<Person>());
-                ex.Message.ShouldBe("Table: Person does not seem to exist.");
-                ex.InnerException.ShouldBeOfType<InvalidOperationException>();
-                ex.InnerException?.Message.ShouldBe("No columns were selected");
+                var ex1 = Should.Throw<InvalidOperationException>(() => db.GetTableInfoAsync<Person>());
+                ex1.Message.ShouldBe("Table: Person does not seem to exist.");
+                ex1.InnerException.ShouldBeOfType<InvalidOperationException>();
+                ex1.InnerException?.Message.ShouldBe("No columns were selected");
+
+                var ex2 = Should.Throw<InvalidOperationException>(() => db.GetTableInfoAsync("Bambolini"));
+                ex2.Message.ShouldBe("Table: Bambolini does not seem to exist.");
+                ex2.InnerException.ShouldBeOfType<InvalidOperationException>();
+                ex2.InnerException?.Message.ShouldBe("No columns were selected");
+            }
+        }
+
+        [Test]
+        public async Task When_checking_table_exists()
+        {
+            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                (await db.ExistsAsync<Person>()).ShouldBeFalse();
+
+                await db.Connection.ExecuteAsync(TableQuery);
+
+                (await db.ExistsAsync<Person>()).ShouldBeTrue();
+            }
+        }
+
+        [Test]
+        public async Task When_executing_some_sql()
+        {
+            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                await db.Connection.ExecuteAsync(TableQuery);
+
+                (await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Person"))
+                    .ShouldBe(0);
+
+                var allRows = await db.QueryAsync<dynamic>("SELECT * FROM Person");
+                allRows.ShouldBeEmpty();
+
+                var ex = Should.Throw<SQLiteException>(async () => 
+                    await db.ExecuteAsync("SELECT * FROM SomeTable;"));
+                ex.Message.ShouldBe("SQL logic error or missing database\r\nno such table: SomeTable");
+                ex.InnerException.ShouldBeNull();
             }
         }
     }

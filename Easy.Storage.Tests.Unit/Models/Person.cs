@@ -5,9 +5,9 @@
     internal sealed class Person
     {
         [PrimaryKey]
-        public ulong Id { get; set; }
+        public long Id { get; set; }
 
         public string Name { get; set; }
-        public uint Age { get; set; }
+        public int Age { get; set; }
     }
 }

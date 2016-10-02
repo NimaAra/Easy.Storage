@@ -7,11 +7,11 @@
     {
         [PrimaryKey]
         [Alias("Id")]
-        public ulong SomeId { get; set; }
+        public long SomeId { get; set; }
 
         [Alias("Name")]
         public string SomeName { get; set; }
 
-        public uint Age { get; set; }
+        public int Age { get; set; }
     }
 }

@@ -1,49 +1,92 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SqlServer
 {
     using System;
+    using System.Data.SqlClient;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Easy.Storage.Common;
-    using Easy.Storage.Sqlite;
+    using Easy.Storage.Common.Extensions;
+    using Easy.Storage.SqlServer;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
-    using Easy.Storage.Common.Extensions;
 
     [TestFixture]
-    internal sealed class SqliteRepositoryTests : Context
+    internal sealed class SqlServerRepositoryTests : Context
     {
-        [Test]
-        public async Task When_checking_if_table_exists_non_aliased_models()
+        [OneTimeSetUp]
+        public void SetUp()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            if (!IsRunningLocaly) { Assert.Ignore("Ignoring SQL Server Tests"); }
+        }
+
+        [Test]
+        public async Task Run()
+        {
+            await When_checking_if_table_exists_non_aliased_models();
+            await When_checking_if_table_exists_aliased_models();
+            await When_getting_non_aliased_models_lazily();
+            await When_getting_aliased_models_lazily();
+            await When_getting_non_aliased_models();
+            await When_getting_aliased_models();
+            await When_getting_non_aliased_models_by_selector();
+            await When_getting_aliased_models_by_selector();
+            await When_getting_non_aliased_models_by_filter();
+            await When_inserting_single_non_aliased_model();
+            await When_inserting_single_aliased_model();
+            await When_inserting_multiple_non_aliased_model();
+            await When_inserting_multiple_aliased_model();
+            await When_updating_single_by_id_non_aliased_model();
+            await When_updating_single_by_id_aliased_model();
+            await When_updating_custom_non_aliased_model();
+            await When_updating_custom_aliased_model();
+            await When_updating_multiple_non_aliased_model();
+            await When_updating_multiple_aliased_model();
+            await When_deleting_non_aliased_model();
+            await When_deleting_aliased_model();
+            await When_deleting_all_non_aliased_model();
+            await When_deleting_all_aliased_model();
+            await When_counting_non_aliased_model();
+            await When_counting_aliased_model();
+            await When_min_non_aliased_model();
+            await When_min_aliased_model();
+            await When_max_non_aliased_model();
+            await When_max_aliased_model();
+            await When_sum_non_aliased_model();
+            await When_sum_aliased_model();
+            await When_avg_non_aliased_model();
+            await When_avg_aliased_model();
+            await When_doing_multiple_operations_with_sample_model();
+
+            await SqlServerRepositoryTranscationTests.Run();
+        }
+
+        private static async Task When_checking_if_table_exists_non_aliased_models()
+        {
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
-                (await db.ExistsAsync<Person>()).ShouldBeFalse();
-                await db.Connection.ExecuteAsync(TableQuery);
                 (await db.ExistsAsync<Person>()).ShouldBeTrue();
             }
         }
 
-        [Test]
-        public async Task When_checking_if_table_exists_aliased_models()
+        private static async Task When_checking_if_table_exists_aliased_models()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
-                (await db.ExistsAsync<MyPerson>()).ShouldBeFalse();
-                await db.Connection.ExecuteAsync(TableQuery);
                 (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
             }
         }
 
-        [Test]
-        public async Task When_getting_non_aliased_models_lazily()
+        private static async Task When_getting_non_aliased_models_lazily()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
@@ -54,7 +97,7 @@
                     new Person { Id = 123, Name = "P3", Age = 30 },
                     new Person { Name = "P4", Age = 40 }
                 };
-
+                
                 (await repo.InsertAsync(people)).ShouldBe(people.Length);
 
                 var insertedPeopleBuffered = (await repo.GetLazyAsync()).ToArray();
@@ -96,15 +139,16 @@
                 insertedPeopleUnBuffered[3].Age.ShouldBe(40);
             }
         }
-
-        [Test]
-        public async Task When_getting_aliased_models_lazily()
+                
+        private static async Task When_getting_aliased_models_lazily()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
@@ -157,15 +201,16 @@
                 insertedPeopleUnBuffered[3].Age.ShouldBe(40);
             }
         }
-
-        [Test]
-        public async Task When_getting_non_aliased_models()
+                
+        private static async Task When_getting_non_aliased_models()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -218,15 +263,16 @@
                 insertedPeopleUnBuffered[3].Age.ShouldBe(40);
             }
         }
-
-        [Test]
-        public async Task When_getting_aliased_models()
+                
+        private static async Task When_getting_aliased_models()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -280,14 +326,15 @@
             }
         }
 
-        [Test]
-        public async Task When_getting_non_aliased_models_by_selector()
+        private static async Task When_getting_non_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -354,14 +401,15 @@
             }
         }
 
-        [Test]
-        public async Task When_getting_aliased_models_by_selector()
+        private static async Task When_getting_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -428,14 +476,16 @@
             }
         }
 
-        [Test] // [ToDo] - Add more filters then do the same for aliased
-        public async Task When_getting_non_aliased_models_by_filter()
+        // [ToDo] - Add more filters then do the same for aliased
+        private static async Task When_getting_non_aliased_models_by_filter()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -487,14 +537,15 @@
             }
         }
 
-        [Test]
-        public async Task When_inserting_single_non_aliased_model()
+        private static async Task When_inserting_single_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -544,14 +595,15 @@
             }
         }
 
-        [Test]
-        public async Task When_inserting_single_aliased_model()
+        private static async Task When_inserting_single_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -601,14 +653,15 @@
             }
         }
 
-        [Test]
-        public async Task When_inserting_multiple_non_aliased_model()
+        private static async Task When_inserting_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -648,14 +701,15 @@
             }
         }
 
-        [Test]
-        public async Task When_inserting_multiple_aliased_model()
+        private static async Task When_inserting_multiple_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -695,14 +749,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_single_by_id_non_aliased_model()
+        private static async Task When_updating_single_by_id_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -747,14 +802,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_single_by_id_aliased_model()
+        private static async Task When_updating_single_by_id_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -799,14 +855,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_custom_non_aliased_model()
+        private static async Task When_updating_custom_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -894,14 +951,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_custom_aliased_model()
+        private static async Task When_updating_custom_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -989,14 +1047,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_multiple_non_aliased_model()
+        private static async Task When_updating_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1059,14 +1118,15 @@
             }
         }
 
-        [Test]
-        public async Task When_updating_multiple_aliased_model()
+        private static async Task When_updating_multiple_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1129,14 +1189,15 @@
             }
         }
 
-        [Test]
-        public async Task When_deleting_non_aliased_model()
+        private static async Task When_deleting_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1205,14 +1266,15 @@
             }
         }
 
-        [Test]
-        public async Task When_deleting_aliased_model()
+        private static async Task When_deleting_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1281,15 +1343,16 @@
             }
         }
 
-        [Test]
-        public async Task When_deleting_all_non_aliased_model()
+        private static async Task When_deleting_all_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
-                
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
                 (await repo.GetAsync()).ShouldBeEmpty();
                 
                 (await repo.DeleteAllAsync()).ShouldBe(0);
@@ -1312,10 +1375,9 @@
             }
         }
 
-        [Test]
-        public async Task When_deleting_all_aliased_model()
+        private static async Task When_deleting_all_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
@@ -1343,10 +1405,9 @@
             }
         }
 
-        [Test]
-        public async Task When_counting_non_aliased_model()
+        private static async Task When_counting_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
@@ -1390,10 +1451,9 @@
             }
         }
 
-        [Test]
-        public async Task When_counting_aliased_model()
+        private static async Task When_counting_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
@@ -1437,14 +1497,15 @@
             }
         }
 
-        [Test]
-        public async Task When_min_non_aliased_model()
+        private static async Task When_min_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MinAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1466,14 +1527,15 @@
             }
         }
 
-        [Test]
-        public async Task When_min_aliased_model()
+        private static async Task When_min_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MinAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1495,14 +1557,15 @@
             }
         }
 
-        [Test]
-        public async Task When_max_non_aliased_model()
+        private static async Task When_max_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MaxAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1524,14 +1587,15 @@
             }
         }
 
-        [Test]
-        public async Task When_max_aliased_model()
+        private static async Task When_max_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MaxAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1553,14 +1617,15 @@
             }
         }
 
-        [Test]
-        public async Task When_sum_non_aliased_model()
+        private static async Task When_sum_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1580,23 +1645,27 @@
                 insertedPeople.Length.ShouldBe(5);
 
                 (await repo.SumAsync(p => p.Id)).ShouldBe(15);
-                (await repo.SumAsync(p => p.Name)).ShouldBe(0);
                 (await repo.SumAsync(p => p.Age)).ShouldBe(110);
                 
                 (await repo.SumAsync(p => p.Id, true)).ShouldBe(15);
-                (await repo.SumAsync(p => p.Name, true)).ShouldBe(0);
                 (await repo.SumAsync(p => p.Age, true)).ShouldBe(100);
+
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.Name))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.Name, true))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
             }
         }
 
-        [Test]
-        public async Task When_sum_aliased_model()
+        private static async Task When_sum_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1616,23 +1685,27 @@
                 insertedPeople.Length.ShouldBe(5);
 
                 (await repo.SumAsync(p => p.SomeId)).ShouldBe(15);
-                (await repo.SumAsync(p => p.SomeName)).ShouldBe(0);
                 (await repo.SumAsync(p => p.Age)).ShouldBe(110);
-                
+
                 (await repo.SumAsync(p => p.SomeId, true)).ShouldBe(15);
-                (await repo.SumAsync(p => p.SomeName, true)).ShouldBe(0);
                 (await repo.SumAsync(p => p.Age, true)).ShouldBe(100);
+
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.SomeName))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.SomeName, true))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
             }
         }
 
-        [Test]
-        public async Task When_avg_non_aliased_model()
+        private static async Task When_avg_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1657,23 +1730,27 @@
                 (await repo.SumAsync(p=> p.Age)).ShouldBe(220);
                 
                 (await repo.AvgAsync(p => p.Id)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.Name)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age)).ShouldBe(31.42m, 0.01m);
+                (await repo.AvgAsync(p => p.Age)).ShouldBe(31);
                 
                 (await repo.AvgAsync(p => p.Id, true)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.Name, true)).ShouldBe(0);
                 (await repo.AvgAsync(p => p.Age, true)).ShouldBe(35m);
+
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.Name))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.Name, true))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
             }
         }
 
-        [Test]
-        public async Task When_avg_aliased_model()
+        private static async Task When_avg_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1698,25 +1775,43 @@
                 (await repo.SumAsync(p => p.Age)).ShouldBe(220);
                 
                 (await repo.AvgAsync(p => p.SomeId)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.SomeName)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age)).ShouldBe(31.42m, 0.01m);
+                (await repo.AvgAsync(p => p.Age)).ShouldBe(31);
                 
                 (await repo.AvgAsync(p => p.SomeId, true)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.SomeName, true)).ShouldBe(0);
                 (await repo.AvgAsync(p => p.Age, true)).ShouldBe(35m);
+
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.SomeName))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
+                Should.Throw<SqlException>(async () => await repo.SumAsync(p => p.SomeName, true))
+                    .Message.ShouldBe("Operand data type nvarchar is invalid for sum operator.");
             }
         }
 
-        [Test]
-        public async Task When_doing_multiple_operations_with_sample_model()
+        private static async Task When_doing_multiple_operations_with_sample_model()
         {
-            var tableQuery = SqliteSqlGenerator.Table<SampleModel>();
-
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:;binaryguid=False;"))
+            const string tableQuery = @"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='SampleModel' AND xtype='U')
+CREATE TABLE SampleModel (
+	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    [Text] VARCHAR(50) NOT NULL,
+    [Int] INTEGER NOT NULL,
+	[Decimal] DECIMAL(18,4) NOT NULL,
+	[Double] REAL NOT NULL,
+	[Float] FLOAT NOT NULL,
+	[Flag] BIT NOT NULL,
+	[Binary] BINARY(100) NOT NULL,
+	[Key] UNIQUEIDENTIFIER NOT NULL,
+	[DateTime] DATETIME2(7) NOT NULL,
+	[DateTimeOffset] DATETIMEOFFSET(7) NOT NULL);";
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
-                (await db.ExistsAsync<SampleModel>()).ShouldBeFalse();
                 await db.Connection.ExecuteAsync(tableQuery);
                 (await db.ExistsAsync<SampleModel>()).ShouldBeTrue();
+
+                await db.Connection.ExecuteAsync("DELETE FROM SampleModel");
+                await db.ExecuteAsync("DBCC CHECKIDENT (SampleModel, RESEED, 0)");
+
+                var binaryData = new byte[100];
+                Encoding.UTF8.GetBytes("Hidden Message!").CopyTo(binaryData, 0);
 
                 var sample1 = new SampleModel
                 {
@@ -1726,7 +1821,7 @@
                     Double = 1.51,
                     Float = 1.9f,
                     Flag = true,
-                    Binary = Encoding.UTF8.GetBytes("Hidden Message!"),
+                    Binary = binaryData,
                     Guid = Guid.NewGuid(),
                     DateTime = new DateTime(1912, 1, 28, 10, 35, 11, 12),
                     DateTimeOffset = new DateTimeOffset(new DateTime(1912, 1, 28, 10, 35, 11, 12), TimeSpan.FromHours(2)),
@@ -1741,12 +1836,12 @@
                 insertedSample1.Id.ShouldBe(1);
                 insertedSample1.Int.ShouldBe(sample1.Int);
                 insertedSample1.Decimal.ShouldBe(sample1.Decimal);
-                insertedSample1.Double.ShouldBe(sample1.Double);
+                insertedSample1.Double.ShouldBe(sample1.Double, 0.01d);
                 insertedSample1.Float.ShouldBe(sample1.Float);
                 insertedSample1.Flag.ShouldBe(sample1.Flag);
                 insertedSample1.Binary.ShouldBe(sample1.Binary);
                 insertedSample1.Guid.ShouldBe(sample1.Guid);
-                insertedSample1.DateTime.ShouldBe(new DateTime(1912, 1, 28, 10, 35, 11));
+                insertedSample1.DateTime.ShouldBe(sample1.DateTime);
 
                 insertedSample1.DateTimeOffset.Offset.ShouldBe(sample1.DateTimeOffset.Offset);
                 insertedSample1.DateTimeOffset.DateTime.Kind.ShouldBe(sample1.DateTime.Kind);
@@ -1771,7 +1866,7 @@
                 updatedSample1.Id.ShouldBe(insertedSample1.Id);
                 updatedSample1.Int.ShouldBe(insertedSample1.Int);
                 updatedSample1.Decimal.ShouldBe(insertedSample1.Decimal);
-                updatedSample1.Double.ShouldBe(insertedSample1.Double);
+                updatedSample1.Double.ShouldBe(insertedSample1.Double, 0.01d);
                 updatedSample1.Float.ShouldBe(insertedSample1.Float);
                 updatedSample1.Flag.ShouldBe(insertedSample1.Flag);
                 updatedSample1.Binary.ShouldBe(insertedSample1.Binary);

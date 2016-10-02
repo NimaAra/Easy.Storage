@@ -13,17 +13,17 @@
         /// <summary>
         /// Gets the Id of the column.
         /// </summary>
-        public long ColumnId { get; internal set; }
+        public long Id { get; internal set; }
 
         /// <summary>
         /// Gets the name of the column.
         /// </summary>
-        public string ColumnName { get; internal set; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the type of the column.
         /// </summary>
-        public SqliteDataType ColumnTpe { get; internal set; }
+        public SqliteDataType Type { get; internal set; }
 
         /// <summary>
         /// Gets the flag indicating whether the column can be <c>NULL</c> or not.

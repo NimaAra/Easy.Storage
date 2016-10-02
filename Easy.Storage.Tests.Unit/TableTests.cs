@@ -23,7 +23,7 @@
             var table = Table.Get<SampleModel>();
 
             table.ShouldNotBeNull();
-            table.Name.ShouldBe("[SampleModel]");
+            table.Name.ShouldBe("SampleModel");
             table.GetColumnName("Text").ShouldBe("[Text]");
             table.GetColumnName("Guid").ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.GetColumnName("Composite").ShouldBe("[Text]"))
@@ -33,20 +33,20 @@
             sqlQuery.ShouldBe("SELECT * FROM SampleModel\r\nAND\r\n    ([Text]  = @Value);");
 
             table.Select.ShouldBe("SELECT\r\n"
-                    + "    [Id] AS Id,\r\n"
-                    + "    [Text] AS Text,\r\n"
-                    + "    [Int] AS Int,\r\n"
-                    + "    [Decimal] AS Decimal,\r\n"
-                    + "    [Double] AS Double,\r\n"
-                    + "    [Float] AS Float,\r\n"
-                    + "    [Flag] AS Flag,\r\n"
-                    + "    [Binary] AS Binary,\r\n"
-                    + "    [Key] AS Guid,\r\n"
-                    + "    [DateTime] AS DateTime,\r\n"
-                    + "    [DateTimeOffset] AS DateTimeOffset\r\n"
-                    + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+                    + "    [Id] AS 'Id',\r\n"
+                    + "    [Text] AS 'Text',\r\n"
+                    + "    [Int] AS 'Int',\r\n"
+                    + "    [Decimal] AS 'Decimal',\r\n"
+                    + "    [Double] AS 'Double',\r\n"
+                    + "    [Float] AS 'Float',\r\n"
+                    + "    [Flag] AS 'Flag',\r\n"
+                    + "    [Binary] AS 'Binary',\r\n"
+                    + "    [Key] AS 'Guid',\r\n"
+                    + "    [DateTime] AS 'DateTime',\r\n"
+                    + "    [DateTimeOffset] AS 'DateTimeOffset'\r\n"
+                    + "FROM SampleModel\r\nWHERE\r\n    1 = 1;");
 
-            table.Insert.ShouldBe("INSERT INTO [SampleModel]\r\n"
+            table.Insert.ShouldBe("INSERT INTO SampleModel\r\n"
                     + "(\r\n"
                     + "    [Text],\r\n"
                     + "    [Int],\r\n"
@@ -73,7 +73,7 @@
                     + "    @DateTimeOffset\r\n"
                     + ");");
 
-            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateDefault.ShouldBe("UPDATE SampleModel SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -86,7 +86,7 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateCustom.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateCustom.ShouldBe("UPDATE SampleModel SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -99,7 +99,7 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM SampleModel\r\nWHERE\r\n    1 = 1;");
         }
     }
 }

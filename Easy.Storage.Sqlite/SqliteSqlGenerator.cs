@@ -28,6 +28,7 @@
 
             var builder = new StringBuilder();
             builder.AppendLine($"CREATE TABLE IF NOT EXISTS {table.Name} (");
+            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT ((julianday('now') - 2440587.5)*86400000),");
 
             foreach (var pair in table.PropertyToColumns)
             {
@@ -49,8 +50,6 @@
         public static string FtsTable<T>(params Expression<Func<T, object>>[] selector)
         {
             var table = Common.Table.Get<T>();
-            var tableName = table.Name.Replace("[", string.Empty).Replace("]", string.Empty);
-
             var propNameToColumn = table.PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
             var columns = new List<string>();
@@ -76,72 +75,86 @@
                 }
             }
 
-            var ftsTableName = string.Concat(tableName, "_fts");
+            var ftsTableName = string.Concat(table.Name, "_fts");
             var ftsColumns = string.Join(", ", columns);
             var ftsTriggerColumns = string.Join(", ", columns.Select(c => "new." + c));
             var builder = new StringBuilder();
 
-            builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content='{tableName}', {ftsColumns});");
+            builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content='{table.Name}', {ftsColumns});");
             builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bu BEFORE UPDATE ON {tableName} BEGIN");
+            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bu BEFORE UPDATE ON {table.Name} BEGIN");
             builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
             builder.AppendLine("END;");
             builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bd BEFORE DELETE ON {tableName} BEGIN");
+            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bd BEFORE DELETE ON {table.Name} BEGIN");
             builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
             builder.AppendLine("END;");
             builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_au AFTER UPDATE ON {tableName} BEGIN");
+            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_au AFTER UPDATE ON {table.Name} BEGIN");
             builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
             builder.AppendLine("END;");
             builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_ai AFTER INSERT ON {tableName} BEGIN");
+            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_ai AFTER INSERT ON {table.Name} BEGIN");
             builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
             builder.Append("END;");
             return builder.ToString();
         }
 
-        private static SqliteDataType GetSqliteType(Type clrType)
+        private static SqliteDataType GetSqliteType(Type type)
         {
-            if (clrType.IsEnum) { return SqliteDataType.TEXT; }
+            if (type.IsEnum) { return SqliteDataType.TEXT; }
 
-            if (clrType == ClrTypes.Bool) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.Byte) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.Short) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.UShort) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.Int) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.UInt) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.Long) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.ULong) { return SqliteDataType.INTEGER; }
-            if (clrType == ClrTypes.Float) { return SqliteDataType.REAL; }
-            if (clrType == ClrTypes.Double) { return SqliteDataType.REAL; }
-            if (clrType == ClrTypes.Decimal) { return SqliteDataType.REAL; }
-            if (clrType == ClrTypes.String) { return SqliteDataType.TEXT; }
-            if (clrType == ClrTypes.Guid) { return SqliteDataType.TEXT; }
-            if (clrType == ClrTypes.DateTime) { return SqliteDataType.TEXT; }
-            if (clrType == ClrTypes.DateTimeOffset) { return SqliteDataType.TEXT; }
-            if (clrType == ClrTypes.ByteArray) { return SqliteDataType.BLOB; }
+            if (type == ClrTypes.Bool || type == ClrTypes.BoolNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.Byte || type == ClrTypes.ByteNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.Short || type == ClrTypes.ShortNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.UShort || type == ClrTypes.UShortNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.Int || type == ClrTypes.IntNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.UInt || type == ClrTypes.UIntNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.Long || type == ClrTypes.LongNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.ULong || type == ClrTypes.ULongNull) { return SqliteDataType.INTEGER; }
+            if (type == ClrTypes.Float || type == ClrTypes.FloatNull) { return SqliteDataType.REAL; }
+            if (type == ClrTypes.Double || type == ClrTypes.DoubleNull) { return SqliteDataType.REAL; }
+            if (type == ClrTypes.Decimal || type == ClrTypes.DecimalNull) { return SqliteDataType.REAL; }
+            if (type == ClrTypes.String) { return SqliteDataType.TEXT; }
+            if (type == ClrTypes.Guid || type == ClrTypes.GuidNull) { return SqliteDataType.TEXT; }
+            if (type == ClrTypes.DateTime || type == ClrTypes.DateTimeNull) { return SqliteDataType.TEXT; }
+            if (type == ClrTypes.DateTimeOffset || type == ClrTypes.DateTimeOffsetNull) { return SqliteDataType.TEXT; }
+            if (type == ClrTypes.ByteArray) { return SqliteDataType.BLOB; }
 
-            throw new ArgumentOutOfRangeException(nameof(clrType), $"There is no mapping between a {nameof(SqliteDataType)} and the CLR type.");
+            throw new ArgumentOutOfRangeException(nameof(type), $"There is no mapping between a {nameof(SqliteDataType)} and the given type of: {type}.");
         }
 
         private static class ClrTypes
         {
             internal static readonly Type Bool = typeof(bool);
+            internal static readonly Type BoolNull = typeof(bool?);
             internal static readonly Type Byte = typeof(byte);
+            internal static readonly Type ByteNull = typeof(byte?);
             internal static readonly Type Short = typeof(short);
+            internal static readonly Type ShortNull = typeof(short?);
             internal static readonly Type UShort = typeof(ushort);
+            internal static readonly Type UShortNull = typeof(ushort?);
             internal static readonly Type Int = typeof(int);
+            internal static readonly Type IntNull = typeof(int?);
             internal static readonly Type UInt = typeof(uint);
+            internal static readonly Type UIntNull = typeof(uint?);
             internal static readonly Type Long = typeof(long);
+            internal static readonly Type LongNull = typeof(long?);
             internal static readonly Type ULong = typeof(ulong);
+            internal static readonly Type ULongNull = typeof(ulong?);
             internal static readonly Type Float = typeof(float);
+            internal static readonly Type FloatNull = typeof(float?);
             internal static readonly Type Double = typeof(double);
+            internal static readonly Type DoubleNull = typeof(double?);
             internal static readonly Type Decimal = typeof(decimal);
+            internal static readonly Type DecimalNull = typeof(decimal?);
             internal static readonly Type String = typeof(string);
             internal static readonly Type Guid = typeof(Guid);
+            internal static readonly Type GuidNull = typeof(Guid?);
             internal static readonly Type DateTime = typeof(DateTime);
+            internal static readonly Type DateTimeNull = typeof(DateTime?);
             internal static readonly Type DateTimeOffset = typeof(DateTimeOffset);
+            internal static readonly Type DateTimeOffsetNull = typeof(DateTimeOffset?);
             internal static readonly Type ByteArray = typeof(byte[]);
         }
     }

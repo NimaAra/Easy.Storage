@@ -28,12 +28,13 @@
 
         private Table(Type type)
         {
-            Name = EscapeAsSqlName(GetModelName(type));
+            Name = GetModelName(type);
             var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);
             _propertyNamesToColumnNames = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
-            IdProperties = new HashSet<PropertyInfo>(props.Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(PrimaryKeyAttribute))));
+            IdProperties = new HashSet<PropertyInfo>(props
+                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(PrimaryKeyAttribute))));
 
             var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id");
             if (!IdProperties.Any())
@@ -57,7 +58,7 @@
 
             var columnsMinusIds = string.Join(Formatter.ColumnSeparator, colNamesMinusIds);
             var propertiesMinusIds = string.Join(Formatter.ColumnSeparator, propNamesMinusIds.Select(x => "@" + x));
-            var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"{col} AS {prop}"));
+            var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"{col} AS '{prop}'"));
             var idColToIdPropName = string.Join(Formatter.AndClauseSeparator, IdProperties.Select(p => $"{PropertyToColumns[p]} = @{p.Name}"));
             var colEqualPropMinusIds = string.Join(Formatter.ColumnSeparator, colNamesMinusIds.Zip(propNamesMinusIds, (col, propName) => $"{col} = @{propName}"));
 
@@ -135,7 +136,8 @@
             return name;
         }
 
-        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(IEnumerable<PropertyInfo> properties)
+        // ReSharper disable once ParameterTypeCanBeEnumerable.Local
+        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(PropertyInfo[] properties)
         {
             var result = new Dictionary<PropertyInfo, string>();
             foreach (var prop in properties)

@@ -6,13 +6,13 @@
     public static class SqliteSql
     {
         /// <summary>
-        /// Queries all the objects from the <c>SQLite</c> master database.
+        /// Query all the objects from the <c>SQLite</c> master database.
         /// </summary>
         public const string Master = "SELECT * FROM SQLITE_MASTER";
 
         /// <summary>
-        /// Queries to find if a given table exists.
+        /// Query to find if a given table exists.
         /// </summary>
-        public const string TableExists = "SELECT COUNT(name) FROM SQLITE_MASTER WHERE type='table' AND name=@tableName";
+        public const string TableExists = "SELECT 1 FROM SQLITE_MASTER WHERE type='table' AND name=@tableName";
     }
 }

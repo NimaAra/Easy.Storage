@@ -137,8 +137,7 @@
             private TermConfig()
             {
                 _table = Table.Get<T>();
-                var ftsTableName = _table.Name.Replace("[", string.Empty).Replace("]", string.Empty) + "_fts";
-                PrefixQuery = $"SELECT docId FROM {ftsTableName} WHERE";
+                PrefixQuery = $"SELECT docId FROM {_table.Name}_fts WHERE";
             }
 
             internal string PrefixQuery { get; }

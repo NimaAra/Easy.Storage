@@ -22,10 +22,7 @@
         /// <summary>
         /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="singleWriter">
-        /// The flag indicating whether a single writer/updater/deleter <see cref="Repository{T}"/> should be returned.
-        /// </param>
-        IRepository<T> GetRepository<T>(bool singleWriter = false);
+        IRepository<T> GetRepository<T>();
 
         /// <summary>
         /// Gets a new <see cref="IDbTransaction"/> if one isn't already active on the connection.

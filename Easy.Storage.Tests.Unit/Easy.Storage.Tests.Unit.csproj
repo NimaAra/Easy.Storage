@@ -66,10 +66,17 @@
     <Compile Include="Sqlite\SqliteRepositoryTranscationTests.cs" />
     <Compile Include="Sqlite\SqliteRollingDatabaseTests.cs" />
     <Compile Include="Sqlite\SqliteSqlGeneratorTests.cs" />
+    <Compile Include="SqlServer\Context.cs" />
+    <Compile Include="SqlServer\SqlServerRepositoryTests.cs" />
+    <Compile Include="SqlServer\SqlServerRepositoryTranscationTests.cs" />
+    <Compile Include="SqlServer\SqlServerDatabaseTests.cs" />
     <Compile Include="TableTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="SqlServer\connection.string">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj">
@@ -79,6 +86,10 @@
     <ProjectReference Include="..\Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj">
       <Project>{800D2B81-5854-4184-8A08-6F13143DA1A3}</Project>
       <Name>Easy.Storage.Sqlite</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Easy.Storage.SqlServer\Easy.Storage.SqlServer.csproj">
+      <Project>{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}</Project>
+      <Name>Easy.Storage.SqlServer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

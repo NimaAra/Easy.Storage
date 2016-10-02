@@ -5,6 +5,7 @@
     using System.Data;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using Dapper;
     using Easy.Common;
     using Easy.Storage.Common.Extensions;
 
@@ -30,7 +31,7 @@
         /// </summary>
         public Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null)
         {
-            return _db.QueryAsync<T>(_table.Select, transaction: transaction);
+            return DbConnectionExtensions.QueryAsync<T>(_db, _table.Select, transaction: transaction);
         }
 
         /// <summary>
@@ -39,7 +40,7 @@
         public Task<IEnumerable<T>> GetLazyAsync(IDbTransaction transaction = null)
         {
             var tcs = new TaskCompletionSource<IEnumerable<T>>();
-            var result = Dapper.SqlMapper.Query<T>(_db, _table.Select, buffered: false, transaction: transaction);
+            var result = _db.Query<T>(_table.Select, buffered: false, transaction: transaction);
             tcs.SetResult(result);
             return tcs.Task;
         }
@@ -55,7 +56,7 @@
             Ensure.NotNull(selector, nameof(selector));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, true);
-            return _db.QueryAsync<T>(query, new { Value = value }, transaction);
+            return DbConnectionExtensions.QueryAsync<T>(_db, query, new { Value = value }, transaction: transaction);
         }
 
         /// <summary>
@@ -70,7 +71,7 @@
             Ensure.NotNull(values, nameof(values));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, false);
-            return _db.QueryAsync<T>(query, new { Values = values }, transaction);
+            return DbConnectionExtensions.QueryAsync<T>(_db, query, new { Values = values }, transaction: transaction);
         }
 
         /// <summary>
@@ -81,7 +82,7 @@
         public Task<IEnumerable<T>> GetAsync(QueryFilter<T> queryFilter, IDbTransaction transaction = null)
         {
             Ensure.NotNull(queryFilter, nameof(queryFilter));
-            return _db.QueryAsync<T>(queryFilter.Query, queryFilter.Parameters, transaction);
+            return DbConnectionExtensions.QueryAsync<T>(_db, queryFilter.Query, queryFilter.Parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -90,7 +91,7 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> InsertAsync(T item, IDbTransaction transaction = null)
         {
-            return _db.ExecuteAsync(_table.Insert, item, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, _table.Insert, item, transaction: transaction);
         }
 
         /// <summary>
@@ -100,7 +101,7 @@
         public virtual Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-            return _db.ExecuteAsync(_table.Insert, items, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, _table.Insert, items, transaction: transaction);
         }
 
         /// <summary>
@@ -109,7 +110,7 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
         {
-            return _db.ExecuteAsync(_table.UpdateDefault, item, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, _table.UpdateDefault, item, transaction: transaction);
         }
 
         /// <summary>
@@ -118,11 +119,11 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
-            var parameters = new Dapper.DynamicParameters(item);
+            var parameters = new DynamicParameters(item);
             parameters.Add("Value", value);
             var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, true);
             
-            return _db.ExecuteAsync(query, parameters, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, query, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -131,11 +132,11 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
-            var parameters = new Dapper.DynamicParameters(item);
+            var parameters = new DynamicParameters(item);
             parameters.Add("Values", values);
             var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, false);
 
-            return _db.ExecuteAsync(query, parameters, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, query, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -144,7 +145,7 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
-            return _db.ExecuteAsync(_table.UpdateDefault, items, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, _table.UpdateDefault, items, transaction: transaction);
         }
 
         /// <summary>
@@ -159,7 +160,7 @@
             Ensure.NotNull(selector, nameof(selector));
 
             var query = _table.GetSqlWithClause(selector, _table.Delete, true);
-            return _db.ExecuteAsync(query, new { Value = value }, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, query, new { Value = value }, transaction: transaction);
         }
 
         /// <summary>
@@ -175,7 +176,7 @@
             Ensure.NotNull(values, nameof(values));
 
             var query = _table.GetSqlWithClause(selector, _table.Delete, false);
-            return _db.ExecuteAsync(query, new { Values = values }, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, query, new { Values = values }, transaction: transaction);
         }
 
         /// <summary>
@@ -183,7 +184,7 @@
         /// </summary>
         public virtual Task<int> DeleteAllAsync(IDbTransaction transaction = null)
         {
-            return _db.ExecuteAsync(_table.Delete, transaction);
+            return DbConnectionExtensions.ExecuteAsync(_db, _table.Delete, transaction: transaction);
         }
 
         /// <summary>
@@ -198,7 +199,7 @@
 
             var column = _table.GetColumnName(selector.GetPropertyName());
             var query = $"SELECT COUNT ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return _db.ExecuteScalarAsync<ulong>(query, transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<ulong>(_db, query, transaction: transaction);
         }
 
         /// <summary>
@@ -213,7 +214,7 @@
 
             var column = _table.GetColumnName(selector.GetPropertyName());
             var query = $"SELECT SUM ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return _db.ExecuteScalarAsync<long>(query, transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<long>(_db, query, transaction: transaction);
         }
 
         /// <summary>
@@ -228,7 +229,7 @@
 
             var column = _table.GetColumnName(selector.GetPropertyName());
             var query = $"SELECT AVG ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return _db.ExecuteScalarAsync<decimal>(query, transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<decimal>(_db, query, transaction: transaction);
         }
 
         /// <summary>
@@ -240,7 +241,7 @@
 
             var column = _table.GetColumnName(selector.GetPropertyName());
             var query = $"SELECT MIN ({column}) FROM {_table.Name}";
-            return _db.ExecuteScalarAsync<TProperty>(query, transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
         }
 
         /// <summary>
@@ -252,7 +253,7 @@
 
             var column = _table.GetColumnName(selector.GetPropertyName());
             var query = $"SELECT MAX ({column}) FROM {_table.Name}";
-            return _db.ExecuteScalarAsync<TProperty>(query, transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
         }
 
         /// <summary>

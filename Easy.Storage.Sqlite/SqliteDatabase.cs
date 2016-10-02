@@ -38,10 +38,7 @@
         /// <summary>
         /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="singleWriter">
-        /// The flag indicating whether a single writer/updater/deleter <see cref="Repository{T}"/> should be returned.
-        /// </param>
-        public override IRepository<T> GetRepository<T>(bool singleWriter = false)
+        public override IRepository<T> GetRepository<T>()
         {
             return new SingleWriterRepository<T>(Connection);
         }
@@ -79,7 +76,7 @@
         /// </summary>
         public Task<IEnumerable<SqliteObject>> GetDatabaseObjectsAsync()
         {
-            return Connection.QueryAsync<SqliteObject>(SqliteSql.Master);
+            return this.QueryAsync<SqliteObject>(SqliteSql.Master);
         }
 
         /// <summary>
@@ -87,26 +84,33 @@
         /// </summary>
         public override async Task<bool> ExistsAsync<T>()
         {
-            var sqliteTableName = Table.Get<T>().Name.Trim('[', ']');
-            return await Connection.ExecuteScalarAsync<uint>(SqliteSql.TableExists, new { tableName = sqliteTableName })
-                .ConfigureAwait(false) != 0;
+            var tableName = Table.Get<T>().Name;
+            return await this.ExecuteScalarAsync<uint>(SqliteSql.TableExists, new {tableName }).ConfigureAwait(false) != 0;
         }
 
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQLite</c> database.
         /// </summary>
-        public async Task<SqliteTableInfo> GetTableInfoAsync<T>()
+        public Task<SqliteTableInfo> GetTableInfoAsync<T>()
         {
-            var sqliteTableName = Table.Get<T>().Name.Trim('[', ']');
+            return GetTableInfoAsync(Table.Get<T>().Name);
+        }
+
+        /// <summary>
+        /// Returns the information relating to the <paramref name="tableName"/>.
+        /// </summary>
+        public async Task<SqliteTableInfo> GetTableInfoAsync(string tableName)
+        {
+            Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
             IEnumerable<dynamic> tableInfo;
             try
             {
-                tableInfo = await Connection.QueryAsync<dynamic>($"PRAGMA table_info({sqliteTableName})").ConfigureAwait(false);
+                tableInfo = await this.QueryAsync<dynamic>($"PRAGMA table_info({tableName})").ConfigureAwait(false);
             }
             catch (InvalidOperationException e)
             {
-                throw new InvalidOperationException($"Table: {sqliteTableName} does not seem to exist.", e);
+                throw new InvalidOperationException($"Table: {tableName} does not seem to exist.", e);
             }
 
             var columnsInfo = tableInfo.Select(i =>
@@ -135,15 +139,15 @@
                 }
                 else
                 {
-                    throw new ArgumentOutOfRangeException(i.type, "Invalid column type of: " + typeStr);
+                    throw new ArgumentOutOfRangeException(nameof(i.type), "Invalid column type of: " + typeStr);
                 }
 
                 return new SqliteColumnInfo
                 {
-                    TableName = sqliteTableName,
-                    ColumnId = i.cid,
-                    ColumnName = i.name,
-                    ColumnTpe = columnType,
+                    TableName = tableName,
+                    Id = i.cid,
+                    Name = i.name,
+                    Type = columnType,
                     NotNull = i.notnull == 1,
                     DefaultValue = i.dflt_value,
                     IsPrimaryKey = i.pk == 1
@@ -155,8 +159,8 @@
 
             return new SqliteTableInfo
             {
-                TableName = sqliteTableName,
-                Sql = databaseObjects.Single(x => x.Type == SqliteObjectType.Table && x.Name == sqliteTableName).Sql,
+                TableName = tableName,
+                Sql = databaseObjects.Single(x => x.Type == SqliteObjectType.Table && x.Name == tableName).Sql,
                 Columns = columnsInfo
             };
         }
@@ -167,7 +171,7 @@
         public Task<IEnumerable<T>> SearchAsync<T>(ITerm<T> term)
         {
             var query = Table.Get<T>().Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
-            return Connection.QueryAsync<T>(query);
+            return this.QueryAsync<T>(query);
         }
 
         /// <summary>

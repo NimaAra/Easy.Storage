@@ -133,7 +133,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBeNull();
                 wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(2));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
 
                 wrapper.Open();
                 wrapper.State.ShouldBe(ConnectionState.Open);
@@ -158,7 +158,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
                 wrapper.RollCount.ShouldBe((uint)1);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(2));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
 
                 wrapper.Dispose();
                 wrapper.State.ShouldBe(ConnectionState.Closed);
@@ -189,7 +189,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBeNull();
                 wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(1));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
 
                 wrapper.Open();
                 wrapper.State.ShouldBe(ConnectionState.Open);
@@ -214,7 +214,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
                 wrapper.RollCount.ShouldBe((uint)1);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(1));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
 
                 wrapper.Dispose();
                 wrapper.State.ShouldBe(ConnectionState.Closed);
@@ -245,7 +245,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBeNull();
                 wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(1));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
 
                 wrapper.Open();
                 wrapper.State.ShouldBe(ConnectionState.Open);
@@ -272,7 +272,7 @@
                 wrapper.Database.ShouldBe("main");
                 wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
                 wrapper.RollCount.ShouldBe((uint)rolledFiles.Length);
-                wrapper.RollBy.ShouldBe(TimeSpan.FromSeconds(1));
+                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
 
                 wrapper.Dispose();
                 wrapper.State.ShouldBe(ConnectionState.Closed);

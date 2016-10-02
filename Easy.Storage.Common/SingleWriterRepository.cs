@@ -28,10 +28,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> InsertAsync(T item, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.InsertAsync(item, transaction);
+                return await base.InsertAsync(item, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -44,10 +44,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.InsertAsync(items, transaction);
+                return await base.InsertAsync(items, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -60,10 +60,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.UpdateAsync(item, transaction);
+                return await base.UpdateAsync(item, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -76,10 +76,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.UpdateAsync(item, selector, value, transaction);
+                return await base.UpdateAsync(item, selector, value, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -92,10 +92,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.UpdateAsync(item, selector, transaction, values);
+                return await base.UpdateAsync(item, selector, transaction, values).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -108,10 +108,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.UpdateAsync(items, transaction);
+                return await base.UpdateAsync(items, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -127,10 +127,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.DeleteAsync(selector, value, transaction);
+                return await base.DeleteAsync(selector, value, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -146,10 +146,10 @@
         /// <returns>Number of rows affected</returns>
         public override async Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.DeleteAsync(selector, transaction, values);
+                return await base.DeleteAsync(selector, transaction, values).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -161,10 +161,10 @@
         /// </summary>
         public override async Task<int> DeleteAllAsync(IDbTransaction transaction = null)
         {
-            await _writerSemaphore.WaitAsync();
+            await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                return await base.DeleteAllAsync(transaction);
+                return await base.DeleteAllAsync(transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();

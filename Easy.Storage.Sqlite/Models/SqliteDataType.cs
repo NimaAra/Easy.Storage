@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite.Models
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Models
 {
     /// <summary>
     /// Represents <c>SQLite</c> data types.

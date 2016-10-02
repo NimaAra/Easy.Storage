@@ -6,9 +6,9 @@
 
     internal sealed class SampleModel
     {
-        public ulong Id { get; set; }
+        public long Id { get; set; }
         public string Text { get; set; }
-        public uint Int { get; set; }
+        public int Int { get; set; }
         public decimal Decimal { get; set; }
         public double Double { get; set; }
         public float Float { get; set; }

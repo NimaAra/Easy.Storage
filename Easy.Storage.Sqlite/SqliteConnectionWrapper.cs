@@ -17,9 +17,10 @@
     public sealed class SqliteConnectionWrapper : DbConnection
     {
         private readonly object _locker = new object();
+        private readonly bool _fromStartOfToday;
         private SQLiteConnection _connection;
         private volatile bool _isDisposed;
-        private DateTime _connectionCreationTime;
+        private DateTime _connectionLastCreationTime;
 
         /// <summary>
         /// Gets the flag indicating whether the underlying connection is <c>In-Memory</c> or not.
@@ -40,13 +41,17 @@
         /// Creates an instance of the <see cref="SqliteConnectionWrapper"/>.
         /// </summary>
         /// <param name="sqliteConnection">A <c>SQLite</c> connection.</param>
-        /// <param name="rollBy">The <see cref="TimeSpan"/> by which the connection database file should be rolled.</param>
-        public SqliteConnectionWrapper(SQLiteConnection sqliteConnection, TimeSpan? rollBy = null)
+        /// <param name="rollEvery">The <see cref="TimeSpan"/> at which the connection database file should be rolled.</param>
+        /// <param name="fromStartOfToday">The flag indicating whether rolling should start from the start of today or from now.</param>
+        public SqliteConnectionWrapper(SQLiteConnection sqliteConnection, TimeSpan? rollEvery = null, bool fromStartOfToday = false)
         {
+            _fromStartOfToday = fromStartOfToday;
             _connection = Ensure.NotNull(sqliteConnection, nameof(sqliteConnection));
             IsInMemory = _connection.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase);
-            RollBy = rollBy?? TimeSpan.MaxValue;
-            _connectionCreationTime = DateTime.UtcNow;
+            RollEvery = rollEvery?? TimeSpan.MaxValue;
+
+            var now = DateTime.Now;
+            _connectionLastCreationTime = fromStartOfToday ? now.Date : now;
         }
 
         /// <summary>
@@ -57,7 +62,7 @@
         /// <summary>
         /// Gets the <see cref="TimeSpan"/> by which the connection database file should be rolled.
         /// </summary>
-        public TimeSpan RollBy { get; }
+        public TimeSpan RollEvery { get; }
 
         /// <summary>
         /// Gets the connection-string containing the parameters for the connection.
@@ -187,7 +192,7 @@
         private bool ShouldRoll()
         {
             if (IsInMemory) { return false; }
-            return DateTime.UtcNow - _connectionCreationTime >= RollBy;
+            return DateTime.Now - _connectionLastCreationTime >= RollEvery;
         }
 
         private void Roll()
@@ -199,7 +204,7 @@
             var builder = new StringBuilder();
             foreach (var item in sqliteObjects)
             {
-                builder.AppendLine(item.Sql + ';');
+                builder.AppendLine(item.Sql + ';'.ToString());
             }
 
             var initializationQuery = builder.ToString();
@@ -207,16 +212,17 @@
             var connString = ConnectionString;
             var currentDbFile = SqliteHelper.GetDatabaseFile(connString);
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var dbFileName = Path.GetFileNameWithoutExtension(currentDbFile.FullName);
-            var newName = $"{dbFileName}_[{(++RollCount).ToString()}][{now:yyyy-MM-dd-HH-mm-ss}]{currentDbFile.Extension}";
+            // ReSharper disable once UseFormatSpecifierInInterpolation
+            var newName = $"{dbFileName}_[{(++RollCount).ToString()}][{now.ToString("yyyy-MM-dd-HH-mm-ss")}]{currentDbFile.Extension}";
             
             currentDbFile.Rename(newName);
 
             _connection = new SQLiteConnection(connString).OpenAndReturn();
             _connection.ExecuteAsync(initializationQuery).Wait();
             _connection.Close();
-            _connectionCreationTime = now;
+            _connectionLastCreationTime = _fromStartOfToday ? now.Date : now;
         }
     }
 }
