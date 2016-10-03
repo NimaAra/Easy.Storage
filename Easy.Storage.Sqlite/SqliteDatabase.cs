@@ -23,11 +23,16 @@
         /// Creates an instance of the <see cref="SqliteDatabase"/>.
         /// </summary>
         /// <param name="connectionString">A valid <c>SQLite</c> connection-string</param>
-        /// <param name="rollBy">The <see cref="TimeSpan"/> by which the connection database file should be rolled.</param>
-        public SqliteDatabase(string connectionString, TimeSpan? rollBy = null)
+        public SqliteDatabase(string connectionString) 
+            : this(new SqliteConnectionWrapper(new SQLiteConnection(connectionString))) {}
+
+        /// <summary>
+        /// Creates an instance of the <see cref="SqliteDatabase"/>.
+        /// </summary>
+        /// <param name="connection">A valid <c>SQLite</c> connection wrapped inside <see cref="SqliteConnectionWrapper"/>.</param>
+        public SqliteDatabase(SqliteConnectionWrapper connection)
         {
-            Ensure.NotNullOrEmptyOrWhiteSpace(connectionString);
-            _connection = new SqliteConnectionWrapper(new SQLiteConnection(connectionString), rollBy);
+            _connection = Ensure.NotNull(connection, nameof(connection));
         }
 
         /// <summary>

@@ -40,6 +40,15 @@
         /// <summary>
         /// Creates an instance of the <see cref="SqliteConnectionWrapper"/>.
         /// </summary>
+        /// <param name="connectionString">A valid <c>SQLite</c> connection-string.</param>
+        /// <param name="rollEvery">The <see cref="TimeSpan"/> at which the connection database file should be rolled.</param>
+        /// <param name="fromStartOfToday">The flag indicating whether rolling should start from the start of today or from now.</param>
+        public SqliteConnectionWrapper(string connectionString, TimeSpan? rollEvery = null, bool fromStartOfToday = false)
+            : this(new SQLiteConnection(connectionString), rollEvery, fromStartOfToday) {}
+
+        /// <summary>
+        /// Creates an instance of the <see cref="SqliteConnectionWrapper"/>.
+        /// </summary>
         /// <param name="sqliteConnection">A <c>SQLite</c> connection.</param>
         /// <param name="rollEvery">The <see cref="TimeSpan"/> at which the connection database file should be rolled.</param>
         /// <param name="fromStartOfToday">The flag indicating whether rolling should start from the start of today or from now.</param>

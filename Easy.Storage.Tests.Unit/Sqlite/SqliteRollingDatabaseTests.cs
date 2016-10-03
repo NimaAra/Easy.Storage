@@ -23,7 +23,7 @@
 
             try
             {
-                using (var db = new SqliteDatabase(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(3)))
+                using (var db = new SqliteDatabase(new SqliteConnectionWrapper(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(3))))
                 {
                     await db.Connection.ExecuteAsync(TableQuery);
                     await db.Connection.ExecuteAsync(ViewQuery);

@@ -22,7 +22,7 @@
 
             try
             {
-                IDatabase db = new SqliteDatabase(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2));
+                IDatabase db = new SqliteDatabase(new SqliteConnectionWrapper(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2)));
                 var repo = db.GetRepository<Person>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
@@ -92,7 +92,7 @@
 
             try
             {
-                IDatabase db = new SqliteDatabase(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2));
+                IDatabase db = new SqliteDatabase(new SqliteConnectionWrapper(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2)));
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);

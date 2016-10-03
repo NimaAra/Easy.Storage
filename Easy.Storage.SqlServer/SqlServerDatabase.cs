@@ -19,11 +19,7 @@
         /// Creates an instance of the <see cref="SqlServerDatabase"/>.
         /// </summary>
         /// <param name="connectionString">A valid <c>SQL Server</c> connection-string.</param>
-        public SqlServerDatabase(string connectionString)
-        {
-            Ensure.NotNullOrEmptyOrWhiteSpace(connectionString);
-            Connection = new SqlConnection(connectionString);
-        }
+        public SqlServerDatabase(string connectionString) : this(new SqlConnection(connectionString)) {}
 
         /// <summary>
         /// Creates an instance of the <see cref="SqlServerDatabase"/>.
