@@ -51,9 +51,13 @@
                     snapshot1[3].Sql.ShouldBe(IndexQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                     await Task.Delay(TimeSpan.FromSeconds(3));
-                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
+                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)0);
 
-                    (await db.ExistsAsync<Person>()).ShouldBeTrue();
+                    var repo = db.GetRepository<Person>();
+                    var p1 = new Person { Name = "P1", Age = 10 };
+                    await repo.InsertAsync(p1);
+
+                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 
                     var rolledFilesFirstRoll = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
                     rolledFilesFirstRoll.ShouldNotBeNull();
@@ -61,9 +65,13 @@
                     rolledFilesFirstRoll.Length.ShouldBe(1);
 
                     await Task.Delay(TimeSpan.FromSeconds(3));
-                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)2);
+                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
+
+                    var p2 = new Person { Name = "P2", Age = 20 };
+                    await repo.InsertAsync(p2);
 
                     (await db.ExistsAsync<Person>()).ShouldBeTrue();
+                    ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)2);
 
                     var rolledFilesSecondRoll = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
                     rolledFilesSecondRoll.ShouldNotBeNull();

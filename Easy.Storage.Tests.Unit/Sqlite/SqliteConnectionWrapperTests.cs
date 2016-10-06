@@ -123,173 +123,40 @@
         }
 
         [Test]
-        public async Task When_rolling_database_file_once()
+        public async Task When_rolling_database_file_is_opened()
         {
             var dbFile = Path.GetTempFileName();
             var fileInfo = new FileInfo(dbFile);
-            var dbFileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
-            try
-            {
-                var wrapper = SqliteConnectionBuilder.GetFileConnectionWrapper(fileInfo, TimeSpan.FromSeconds(2));
+            var wrapper = SqliteConnectionBuilder.GetFileConnectionWrapper(fileInfo, TimeSpan.FromSeconds(2));
 
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBeNull();
-                wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
+            wrapper.State.ShouldBe(ConnectionState.Closed);
+            wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
+            wrapper.ConnectionString.ShouldContain(dbFile);
+            wrapper.ConnectionString.ShouldContain("WAL");
+            wrapper.ConnectionTimeout.ShouldBe(15);
+            wrapper.Database.ShouldBe("main");
+            wrapper.DataSource.ShouldBeNull();
+            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
 
-                wrapper.Open();
-                wrapper.State.ShouldBe(ConnectionState.Open);
+            wrapper.Open();
+            wrapper.State.ShouldBe(ConnectionState.Open);
 
-                wrapper.Close();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
+            wrapper.RollCount.ShouldBe((uint)0);
 
-                await Task.Delay(TimeSpan.FromSeconds(4)).ConfigureAwait(false);
+            wrapper.Close();
+            wrapper.State.ShouldBe(ConnectionState.Closed);
 
-                wrapper.Open();
-                wrapper.State.ShouldBe(ConnectionState.Open);
+            wrapper.RollCount.ShouldBe((uint)0);
 
-                var rolledFiles = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*]*.tmp");
-                rolledFiles.ShouldNotBeNull();
-                rolledFiles.ShouldNotBeEmpty();
-                rolledFiles.Length.ShouldBe(1);
-                
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
-                wrapper.RollCount.ShouldBe((uint)1);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
+            await Task.Delay(TimeSpan.FromSeconds(4)).ConfigureAwait(false);
 
-                wrapper.Dispose();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
+            wrapper.RollCount.ShouldBe((uint)0);
 
-                Array.ForEach(rolledFiles, File.Delete);
+            wrapper.Open();
+            wrapper.State.ShouldBe(ConnectionState.Open);
 
-            } finally
-            {
-                fileInfo.Delete();
-            }
-        }
-
-        [Test]
-        public async Task When_rolling_database_file_every_second_and_connection_only_opened_once()
-        {
-            var dbFile = Path.GetTempFileName();
-            var fileInfo = new FileInfo(dbFile);
-            var dbFileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
-            try
-            {
-                var wrapper = SqliteConnectionBuilder.GetFileConnectionWrapper(fileInfo, TimeSpan.FromSeconds(1));
-
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBeNull();
-                wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
-
-                wrapper.Open();
-                wrapper.State.ShouldBe(ConnectionState.Open);
-
-                wrapper.Close();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-
-                await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
-
-                wrapper.Open();
-                wrapper.State.ShouldBe(ConnectionState.Open);
-
-                var rolledFiles = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
-                rolledFiles.ShouldNotBeNull();
-                rolledFiles.ShouldNotBeEmpty();
-                rolledFiles.Length.ShouldBe(1);
-
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
-                wrapper.RollCount.ShouldBe((uint)1);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
-
-                wrapper.Dispose();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-
-                Array.ForEach(rolledFiles, File.Delete);
-            }
-            finally
-            {
-                fileInfo.Delete();
-            }
-        }
-
-        [Test]
-        public async Task When_rolling_database_file_every_second_and_connection_only_opened_multiple_times()
-        {
-            var dbFile = Path.GetTempFileName();
-            var fileInfo = new FileInfo(dbFile);
-            var dbFileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.Name);
-            try
-            {
-                var wrapper = SqliteConnectionBuilder.GetFileConnectionWrapper(fileInfo, TimeSpan.FromSeconds(1));
-
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBeNull();
-                wrapper.RollCount.ShouldBe((uint)0);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
-
-                wrapper.Open();
-                wrapper.State.ShouldBe(ConnectionState.Open);
-
-                wrapper.Close();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-
-                for (var i = 0; i < 10; i++)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                    wrapper.Open();
-                    wrapper.State.ShouldBe(ConnectionState.Open);
-                }
-                
-                var rolledFiles = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
-                rolledFiles.ShouldNotBeNull();
-                rolledFiles.ShouldNotBeEmpty();
-                rolledFiles.Length.ShouldBeGreaterThan(6);
-
-                wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-                wrapper.ConnectionString.ShouldContain(dbFile);
-                wrapper.ConnectionString.ShouldContain("WAL");
-                wrapper.ConnectionTimeout.ShouldBe(15);
-                wrapper.Database.ShouldBe("main");
-                wrapper.DataSource.ShouldBe(dbFileNameWithoutExtension);
-                wrapper.RollCount.ShouldBe((uint)rolledFiles.Length);
-                wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(1));
-
-                wrapper.Dispose();
-                wrapper.State.ShouldBe(ConnectionState.Closed);
-
-                Array.ForEach(rolledFiles, File.Delete);
-            }
-            finally
-            {
-                fileInfo.Delete();
-            }
+            wrapper.RollCount.ShouldBe((uint)0);
         }
     }
 }

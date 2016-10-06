@@ -6,6 +6,7 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Easy.Common;
     using Easy.Storage.Common;
 
     /// <summary>
@@ -18,9 +19,9 @@
         /// <summary>
         /// Creates an instance of the <see cref="SingleWriterRepository{T}"/>.
         /// </summary>
-        internal SingleWriterRepository(IDbConnection connection) : base(connection, Dialect.Sqlite)
+        internal SingleWriterRepository(SemaphoreSlim semaphore, IDbConnection connection) : base(connection, Dialect.Sqlite)
         {
-            _writerSemaphore = new SemaphoreSlim(1, 1);
+            _writerSemaphore = Ensure.NotNull(semaphore, nameof(semaphore));
         }
 
         /// <summary>
@@ -32,6 +33,7 @@
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
+                RollIfYouShould();
                 return await base.InsertAsync(item, transaction).ConfigureAwait(false);
             } finally
             {
@@ -48,6 +50,7 @@
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
+                RollIfYouShould();
                 return await base.InsertAsync(items, transaction).ConfigureAwait(false);
             } finally
             {
@@ -172,13 +175,14 @@
             }
         }
 
-        /// <summary>
-        /// Releases the resources used by this instance.
-        /// </summary>
-        public override void Dispose()
+        private void RollIfYouShould()
         {
-            _writerSemaphore.Dispose();
-            base.Dispose();
+            var con = (SqliteConnectionWrapper)Connection;
+
+            if (con.ShouldRoll())
+            {
+                con.Roll();
+            }
         }
     }
 }

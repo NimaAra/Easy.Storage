@@ -15,15 +15,19 @@
     /// </summary>
     public class Repository<T> : IRepository<T>
     {
-        private readonly IDbConnection _db;
         private readonly Table _table;
+
+        /// <summary>
+        /// The <see cref="IDbConnection"/> used by the <see cref="Repository{T}"/>.
+        /// </summary>
+        protected readonly IDbConnection Connection;
 
         /// <summary>
         /// Creates an instance of the <see cref="Repository{T}"/>.
         /// </summary>
         internal Repository(IDbConnection dbConnection, Dialect dialect = Dialect.Generic)
         {
-            _db = Ensure.NotNull(dbConnection, nameof(dbConnection));
+            Connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
             _table = Table.Get<T>(dialect);
         }
 
@@ -32,7 +36,7 @@
         /// </summary>
         public Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.QueryAsync<T>(_db, _table.Select, transaction: transaction);
+            return DbConnectionExtensions.QueryAsync<T>(Connection, _table.Select, transaction: transaction);
         }
 
         /// <summary>
@@ -41,7 +45,7 @@
         public Task<IEnumerable<T>> GetLazyAsync(IDbTransaction transaction = null)
         {
             var tcs = new TaskCompletionSource<IEnumerable<T>>();
-            var result = _db.Query<T>(_table.Select, buffered: false, transaction: transaction);
+            var result = Connection.Query<T>(_table.Select, buffered: false, transaction: transaction);
             tcs.SetResult(result);
             return tcs.Task;
         }
@@ -57,7 +61,7 @@
             Ensure.NotNull(selector, nameof(selector));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, true);
-            return DbConnectionExtensions.QueryAsync<T>(_db, query, new { Value = value }, transaction: transaction);
+            return DbConnectionExtensions.QueryAsync<T>(Connection, query, new { Value = value }, transaction: transaction);
         }
 
         /// <summary>
@@ -72,7 +76,7 @@
             Ensure.NotNull(values, nameof(values));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, false);
-            return DbConnectionExtensions.QueryAsync<T>(_db, query, new { Values = values }, transaction: transaction);
+            return DbConnectionExtensions.QueryAsync<T>(Connection, query, new { Values = values }, transaction: transaction);
         }
 
         /// <summary>
@@ -83,7 +87,7 @@
         public Task<IEnumerable<T>> GetAsync(QueryFilter<T> queryFilter, IDbTransaction transaction = null)
         {
             Ensure.NotNull(queryFilter, nameof(queryFilter));
-            return DbConnectionExtensions.QueryAsync<T>(_db, queryFilter.Query, queryFilter.Parameters, transaction: transaction);
+            return DbConnectionExtensions.QueryAsync<T>(Connection, queryFilter.Query, queryFilter.Parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -92,7 +96,7 @@
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
         public virtual async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
         {
-            return (await DbConnectionExtensions.QueryAsync<long>(_db, _table.Insert, item, transaction: transaction)
+            return (await DbConnectionExtensions.QueryAsync<long>(Connection, _table.Insert, item, transaction: transaction)
                 .ConfigureAwait(false)).First();
         }
 
@@ -103,7 +107,7 @@
         public virtual Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-            return DbConnectionExtensions.ExecuteAsync(_db, _table.Insert, items, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, _table.Insert, items, transaction: transaction);
         }
 
         /// <summary>
@@ -112,7 +116,7 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(_db, _table.UpdateDefault, item, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, _table.UpdateDefault, item, transaction: transaction);
         }
 
         /// <summary>
@@ -125,7 +129,7 @@
             parameters.Add("Value", value);
             var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, true);
             
-            return DbConnectionExtensions.ExecuteAsync(_db, query, parameters, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, query, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -138,7 +142,7 @@
             parameters.Add("Values", values);
             var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, false);
 
-            return DbConnectionExtensions.ExecuteAsync(_db, query, parameters, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, query, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -147,7 +151,7 @@
         /// <returns>Number of rows affected</returns>
         public virtual Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(_db, _table.UpdateDefault, items, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, _table.UpdateDefault, items, transaction: transaction);
         }
 
         /// <summary>
@@ -162,7 +166,7 @@
             Ensure.NotNull(selector, nameof(selector));
 
             var query = _table.GetSqlWithClause(selector, _table.Delete, true);
-            return DbConnectionExtensions.ExecuteAsync(_db, query, new { Value = value }, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, query, new { Value = value }, transaction: transaction);
         }
 
         /// <summary>
@@ -178,7 +182,7 @@
             Ensure.NotNull(values, nameof(values));
 
             var query = _table.GetSqlWithClause(selector, _table.Delete, false);
-            return DbConnectionExtensions.ExecuteAsync(_db, query, new { Values = values }, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, query, new { Values = values }, transaction: transaction);
         }
 
         /// <summary>
@@ -186,7 +190,7 @@
         /// </summary>
         public virtual Task<int> DeleteAllAsync(IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(_db, _table.Delete, transaction: transaction);
+            return DbConnectionExtensions.ExecuteAsync(Connection, _table.Delete, transaction: transaction);
         }
 
         /// <summary>
@@ -201,7 +205,7 @@
 
             var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT COUNT ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<ulong>(_db, query, transaction: transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<ulong>(Connection, query, transaction: transaction);
         }
 
         /// <summary>
@@ -216,7 +220,7 @@
 
             var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT SUM ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<long>(_db, query, transaction: transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<long>(Connection, query, transaction: transaction);
         }
 
         /// <summary>
@@ -231,7 +235,7 @@
 
             var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT AVG ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<decimal>(_db, query, transaction: transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<decimal>(Connection, query, transaction: transaction);
         }
 
         /// <summary>
@@ -243,7 +247,7 @@
 
             var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT MIN ({column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
+            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(Connection, query, transaction: transaction);
         }
 
         /// <summary>
@@ -255,15 +259,7 @@
 
             var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT MAX ({column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
-        }
-
-        /// <summary>
-        /// Releases the resources used by this instance.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            // does nothing
+            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(Connection, query, transaction: transaction);
         }
     }
 }

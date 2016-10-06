@@ -125,7 +125,6 @@
         public override IDbTransaction BeginTransaction()
         {
             if (Connection.State != ConnectionState.Open) { Connection.Open(); }
-
             return Connection.BeginTransaction();
         }
 
@@ -135,7 +134,6 @@
         public override IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
         {
             if (Connection.State != ConnectionState.Open) { Connection.Open(); }
-
             return Connection.BeginTransaction(isolationLevel);
         }
 

@@ -51,6 +51,10 @@
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)people.Length);
 
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)0);
+
+                var p5 = new Person { Name = "P5", Age = 50 };
+                await repo.InsertAsync(p5);
                 ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 
                 (await db.ExistsAsync<Person>()).ShouldBeTrue();
@@ -60,9 +64,9 @@
                 rolledFiles.ShouldNotBeEmpty();
                 rolledFiles.Length.ShouldBe(1);
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)0);
+                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)1);
+                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)1);
 
                 ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 
@@ -121,6 +125,10 @@
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)people.Length);
 
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)0);
+
+                var p5 = new MyPerson { SomeName = "P5", Age = 50 };
+                await repo.InsertAsync(p5);
                 ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 
                 (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
@@ -130,9 +138,9 @@
                 rolledFiles.ShouldNotBeEmpty();
                 rolledFiles.Length.ShouldBe(1);
 
-                (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)0);
+                (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)1);
+                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)1);
+                (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)1);
 
                 ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 

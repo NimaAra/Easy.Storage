@@ -9,7 +9,7 @@
     /// <summary>
     /// Specifies the contract that a repository would need to implement.
     /// </summary>
-    public interface IRepository<T> : IDisposable
+    public interface IRepository<T>
     {
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.

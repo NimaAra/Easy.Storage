@@ -5,6 +5,7 @@
     using System.Data;
     using System.Data.SQLite;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Easy.Common;
     using Easy.Storage.Common;
@@ -18,6 +19,7 @@
     public sealed class SqliteDatabase : Database
     {
         private readonly SqliteConnectionWrapper _connection;
+        private readonly SemaphoreSlim _writerSemaphore;
 
         /// <summary>
         /// Creates an instance of the <see cref="SqliteDatabase"/>.
@@ -32,20 +34,21 @@
         /// <param name="connection">A valid <c>SQLite</c> connection wrapped inside <see cref="SqliteConnectionWrapper"/>.</param>
         public SqliteDatabase(SqliteConnectionWrapper connection)
         {
+            _writerSemaphore = new SemaphoreSlim(1, 1);
             _connection = Ensure.NotNull(connection, nameof(connection));
         }
 
         /// <summary>
         /// Gets the connection.
         /// </summary>
-        public override IDbConnection Connection => _connection.OpenAndReturn();
+        public override IDbConnection Connection => _connection;
 
         /// <summary>
         /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
         /// </summary>
         public override IRepository<T> GetRepository<T>()
         {
-            return new SingleWriterRepository<T>(Connection);
+            return new SingleWriterRepository<T>(_writerSemaphore, Connection);
         }
 
         /// <summary>
@@ -53,6 +56,7 @@
         /// </summary>
         public override IDbTransaction BeginTransaction()
         {
+            if (Connection.State != ConnectionState.Open) { Connection.Open(); }
             return Connection.BeginTransaction();
         }
 
@@ -73,6 +77,7 @@
         /// <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
         public override IDbTransaction BeginTransaction(IsolationLevel isolationLevel)
         {
+            if (Connection.State != ConnectionState.Open) { Connection.Open(); }
             return Connection.BeginTransaction(isolationLevel);
         }
 
@@ -184,6 +189,7 @@
         /// </summary>
         public override void Dispose()
         {
+            _writerSemaphore.Dispose();
             ((SqliteConnectionWrapper)Connection).Dispose();
         }
     }

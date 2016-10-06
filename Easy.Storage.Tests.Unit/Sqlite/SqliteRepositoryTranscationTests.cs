@@ -20,12 +20,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
-                
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person);
 
                 using (var tran = db.BeginTransaction())
@@ -45,12 +45,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
 
+                var repo = db.GetRepository<Person>();
                 using (var tran = db.BeginTransaction())
                 {
                     await repo.InsertAsync(person);
@@ -72,12 +72,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
 
+                var repo = db.GetRepository<Person>();
                 using (var tran = db.BeginTransaction())
                 {
                     await repo.InsertAsync(person);
@@ -100,12 +100,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
 
+                var repo = db.GetRepository<Person>();
                 using (var tran = db.BeginTransaction())
                 {
                     await repo.InsertAsync(person);
@@ -126,11 +126,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person1 = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person1);
 
                 using (var tran = db.BeginTransaction())
@@ -154,11 +155,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person1 = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person1);
 
                 using (var tran = db.BeginTransaction())
@@ -184,11 +186,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person);
 
                 var insertedPerson = (await repo.GetAsync()).Single();
@@ -227,11 +230,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person);
 
                 var insertedPerson = (await repo.GetAsync()).Single();
@@ -270,11 +274,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person);
 
                 var insertedPerson = (await repo.GetAsync()).Single();
@@ -313,11 +318,12 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
 
                 var person = new Person { Name = "P1", Age = 10 };
+
+                var repo = db.GetRepository<Person>();
                 await repo.InsertAsync(person);
 
                 var insertedPerson = (await repo.GetAsync()).Single();

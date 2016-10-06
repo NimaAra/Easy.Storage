@@ -33,9 +33,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -59,9 +60,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -87,9 +89,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -116,9 +119,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -142,9 +146,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -170,9 +175,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -201,9 +207,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -245,9 +252,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -289,9 +297,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -333,9 +342,10 @@
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            using (var repo = db.GetRepository<Person>())
             {
                 await db.Connection.ExecuteAsync(TableQuery);
+
+                var repo = db.GetRepository<Person>();
                 await repo.DeleteAllAsync();
                 await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 

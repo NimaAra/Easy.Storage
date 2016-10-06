@@ -16,7 +16,6 @@
     /// </summary>
     public sealed class SqliteConnectionWrapper : DbConnection
     {
-        private readonly object _locker = new object();
         private readonly bool _fromStartOfToday;
         private SQLiteConnection _connection;
         private volatile bool _isDisposed;
@@ -167,24 +166,7 @@
         /// </summary>
         public override void Open()
         {
-            using (_locker.Lock(5.Seconds()))
-            {
-                if (ShouldRoll()) { Roll(); }
-            }
-
-            if (State == ConnectionState.Closed)
-            {
-                _connection.Open();
-            }
-        }
-
-        /// <summary>
-        /// Opens and returns the connection.
-        /// </summary>
-        public SqliteConnectionWrapper OpenAndReturn()
-        {
-            Open();
-            return this;
+            if (State == ConnectionState.Closed) { _connection.Open(); }
         }
 
         /// <summary>
@@ -198,16 +180,16 @@
             _isDisposed = true;
         }
 
-        private bool ShouldRoll()
+        internal bool ShouldRoll()
         {
             if (IsInMemory) { return false; }
             return DateTime.Now - _connectionLastCreationTime >= RollEvery;
         }
 
-        private void Roll()
+        internal async void Roll()
         {
             if (State != ConnectionState.Open) { _connection.Open(); }
-            var sqliteObjects = _connection.QueryAsync<SqliteObject>(SqliteSql.Master).Result;
+            var sqliteObjects = await _connection.QueryAsync<SqliteObject>(SqliteSql.Master);
             _connection.Close();
 
             var builder = new StringBuilder();

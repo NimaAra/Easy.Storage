@@ -21,10 +21,10 @@
         /// <summary>
         /// Returns an file-based <see cref="SqliteConnectionWrapper"/>.
         /// </summary>
-        public static SqliteConnectionWrapper GetFileConnectionWrapper(FileInfo file, TimeSpan? rollBy = null)
+        public static SqliteConnectionWrapper GetFileConnectionWrapper(FileInfo file, TimeSpan? rollEvery = null, bool fromStartOfToday = false)
         {
             Ensure.NotNull(file, nameof(file));
-            return new SqliteConnectionWrapper(new SQLiteConnection(GetConnectionString(file.FullName)), rollBy);
+            return new SqliteConnectionWrapper(new SQLiteConnection(GetConnectionString(file.FullName)), rollEvery, fromStartOfToday);
         }
 
         /// <summary>
