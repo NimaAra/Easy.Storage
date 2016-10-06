@@ -11,6 +11,7 @@
     {
         private const string DataSourceToken = "data source=";
         private const string InMemoryToken = ":memory:";
+        private static readonly char[] TrimCharacters = {'"'};
 
         /// <summary>
         /// Gets the database <see cref="FileInfo"/> of a <c>SQLite</c> database created from <paramref name="sqliteConnectionString"/>.
@@ -35,7 +36,7 @@
             var dataSourceValue = sqliteConnectionString.Substring(startIndex, endIndex);
             if (dataSourceValue.Equals(InMemoryToken, StringComparison.OrdinalIgnoreCase)) { return null; }
 
-            return new FileInfo(dataSourceValue);
+            return new FileInfo(dataSourceValue.Trim(TrimCharacters));
         }
     }
 }

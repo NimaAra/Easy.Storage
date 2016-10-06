@@ -24,9 +24,9 @@
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("SampleModel");
-            table.GetColumnName("Text").ShouldBe("[Text]");
-            table.GetColumnName("Guid").ShouldBe("[Key]");
-            Should.Throw<KeyNotFoundException>(() => table.GetColumnName("Composite").ShouldBe("[Text]"))
+            table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
+            table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
+            Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
                 .Message.ShouldBe("The given key was not present in the dictionary.");
 
             var sqlQuery = table.GetSqlWithClause<SampleModel, string>(m => m.Text, "SELECT * FROM SampleModel;", true);

@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Easy.Common;
     using Easy.Common.Extensions;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
@@ -13,96 +14,87 @@
     /// <summary>
     /// Represents information about the table a model should be stored at.
     /// </summary>
-    public sealed class Table // [ToDo] Test model with multiple primary keys
+    public sealed class Table
     {
-        private static readonly ConcurrentDictionary<Type, Table> Cache = new ConcurrentDictionary<Type, Table>();
-
-        internal static Table Get<TItem>()
+        private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
+        internal static Table Get<TItem>(Dialect dialect = Dialect.Generic)
         {
-            return Cache.GetOrAdd(typeof(TItem), theType => new Table(theType));
+            var key = new TableKey(typeof(TItem), dialect);
+            return Cache.GetOrAdd(key, theKey => new Table(theKey));
         }
 
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
-        internal readonly HashSet<PropertyInfo> IdProperties;
-        private readonly Dictionary<string, string> _propertyNamesToColumnNames;
+        internal readonly Dictionary<string, string> PropertyNamesToColumns;
+        internal readonly PropertyInfo PrimaryKey;
 
-        private Table(Type type)
+        private Table(TableKey key)
         {
-            Name = GetModelName(type);
-            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            Dialect = key.Dialect;
+            Name = GetModelName(key.Type);
+            var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            PrimaryKey = GetPrimaryKey(props);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);
-            _propertyNamesToColumnNames = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
-
-            IdProperties = new HashSet<PropertyInfo>(props
-                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(PrimaryKeyAttribute))));
-
-            var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id");
-            if (!IdProperties.Any())
-            {
-                if (defaultIdProp != null)
-                {
-                    IdProperties.Add(defaultIdProp);
-                } else
-                {
-                    throw new InvalidOperationException("The model does not have a default 'Id' property specified or any it's members marked as primary key.");
-                }
-            }
+            PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
             var propNames = PropertyToColumns.Keys.Select(p => p.Name);
             var colNames = PropertyToColumns.Values;
 
-            // all properties that are not marked as PrimaryKey
-            var propToColsMinusIds = PropertyToColumns.Where(p => !IdProperties.Contains(p.Key)).ToArray();
-            var colNamesMinusIds = propToColsMinusIds.Select(kv => kv.Value).ToArray();
-            var propNamesMinusIds = propToColsMinusIds.Select(kv => kv.Key.Name).ToArray();
+            var propToColsMinusPrimaryKey = PropertyToColumns.Where(p => p.Key != PrimaryKey).ToArray();
+            var colNamesMinusPrimaryKey = propToColsMinusPrimaryKey.Select(kv => kv.Value).ToArray();
+            var propNamesMinusPrimaryKey = propToColsMinusPrimaryKey.Select(kv => kv.Key.Name).ToArray();
 
-            var columnsMinusIds = string.Join(Formatter.ColumnSeparator, colNamesMinusIds);
-            var propertiesMinusIds = string.Join(Formatter.ColumnSeparator, propNamesMinusIds.Select(x => "@" + x));
+            var columnsMinusPrimaryKey = string.Join(Formatter.ColumnSeparator, colNamesMinusPrimaryKey);
+            var propertiesMinusPrimaryKey = string.Join(Formatter.ColumnSeparator, propNamesMinusPrimaryKey.Select(x => "@" + x));
             var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"{col} AS '{prop}'"));
-            var idColToIdPropName = string.Join(Formatter.AndClauseSeparator, IdProperties.Select(p => $"{PropertyToColumns[p]} = @{p.Name}"));
-            var colEqualPropMinusIds = string.Join(Formatter.ColumnSeparator, colNamesMinusIds.Zip(propNamesMinusIds, (col, propName) => $"{col} = @{propName}"));
+            var colEqualPropMinusPrimaryKey = string.Join(Formatter.ColumnSeparator, colNamesMinusPrimaryKey.Zip(propNamesMinusPrimaryKey, (col, propName) => $"{col} = @{propName}"));
 
             Select =        $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            Insert =        $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIds}{Formatter.NewLine}){Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIds}{Formatter.NewLine});";
-            UpdateDefault = $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIds}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{idColToIdPropName};";
-            UpdateCustom =  $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIds}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            UpdateDefault = $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusPrimaryKey}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[PrimaryKey]} = @{PrimaryKey.Name};";
+            UpdateCustom =  $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusPrimaryKey}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
             Delete =        $"DELETE FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            Insert =        GetInsertQuery(Dialect, Name, columnsMinusPrimaryKey, propertiesMinusPrimaryKey);
         }
+
+        /// <summary>
+        /// Gets the type of the <c>SQL</c> database.
+        /// </summary>
+        internal Dialect Dialect { get; }
 
         /// <summary>
         /// Gets the name by which the model will be stored as.
         /// </summary>
-        public string Name { get; }
+        internal string Name { get; }
 
         /// <summary>
         /// Gets the <c>SELECt</c> query to retrieve the model.
         /// </summary>
-        public string Select { get; }
+        internal string Select { get; }
 
         /// <summary>
         /// Gets the <c>INSERT</c> query to store the model.
         /// </summary>
-        public string Insert { get; }
+        internal string Insert { get; }
 
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on the model's Ids.
         /// </summary>
-        public string UpdateDefault { get; }
+        internal string UpdateDefault { get; }
 
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on any of the model's columns.
         /// </summary>
-        public string UpdateCustom { get; }
+        internal string UpdateCustom { get; }
 
         /// <summary>
         /// Gets the <c>DELETE</c> query to delete the model.
         /// </summary>
-        public string Delete { get; }
+        internal string Delete { get; }
 
         internal string GetSqlWithClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string baseQuery, bool single)
         {
             var propertyName = selector.GetPropertyName();
-            var columnName = GetColumnName(propertyName);
+            var columnName = PropertyNamesToColumns[propertyName];
 
             const string MultipleClause = " IN @Values";
             const string SingleClause = " = @Value";
@@ -111,9 +103,42 @@
             return baseQuery.Replace(";", subQuery);
         }
 
-        internal string GetColumnName(string propertyName)
+        private static PropertyInfo GetPrimaryKey(PropertyInfo[] props)
         {
-            return _propertyNamesToColumnNames[propertyName];
+            var possiblePrimaryKeys = props.Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(PrimaryKeyAttribute)))
+                .ToArray();
+
+            Ensure.That<InvalidOperationException>(possiblePrimaryKeys.Length <= 1,
+                "The model can only have one property specified as the Primary Key.");
+
+            // A marked PrimaryKey has precedence over default Id property
+            if (possiblePrimaryKeys.Length == 1) { return possiblePrimaryKeys[0]; }
+
+            var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id" &&
+                (p.PropertyType == typeof(int) || p.PropertyType == typeof(long)));
+
+            if (defaultIdProp != null) { return defaultIdProp; }
+
+            throw new InvalidOperationException("The model does not have a default 'Id' property specified or any it's members marked as primary key.");
+        }
+
+        private static string GetInsertQuery(Dialect dialect, string name, string columnsMinusIds, string propertiesMinusIds)
+        {
+            switch (dialect)
+            {
+                case Dialect.Generic:
+                    return $"INSERT INTO {name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIds}{Formatter.NewLine}){Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIds}{Formatter.NewLine});";
+                case Dialect.Sqlite:
+                    return $"INSERT INTO {name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIds}{Formatter.NewLine}){Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIds}{Formatter.NewLine}); SELECT last_insert_rowid();";
+                case Dialect.SqlServer:
+                    var idColumnName = "Id";
+                    var declarationClause = $"DECLARE @InsertedRows AS TABLE ({idColumnName} BIGINT);";
+                    var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
+                    var selectInsertedIdClause = $"SELECT {idColumnName} FROM @InsertedRows;";
+                    return $"{declarationClause}{Formatter.NewLine}INSERT INTO {name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIds}{Formatter.NewLine}) {outputClause}{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIds}{Formatter.NewLine});{Formatter.NewLine}{selectInsertedIdClause}";
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(dialect), dialect, null);
         }
 
         private static string GetModelName(Type type)
@@ -154,6 +179,48 @@
             }
 
             return result;
+        }
+
+        private struct TableKey : IEquatable<TableKey>
+        {
+            public TableKey(Type type, Dialect dialect)
+            {
+                Type = type;
+                Dialect = dialect;
+            }
+
+            internal Type Type { get; }
+            internal Dialect Dialect { get; }
+
+            #region Equality
+
+            public bool Equals(TableKey other)
+            {
+                return GetHashCode() == other.GetHashCode();
+            }
+
+            public static bool operator ==(TableKey left, TableKey right)
+            {
+                return left.Equals(right);
+            }
+
+            public static bool operator !=(TableKey left, TableKey right)
+            {
+                return !left.Equals(right);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                return obj is TableKey && Equals((TableKey) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashHelper.GetHashCode(Type, Dialect);
+            }
+
+            #endregion
         }
     }
 }

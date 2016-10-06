@@ -98,7 +98,7 @@
                     new Person { Name = "P4", Age = 40 }
                 };
                 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeopleBuffered = (await repo.GetLazyAsync()).ToArray();
                 var insertedPeopleUnBuffered = (await repo.GetLazyAsync()).ToArray();
@@ -160,7 +160,7 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeopleBuffered = (await repo.GetLazyAsync()).ToArray();
                 var insertedPeopleUnBuffered = (await repo.GetLazyAsync()).ToArray();
@@ -222,7 +222,7 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeopleBuffered = (await repo.GetAsync()).ToArray();
                 var insertedPeopleUnBuffered = (await repo.GetAsync()).ToArray();
@@ -284,7 +284,7 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeopleBuffered = (await repo.GetAsync()).ToArray();
                 var insertedPeopleUnBuffered = (await repo.GetAsync()).ToArray();
@@ -348,7 +348,7 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(6);
 
                 var onePerson = (await repo.GetAsync(p => p.Id, 1)).ToArray();
 
@@ -423,7 +423,7 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(6);
 
                 var onePerson = (await repo.GetAsync(p => p.SomeId, 1)).ToArray();
 
@@ -499,7 +499,7 @@
                     new Person { Name = "P5", Age = 50 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(6);
 
                 var filter1 = new QueryFilter<Person>();
                 filter1.And(p => p.Age, Operand.GreaterThan, 30);
@@ -561,7 +561,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(1);
+                (await repo.InsertAsync(p2)).ShouldBe(2);
 
                 (await repo.GetAsync()).Count().ShouldBe(2);
 
@@ -572,7 +572,7 @@
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new Person { Id = 1, Name = "P3", Age = 30 };
-                (await repo.InsertAsync(p3)).ShouldBe(1);
+                (await repo.InsertAsync(p3)).ShouldBe(3);
 
                 (await repo.GetAsync()).Count().ShouldBe(3);
 
@@ -583,7 +583,7 @@
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new Person { Id = 4, Name = "P4", Age = 40 };
-                (await repo.InsertAsync(p4)).ShouldBe(1);
+                (await repo.InsertAsync(p4)).ShouldBe(4);
 
                 (await repo.GetAsync()).Count().ShouldBe(4);
 
@@ -619,7 +619,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(1);
+                (await repo.InsertAsync(p2)).ShouldBe(2);
 
                 (await repo.GetAsync()).Count().ShouldBe(2);
 
@@ -630,7 +630,7 @@
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new MyPerson { SomeId = 1, SomeName = "P3", Age = 30 };
-                (await repo.InsertAsync(p3)).ShouldBe(1);
+                (await repo.InsertAsync(p3)).ShouldBe(3);
 
                 (await repo.GetAsync()).Count().ShouldBe(3);
 
@@ -641,7 +641,7 @@
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new MyPerson { SomeId = 4, SomeName = "P4", Age = 40 };
-                (await repo.InsertAsync(p4)).ShouldBe(1);
+                (await repo.InsertAsync(p4)).ShouldBe(4);
 
                 (await repo.GetAsync()).Count().ShouldBe(4);
 
@@ -673,7 +673,7 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -721,7 +721,7 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -771,7 +771,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(1);
+                (await repo.InsertAsync(p2)).ShouldBe(2);
 
                 var insertedP2 = (await repo.GetAsync(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -824,7 +824,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(1);
+                (await repo.InsertAsync(p2)).ShouldBe(2);
 
                 var insertedP2 = (await repo.GetAsync(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -878,7 +878,7 @@
                     new Person { Name = "P5", Age = 70 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(7);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -974,7 +974,7 @@
                     new MyPerson { SomeName = "P5", Age = 70 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(7);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -1067,12 +1067,12 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
                 var someOtherPerson = new Person { Name = "Santa", Age = 96 };
-                (await repo.InsertAsync(someOtherPerson)).ShouldBe(1);
+                (await repo.InsertAsync(someOtherPerson)).ShouldBe(5);
 
                 (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
 
@@ -1138,12 +1138,12 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
                 var someOtherPerson = new MyPerson { SomeName = "Santa", Age = 96 };
-                (await repo.InsertAsync(someOtherPerson)).ShouldBe(1);
+                (await repo.InsertAsync(someOtherPerson)).ShouldBe(5);
 
                 (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
 
@@ -1209,7 +1209,7 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
@@ -1239,7 +1239,7 @@
                     new Person { Name = "MP5", Age = 100 }
                 };
 
-                (await repo.InsertAsync(morePeople)).ShouldBe(morePeople.Length);
+                (await repo.InsertAsync(morePeople)).ShouldBe(6);
 
                 var allPeople = (await repo.GetAsync()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
@@ -1286,7 +1286,7 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
@@ -1316,7 +1316,7 @@
                     new MyPerson { SomeName = "MP5", Age = 100 }
                 };
 
-                (await repo.InsertAsync(morePeople)).ShouldBe(morePeople.Length);
+                (await repo.InsertAsync(morePeople)).ShouldBe(6);
 
                 var allPeople = (await repo.GetAsync()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
@@ -1365,7 +1365,7 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
@@ -1395,7 +1395,7 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
@@ -1429,7 +1429,7 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
@@ -1475,8 +1475,8 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
-                
+                (await repo.InsertAsync(people)).ShouldBe(4);
+
                 (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)people.Length);
@@ -1519,8 +1519,8 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
-                
+                (await repo.InsertAsync(people)).ShouldBe(4);
+
                 (await repo.MinAsync(p => p.Id)).ShouldBe(1);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(10);
                 (await repo.MinAsync(p => p.Name)).ShouldBe("P1");
@@ -1549,8 +1549,8 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
-                
+                (await repo.InsertAsync(people)).ShouldBe(4);
+
                 (await repo.MinAsync(p => p.SomeId)).ShouldBe(1);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(10);
                 (await repo.MinAsync(p => p.SomeName)).ShouldBe("P1");
@@ -1579,8 +1579,8 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
-                
+                (await repo.InsertAsync(people)).ShouldBe(4);
+
                 (await repo.MaxAsync(p => p.Id)).ShouldBe(4);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(30);
                 (await repo.MaxAsync(p => p.Name)).ShouldBe("P3");
@@ -1609,7 +1609,7 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 (await repo.MaxAsync(p => p.SomeId)).ShouldBe(4);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(30);
@@ -1638,7 +1638,7 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(5);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -1678,7 +1678,7 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(5);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -1720,7 +1720,7 @@
                     new Person { Name = "P7", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(7);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -1765,7 +1765,7 @@
                     new MyPerson { SomeName = "P7", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(7);
 
                 var insertedPeople = (await repo.GetAsync()).ToArray();
 
@@ -1789,6 +1789,7 @@
 
         private static async Task When_doing_multiple_operations_with_sample_model()
         {
+            // ReSharper disable once InconsistentNaming
             const string tableQuery = @"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='SampleModel' AND xtype='U')
 CREATE TABLE SampleModel (
 	Id INT IDENTITY(1,1) PRIMARY KEY NOT NULL,
@@ -1802,6 +1803,7 @@ CREATE TABLE SampleModel (
 	[Key] UNIQUEIDENTIFIER NOT NULL,
 	[DateTime] DATETIME2(7) NOT NULL,
 	[DateTimeOffset] DATETIMEOFFSET(7) NOT NULL);";
+
             using (IDatabase db = new SqlServerDatabase(ConnectionString))
             {
                 await db.Connection.ExecuteAsync(tableQuery);

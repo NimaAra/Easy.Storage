@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Dapper;
@@ -20,10 +21,10 @@
         /// <summary>
         /// Creates an instance of the <see cref="Repository{T}"/>.
         /// </summary>
-        internal Repository(IDbConnection dbConnection)
+        internal Repository(IDbConnection dbConnection, Dialect dialect = Dialect.Generic)
         {
             _db = Ensure.NotNull(dbConnection, nameof(dbConnection));
-            _table = Table.Get<T>();
+            _table = Table.Get<T>(dialect);
         }
 
         /// <summary>
@@ -88,16 +89,17 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
-        public virtual Task<int> InsertAsync(T item, IDbTransaction transaction = null)
+        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
+        public virtual async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(_db, _table.Insert, item, transaction: transaction);
+            return (await DbConnectionExtensions.QueryAsync<long>(_db, _table.Insert, item, transaction: transaction)
+                .ConfigureAwait(false)).First();
         }
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
+        /// <returns>The number of inserted records.</returns>
         public virtual Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
@@ -197,7 +199,7 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.GetColumnName(selector.GetPropertyName());
+            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT COUNT ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
             return DbConnectionExtensions.ExecuteScalarAsync<ulong>(_db, query, transaction: transaction);
         }
@@ -212,7 +214,7 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.GetColumnName(selector.GetPropertyName());
+            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT SUM ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
             return DbConnectionExtensions.ExecuteScalarAsync<long>(_db, query, transaction: transaction);
         }
@@ -227,7 +229,7 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.GetColumnName(selector.GetPropertyName());
+            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT AVG ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
             return DbConnectionExtensions.ExecuteScalarAsync<decimal>(_db, query, transaction: transaction);
         }
@@ -239,7 +241,7 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.GetColumnName(selector.GetPropertyName());
+            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT MIN ({column}) FROM {_table.Name}";
             return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
         }
@@ -251,7 +253,7 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.GetColumnName(selector.GetPropertyName());
+            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT MAX ({column}) FROM {_table.Name}";
             return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(_db, query, transaction: transaction);
         }

@@ -16,7 +16,7 @@
 
             tableSql.ShouldNotBeNullOrWhiteSpace();
             tableSql.ShouldBe("CREATE TABLE IF NOT EXISTS SampleModel (\r\n"
-                        + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT ((julianday('now') - 2440587.5)*86400000),\r\n"
+                        + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),\r\n"
                         + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
                         + "    [Text] TEXT NOT NULL,\r\n"
                         + "    [Int] INTEGER NOT NULL,\r\n"

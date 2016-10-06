@@ -47,13 +47,13 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
-        Task<int> InsertAsync(T item, IDbTransaction transaction = null);
+        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
+        Task<long> InsertAsync(T item, IDbTransaction transaction = null);
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
+        /// <returns>The number of inserted records.</returns>
         Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null);
 
         /// <summary>

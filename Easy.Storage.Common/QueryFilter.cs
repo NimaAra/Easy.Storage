@@ -62,7 +62,7 @@
             TProperty value)
         {
             var propertyName = selector.GetPropertyName();
-            var columnName = _table.GetColumnName(propertyName);
+            var columnName = _table.PropertyNamesToColumns[propertyName];
 
             var paramName = string.Concat(propertyName, _paramCounter++.ToString());
             Parameters.Add(paramName, value);

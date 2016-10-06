@@ -144,7 +144,7 @@
 
             internal string GetColumnName(string getPropertyName)
             {
-                return _table.GetColumnName(getPropertyName);
+                return _table.PropertyNamesToColumns[getPropertyName];
             }
         }
 

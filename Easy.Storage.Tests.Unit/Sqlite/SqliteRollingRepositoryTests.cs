@@ -43,7 +43,7 @@
                     new Person {Name = "P3", Age = 30}
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 await Task.Delay(TimeSpan.FromSeconds(3));
 
@@ -113,7 +113,7 @@
                     new MyPerson {SomeName = "P3", Age = 30}
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(people.Length);
+                (await repo.InsertAsync(people)).ShouldBe(4);
 
                 await Task.Delay(TimeSpan.FromSeconds(3));
 

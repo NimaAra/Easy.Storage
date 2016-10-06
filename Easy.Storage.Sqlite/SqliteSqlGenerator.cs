@@ -28,12 +28,12 @@
 
             var builder = new StringBuilder();
             builder.AppendLine($"CREATE TABLE IF NOT EXISTS {table.Name} (");
-            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT ((julianday('now') - 2440587.5)*86400000),");
+            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
 
             foreach (var pair in table.PropertyToColumns)
             {
                 var sqliteType = GetSqliteType(pair.Key.PropertyType).ToString();
-                var isIdColumn = table.IdProperties.Contains(pair.Key);
+                var isIdColumn = table.PrimaryKey == pair.Key;
 
                 builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
             }

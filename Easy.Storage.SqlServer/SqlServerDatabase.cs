@@ -116,7 +116,7 @@
         /// </summary>
         public override IRepository<T> GetRepository<T>()
         {
-            return new Repository<T>(Connection);
+            return new Repository<T>(Connection, Dialect.SqlServer);
         }
 
         /// <summary>

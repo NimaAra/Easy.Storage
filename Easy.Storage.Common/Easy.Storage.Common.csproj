@@ -51,6 +51,7 @@
     <Compile Include="Attributes\IgnoreAttribute.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="Dialect.cs" />
     <Compile Include="Extensions\DbConnectionExtensions.cs" />
     <Compile Include="TypeHandlers\DateTimeOffsetHandler.cs" />
     <Compile Include="Extensions\DatabaseExtensions.cs" />
@@ -63,7 +64,6 @@
     <Compile Include="QueryFilter.cs" />
     <Compile Include="Formatter.cs" />
     <Compile Include="Repository.cs" />
-    <Compile Include="SingleWriterRepository.cs" />
     <Compile Include="Table.cs" />
   </ItemGroup>
   <ItemGroup>

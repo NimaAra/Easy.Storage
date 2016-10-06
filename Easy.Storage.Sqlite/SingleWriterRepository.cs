@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Common
+﻿namespace Easy.Storage.Sqlite
 {
     using System;
     using System.Collections.Generic;
@@ -6,6 +6,7 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Easy.Storage.Common;
 
     /// <summary>
     /// Represents a <see cref="Repository{T}"/> which allows a single writer/updater/deleter at a time.
@@ -17,7 +18,7 @@
         /// <summary>
         /// Creates an instance of the <see cref="SingleWriterRepository{T}"/>.
         /// </summary>
-        internal SingleWriterRepository(IDbConnection connection) : base(connection)
+        internal SingleWriterRepository(IDbConnection connection) : base(connection, Dialect.Sqlite)
         {
             _writerSemaphore = new SemaphoreSlim(1, 1);
         }
@@ -25,8 +26,8 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
-        public override async Task<int> InsertAsync(T item, IDbTransaction transaction = null)
+        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
+        public override async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
         {
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
@@ -41,7 +42,7 @@
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
+        /// <returns>The number of inserted records.</returns>
         public override async Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
