@@ -67,6 +67,7 @@
     <Compile Include="Sqlite\SqliteRollingDatabaseTests.cs" />
     <Compile Include="Sqlite\SqliteSqlGeneratorTests.cs" />
     <Compile Include="SqlServer\Context.cs" />
+    <Compile Include="SqlServer\SqlServerColumnTypeParsingTests.cs" />
     <Compile Include="SqlServer\SqlServerRepositoryTests.cs" />
     <Compile Include="SqlServer\SqlServerRepositoryTranscationTests.cs" />
     <Compile Include="SqlServer\SqlServerDatabaseTests.cs" />

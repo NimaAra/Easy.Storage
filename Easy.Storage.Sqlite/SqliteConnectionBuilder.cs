@@ -15,7 +15,7 @@
         /// </summary>
         public static SqliteConnectionWrapper GetInMemoryConnectionWrapper()
         {
-            return new SqliteConnectionWrapper(new SQLiteConnection(GetConnectionString(":memory:")));
+            return new SqliteConnectionWrapper(new SQLiteConnection(GetInMemoryConnectionString()));
         }
 
         /// <summary>

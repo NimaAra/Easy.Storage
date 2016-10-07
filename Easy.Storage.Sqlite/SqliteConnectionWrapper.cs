@@ -16,7 +16,6 @@
     /// </summary>
     public sealed class SqliteConnectionWrapper : DbConnection
     {
-        private readonly bool _fromStartOfToday;
         private SQLiteConnection _connection;
         private volatile bool _isDisposed;
         private DateTime _connectionLastCreationTime;
@@ -53,7 +52,6 @@
         /// <param name="fromStartOfToday">The flag indicating whether rolling should start from the start of today or from now.</param>
         public SqliteConnectionWrapper(SQLiteConnection sqliteConnection, TimeSpan? rollEvery = null, bool fromStartOfToday = false)
         {
-            _fromStartOfToday = fromStartOfToday;
             _connection = Ensure.NotNull(sqliteConnection, nameof(sqliteConnection));
             IsInMemory = _connection.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase);
             RollEvery = rollEvery?? TimeSpan.MaxValue;
@@ -188,14 +186,16 @@
 
         internal async void Roll()
         {
+            var now = DateTime.Now;
+
             if (State != ConnectionState.Open) { _connection.Open(); }
-            var sqliteObjects = await _connection.QueryAsync<SqliteObject>(SqliteSql.Master);
+            var sqliteObjects = await _connection.QueryAsync<SqliteObject>(SqliteSql.Master).ConfigureAwait(false);
             _connection.Close();
 
             var builder = new StringBuilder();
             foreach (var item in sqliteObjects)
             {
-                builder.AppendLine(item.Sql + ';'.ToString());
+                builder.AppendLine(item.Sql + ";");
             }
 
             var initializationQuery = builder.ToString();
@@ -203,7 +203,6 @@
             var connString = ConnectionString;
             var currentDbFile = SqliteHelper.GetDatabaseFile(connString);
 
-            var now = DateTime.Now;
             var dbFileName = Path.GetFileNameWithoutExtension(currentDbFile.FullName);
             // ReSharper disable once UseFormatSpecifierInInterpolation
             var newName = $"{dbFileName}_[{(++RollCount).ToString()}][{now.ToString("yyyy-MM-dd-HH-mm-ss")}]{currentDbFile.Extension}";
@@ -211,9 +210,9 @@
             currentDbFile.Rename(newName);
 
             _connection = new SQLiteConnection(connString).OpenAndReturn();
-            _connection.ExecuteAsync(initializationQuery).Wait();
+            await _connection.ExecuteAsync(initializationQuery).ConfigureAwait(false);
             _connection.Close();
-            _connectionLastCreationTime = _fromStartOfToday ? now.Date : now;
+            _connectionLastCreationTime = now;
         }
     }
 }

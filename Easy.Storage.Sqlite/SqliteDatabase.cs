@@ -95,7 +95,7 @@
         public override async Task<bool> ExistsAsync<T>()
         {
             var tableName = Table.Get<T>().Name;
-            return await this.ExecuteScalarAsync<uint>(SqliteSql.TableExists, new {tableName }).ConfigureAwait(false) != 0;
+            return await this.ExecuteScalarAsync<uint>(SqliteSql.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
 
         /// <summary>
@@ -181,7 +181,7 @@
         public Task<IEnumerable<T>> SearchAsync<T>(ITerm<T> term)
         {
             var query = Table.Get<T>().Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
-            return this.QueryAsync<T>(query);
+            return this.QueryAsync<T>(query, buffered: false);
         }
 
         /// <summary>

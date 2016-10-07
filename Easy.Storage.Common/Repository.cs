@@ -33,25 +33,25 @@
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
+        /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
         public Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.QueryAsync<T>(Connection, _table.Select, transaction: transaction);
+            return Connection.QueryAsync<T>(_table.Select, transaction: transaction, buffered: true);
         }
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
+        /// <remarks>This method returns a non-buffered result.</remarks>
         /// </summary>
         public Task<IEnumerable<T>> GetLazyAsync(IDbTransaction transaction = null)
         {
-            var tcs = new TaskCompletionSource<IEnumerable<T>>();
-            var result = Connection.Query<T>(_table.Select, buffered: false, transaction: transaction);
-            tcs.SetResult(result);
-            return tcs.Task;
+            return Connection.QueryAsync<T>(_table.Select, transaction: transaction, buffered: false);
         }
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
+        /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="value">The value associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
@@ -61,11 +61,12 @@
             Ensure.NotNull(selector, nameof(selector));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, true);
-            return DbConnectionExtensions.QueryAsync<T>(Connection, query, new { Value = value }, transaction: transaction);
+            return Connection.QueryAsync<T>(query, new { Value = value }, transaction: transaction, buffered: true);
         }
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
+        /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
@@ -76,18 +77,19 @@
             Ensure.NotNull(values, nameof(values));
 
             var query = _table.GetSqlWithClause(selector, _table.Select, false);
-            return DbConnectionExtensions.QueryAsync<T>(Connection, query, new { Values = values }, transaction: transaction);
+            return Connection.QueryAsync<T>(query, new { Values = values }, transaction: transaction, buffered: true);
         }
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> based on the given <paramref name="queryFilter"/>.
+        /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
         /// <param name="transaction">The transaction</param>
         /// <param name="queryFilter">The filter to limit the records returned</param>
         public Task<IEnumerable<T>> GetAsync(QueryFilter<T> queryFilter, IDbTransaction transaction = null)
         {
             Ensure.NotNull(queryFilter, nameof(queryFilter));
-            return DbConnectionExtensions.QueryAsync<T>(Connection, queryFilter.Query, queryFilter.Parameters, transaction: transaction);
+            return Connection.QueryAsync<T>(queryFilter.Query, queryFilter.Parameters, transaction: transaction, buffered: true);
         }
 
         /// <summary>
@@ -96,7 +98,7 @@
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
         public virtual async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
         {
-            return (await DbConnectionExtensions.QueryAsync<long>(Connection, _table.Insert, item, transaction: transaction)
+            return (await Connection.QueryAsync<long>(_table.Insert, item, transaction: transaction, buffered: true)
                 .ConfigureAwait(false)).First();
         }
 
@@ -128,7 +130,7 @@
             var parameters = new DynamicParameters(item);
             parameters.Add("Value", value);
             var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, true);
-            
+
             return DbConnectionExtensions.ExecuteAsync(Connection, query, parameters, transaction: transaction);
         }
 

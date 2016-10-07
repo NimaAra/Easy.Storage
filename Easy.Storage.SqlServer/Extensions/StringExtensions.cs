@@ -1,179 +1,182 @@
 ﻿namespace Easy.Storage.SqlServer.Extensions
 {
     using System;
+    using Easy.Common;
     using Easy.Storage.SqlServer.Models;
 
     internal static class StringExtensions
     {
         internal static SqlServerDataType ParseAsSqlServerDataType(this string columnType)
         {
-            var policy = StringComparison.OrdinalIgnoreCase;
-            if (columnType.Equals("image", policy))
+            Ensure.NotNullOrEmptyOrWhiteSpace(columnType);
+
+            const StringComparison Policy = StringComparison.OrdinalIgnoreCase;
+            if (columnType.Equals("image", Policy))
             {
                 return SqlServerDataType.Image;
             }
 
-            if (columnType.Equals("text", policy))
+            if (columnType.Equals("text", Policy))
             {
                 return SqlServerDataType.Text;
             }
 
-            if (columnType.Equals("uniqueidentifier", policy))
+            if (columnType.Equals("uniqueidentifier", Policy))
             {
                 return SqlServerDataType.UniqueIdentifier;
             }
 
-            if (columnType.Equals("date", policy))
+            if (columnType.Equals("date", Policy))
             {
                 return SqlServerDataType.Date;
             }
 
-            if (columnType.Equals("time", policy))
+            if (columnType.Equals("time", Policy))
             {
                 return SqlServerDataType.Time;
             }
 
-            if (columnType.Equals("smalldatetime", policy))
+            if (columnType.Equals("smalldatetime", Policy))
             {
                 return SqlServerDataType.SmallDateTime;
             }
 
-            if (columnType.Equals("datetime", policy))
+            if (columnType.Equals("datetime", Policy))
             {
                 return SqlServerDataType.DateTime;
             }
 
-            if (columnType.Equals("datetime2", policy))
+            if (columnType.Equals("datetime2", Policy))
             {
                 return SqlServerDataType.DateTime2;
             }
 
-            if (columnType.Equals("datetimeoffset", policy))
+            if (columnType.Equals("datetimeoffset", Policy))
             {
                 return SqlServerDataType.DateTimeOffset;
             }
 
-            if (columnType.Equals("tinyint", policy))
-            {
-                return SqlServerDataType.TinyInt;
-            }
-
-            if (columnType.Equals("smallint", policy))
-            {
-                return SqlServerDataType.SmallInt;
-            }
-
-            if (columnType.Equals("int", policy))
-            {
-                return SqlServerDataType.Int;
-            }
-
-            if (columnType.Equals("real", policy))
-            {
-                return SqlServerDataType.Real;
-            }
-
-            if (columnType.Equals("money", policy))
-            {
-                return SqlServerDataType.Money;
-            }
-
-            if (columnType.Equals("float", policy))
-            {
-                return SqlServerDataType.Float;
-            }
-
-            if (columnType.Equals("decimal", policy))
-            {
-                return SqlServerDataType.Decimal;
-            }
-
-            if (columnType.Equals("sql_variant", policy))
-            {
-                return SqlServerDataType.Variant;
-            }
-
-            if (columnType.Equals("ntext", policy))
-            {
-                return SqlServerDataType.NText;
-            }
-
-            if (columnType.Equals("bit", policy))
-            {
-                return SqlServerDataType.Bit;
-            }
-
-            if (columnType.Equals("numeric", policy))
-            {
-                return SqlServerDataType.Numeric;
-            }
-
-            if (columnType.Equals("smallmoney", policy))
-            {
-                return SqlServerDataType.SmallMoney;
-            }
-
-            if (columnType.Equals("bigint", policy))
-            {
-                return SqlServerDataType.BigInt;
-            }
-
-            if (columnType.Equals("hierarchyid", policy))
-            {
-                return SqlServerDataType.HierarchyId;
-            }
-
-            if (columnType.Equals("geometry", policy))
-            {
-                return SqlServerDataType.Geometry;
-            }
-
-            if (columnType.Equals("geography", policy))
-            {
-                return SqlServerDataType.Geography;
-            }
-
-            if (columnType.Equals("varbinary", policy))
-            {
-                return SqlServerDataType.VarBinary;
-            }
-
-            if (columnType.Equals("varchar", policy))
-            {
-                return SqlServerDataType.VarChar;
-            }
-
-            if (columnType.Equals("binary", policy))
-            {
-                return SqlServerDataType.Binary;
-            }
-
-            if (columnType.Equals("char", policy))
-            {
-                return SqlServerDataType.Char;
-            }
-
-            if (columnType.Equals("timestamp", policy))
+            if (columnType.Equals("timestamp", Policy))
             {
                 return SqlServerDataType.Timestamp;
             }
 
-            if (columnType.Equals("nvarchar", policy))
+            if (columnType.Equals("tinyint", Policy))
+            {
+                return SqlServerDataType.TinyInt;
+            }
+
+            if (columnType.Equals("smallint", Policy))
+            {
+                return SqlServerDataType.SmallInt;
+            }
+
+            if (columnType.Equals("int", Policy))
+            {
+                return SqlServerDataType.Int;
+            }
+
+            if (columnType.Equals("real", Policy))
+            {
+                return SqlServerDataType.Real;
+            }
+
+            if (columnType.Equals("money", Policy))
+            {
+                return SqlServerDataType.Money;
+            }
+
+            if (columnType.Equals("float", Policy))
+            {
+                return SqlServerDataType.Float;
+            }
+
+            if (columnType.Equals("decimal", Policy))
+            {
+                return SqlServerDataType.Decimal;
+            }
+
+            if (columnType.Equals("sql_variant", Policy))
+            {
+                return SqlServerDataType.Variant;
+            }
+
+            if (columnType.Equals("ntext", Policy))
+            {
+                return SqlServerDataType.NText;
+            }
+
+            if (columnType.Equals("bit", Policy))
+            {
+                return SqlServerDataType.Bit;
+            }
+
+            if (columnType.Equals("numeric", Policy))
+            {
+                return SqlServerDataType.Numeric;
+            }
+
+            if (columnType.Equals("smallmoney", Policy))
+            {
+                return SqlServerDataType.SmallMoney;
+            }
+
+            if (columnType.Equals("bigint", Policy))
+            {
+                return SqlServerDataType.BigInt;
+            }
+
+            if (columnType.Equals("hierarchyid", Policy))
+            {
+                return SqlServerDataType.HierarchyId;
+            }
+
+            if (columnType.Equals("geometry", Policy))
+            {
+                return SqlServerDataType.Geometry;
+            }
+
+            if (columnType.Equals("geography", Policy))
+            {
+                return SqlServerDataType.Geography;
+            }
+
+            if (columnType.Equals("varbinary", Policy))
+            {
+                return SqlServerDataType.VarBinary;
+            }
+
+            if (columnType.Equals("varchar", Policy))
+            {
+                return SqlServerDataType.VarChar;
+            }
+
+            if (columnType.Equals("binary", Policy))
+            {
+                return SqlServerDataType.Binary;
+            }
+
+            if (columnType.Equals("char", Policy))
+            {
+                return SqlServerDataType.Char;
+            }
+
+            if (columnType.Equals("nvarchar", Policy))
             {
                 return SqlServerDataType.NVarChar;
             }
 
-            if (columnType.Equals("nchar", policy))
+            if (columnType.Equals("nchar", Policy))
             {
                 return SqlServerDataType.NChar;
             }
 
-            if (columnType.Equals("xml", policy))
+            if (columnType.Equals("xml", Policy))
             {
                 return SqlServerDataType.Xml;
             }
 
-            if (columnType.Equals("sysname", policy))
+            if (columnType.Equals("sysname", Policy))
             {
                 return SqlServerDataType.SysName;
             }
