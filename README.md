@@ -8,3 +8,4 @@ ___
 
 #### NuGets:
 * **SQLite**: https://www.nuget.org/packages/Easy.Storage.Sqlite/
+* **SQL Server**: https://www.nuget.org/packages/Easy.Storage.SqlServer/
