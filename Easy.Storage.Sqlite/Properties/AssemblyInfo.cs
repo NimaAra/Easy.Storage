@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("EasyStorage.SQLite")]
 
-[assembly: AssemblyVersion("0.3.0.0")]
-[assembly: AssemblyFileVersion("0.3.0.0")]
+[assembly: AssemblyVersion("0.3.1.0")]
+[assembly: AssemblyFileVersion("0.3.1.0")]
 
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 

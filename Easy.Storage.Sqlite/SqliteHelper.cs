@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using Easy.Common;
+    using Easy.Common.Extensions;
 
     /// <summary>
     /// A helper class to extract data-source of a file-based <c>SQLite</c> database.
@@ -37,6 +38,14 @@
             if (dataSourceValue.Equals(InMemoryToken, StringComparison.OrdinalIgnoreCase)) { return null; }
 
             return new FileInfo(dataSourceValue.Trim(TrimCharacters));
+        }
+
+        /// <summary>
+        /// Gets the flag indicating whether the given <paramref name="sqliteConnectionString"/> is an in-memory connection.
+        /// </summary>
+        internal static bool IsInMemoryConnection(string sqliteConnectionString)
+        {
+            return sqliteConnectionString.Contains(InMemoryToken, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

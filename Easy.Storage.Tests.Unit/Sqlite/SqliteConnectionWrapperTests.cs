@@ -127,36 +127,48 @@
         {
             var dbFile = Path.GetTempFileName();
             var fileInfo = new FileInfo(dbFile);
+            var dbNameWithoutExtension = Path.GetFileNameWithoutExtension(dbFile);
+            Console.WriteLine("DB File: " + dbFile);
+
             var wrapper = SqliteConnectionBuilder.GetFileConnectionWrapper(fileInfo, TimeSpan.FromSeconds(2));
 
             wrapper.State.ShouldBe(ConnectionState.Closed);
             wrapper.ConnectionString.ShouldNotBeNullOrWhiteSpace();
-            wrapper.ConnectionString.ShouldContain(dbFile);
+            wrapper.ConnectionString.ShouldNotContain(dbFile);
+            wrapper.ConnectionString.ShouldContain(Path.Combine(fileInfo.DirectoryName, dbNameWithoutExtension + "_[1]["));
             wrapper.ConnectionString.ShouldContain("WAL");
             wrapper.ConnectionTimeout.ShouldBe(15);
             wrapper.Database.ShouldBe("main");
             wrapper.DataSource.ShouldBeNull();
-            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollCount.ShouldBe((uint)1);
             wrapper.RollEvery.ShouldBe(TimeSpan.FromSeconds(2));
 
             wrapper.Open();
             wrapper.State.ShouldBe(ConnectionState.Open);
 
-            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollCount.ShouldBe((uint)1);
 
             wrapper.Close();
             wrapper.State.ShouldBe(ConnectionState.Closed);
 
-            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollCount.ShouldBe((uint)1);
 
             await Task.Delay(TimeSpan.FromSeconds(4)).ConfigureAwait(false);
 
-            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollCount.ShouldBe((uint)1);
 
             wrapper.Open();
             wrapper.State.ShouldBe(ConnectionState.Open);
 
-            wrapper.RollCount.ShouldBe((uint)0);
+            wrapper.RollCount.ShouldBe((uint)1);
+
+            wrapper.Dispose();
+
+            var totalDbFiles = Directory.GetFiles(fileInfo.DirectoryName, dbNameWithoutExtension + "*.tmp");
+            Array.ForEach(totalDbFiles, Console.WriteLine);
+            totalDbFiles.Length.ShouldBe(2);
+
+            Array.ForEach(totalDbFiles, File.Delete);
         }
     }
 }

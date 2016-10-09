@@ -14,89 +14,19 @@
     internal sealed class SqliteRollingRepositoryTests : Context
     {
         [Test]
-        public async Task When_counting_non_aliased_model()
-        {
-            var dbFile = Path.GetTempFileName();
-            var fileInfo = new FileInfo(dbFile);
-            var dbFileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.FullName);
-
-            try
-            {
-                IDatabase db = new SqliteDatabase(new SqliteConnectionWrapper(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2)));
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)0);
-
-                (await repo.CountAsync(p => p.Id, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name, true)).ShouldBe((ulong)0);
-
-                var people = new[]
-                {
-                    new Person {Name = "P1", Age = 10},
-                    new Person {Name = "P2", Age = 30},
-                    new Person {Id = 123, Name = "P3", Age = 30},
-                    new Person {Name = "P3", Age = 30}
-                };
-
-                (await repo.InsertAsync(people)).ShouldBe(4);
-
-                await Task.Delay(TimeSpan.FromSeconds(3));
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)people.Length);
-
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)0);
-
-                var p5 = new Person { Name = "P5", Age = 50 };
-                await repo.InsertAsync(p5);
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
-
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
-
-                var rolledFiles = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
-                rolledFiles.ShouldNotBeNull();
-                rolledFiles.ShouldNotBeEmpty();
-                rolledFiles.Length.ShouldBe(1);
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)1);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)1);
-
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
-
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
-
-                var rolledFilesFirstRoll = Directory.GetFiles(fileInfo.DirectoryName,
-                    dbFileNameWithoutExtension + "_[*][*].tmp");
-                rolledFilesFirstRoll.ShouldNotBeNull();
-                rolledFilesFirstRoll.ShouldNotBeEmpty();
-                rolledFilesFirstRoll.Length.ShouldBe(1);
-
-                db.Dispose();
-                Array.ForEach(rolledFiles, File.Delete);
-            }
-            finally
-            {
-                fileInfo.Delete();
-            }
-        }
-
-        [Test]
         public async Task When_counting_aliased_model()
         {
             var dbFile = Path.GetTempFileName();
             var fileInfo = new FileInfo(dbFile);
+            var originalConnectionString = SqliteConnectionBuilder.GetFileConnectionString(fileInfo);
+            var dbDir = fileInfo.DirectoryName;
             var dbFileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileInfo.FullName);
+            fileInfo.Delete();
 
-            try
+            Console.WriteLine("DB File: " + dbFile);
+
+            using (IDatabase db = new SqliteDatabase(new SqliteConnectionWrapper(originalConnectionString, TimeSpan.FromSeconds(2))))
             {
-                IDatabase db = new SqliteDatabase(new SqliteConnectionWrapper(SqliteConnectionBuilder.GetFileConnectionString(fileInfo), TimeSpan.FromSeconds(2)));
                 var repo = db.GetRepository<MyPerson>();
 
                 await db.Connection.ExecuteAsync(TableQuery);
@@ -117,6 +47,8 @@
                     new MyPerson {SomeName = "P3", Age = 30}
                 };
 
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
+
                 (await repo.InsertAsync(people)).ShouldBe(4);
 
                 await Task.Delay(TimeSpan.FromSeconds(3));
@@ -125,39 +57,37 @@
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
                 (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)people.Length);
 
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)0);
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
 
                 var p5 = new MyPerson { SomeName = "P5", Age = 50 };
                 await repo.InsertAsync(p5);
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)2);
 
                 (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
 
-                var rolledFiles = Directory.GetFiles(fileInfo.DirectoryName, dbFileNameWithoutExtension + "_[*][*].tmp");
+                var rolledFiles = Directory.GetFiles(dbDir, dbFileNameWithoutExtension + "_[*][*].tmp");
                 rolledFiles.ShouldNotBeNull();
                 rolledFiles.ShouldNotBeEmpty();
-                rolledFiles.Length.ShouldBe(1);
+                rolledFiles.Length.ShouldBe(2);
 
                 (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)1);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)1);
                 (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)1);
 
-                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)1);
+                ((SqliteConnectionWrapper)db.Connection).RollCount.ShouldBe((uint)2);
 
                 (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
 
-                var rolledFilesFirstRoll = Directory.GetFiles(fileInfo.DirectoryName,
-                    dbFileNameWithoutExtension + "_[*][*].tmp");
+                var rolledFilesFirstRoll = Directory.GetFiles(dbDir, dbFileNameWithoutExtension + "_[*][*].tmp");
                 rolledFilesFirstRoll.ShouldNotBeNull();
                 rolledFilesFirstRoll.ShouldNotBeEmpty();
-                rolledFilesFirstRoll.Length.ShouldBe(1);
+                rolledFilesFirstRoll.Length.ShouldBe(2);
 
-                db.Dispose();
+                var totalDbFiles = Directory.GetFiles(dbDir, dbFileNameWithoutExtension + "*.tmp");
+                Array.ForEach(totalDbFiles, Console.WriteLine);
+                totalDbFiles.Length.ShouldBe(2);
+
                 Array.ForEach(rolledFiles, File.Delete);
-            }
-            finally
-            {
-                fileInfo.Delete();
             }
         }
     }

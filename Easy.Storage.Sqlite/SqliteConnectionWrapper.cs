@@ -7,6 +7,7 @@
     using System.Data.SQLite;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using Easy.Common;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.Sqlite.Models;
@@ -19,6 +20,10 @@
         private SQLiteConnection _connection;
         private volatile bool _isDisposed;
         private DateTime _connectionLastCreationTime;
+        private readonly bool _fromStartOfToday;
+        private readonly FileInfo _originalDbFile;
+        private readonly string _originalConnString;
+        private readonly bool _isRollable = true;
 
         /// <summary>
         /// Gets the flag indicating whether the underlying connection is <c>In-Memory</c> or not.
@@ -52,12 +57,26 @@
         /// <param name="fromStartOfToday">The flag indicating whether rolling should start from the start of today or from now.</param>
         public SqliteConnectionWrapper(SQLiteConnection sqliteConnection, TimeSpan? rollEvery = null, bool fromStartOfToday = false)
         {
+            _fromStartOfToday = fromStartOfToday;
             _connection = Ensure.NotNull(sqliteConnection, nameof(sqliteConnection));
-            IsInMemory = _connection.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase);
+            IsInMemory = SqliteHelper.IsInMemoryConnection(_connection.ConnectionString);
             RollEvery = rollEvery?? TimeSpan.MaxValue;
 
+            if (IsInMemory || RollEvery == TimeSpan.MaxValue) { _isRollable = false; }
+
+            Ensure.That<ArgumentOutOfRangeException>(RollEvery >= 1.Seconds(), $"{nameof(rollEvery)} cannot be less than 1 second.");
+
+            _originalConnString = _connection.ConnectionString;
+            _originalDbFile = SqliteHelper.GetDatabaseFile(_originalConnString);
+
             var now = DateTime.Now;
-            _connectionLastCreationTime = fromStartOfToday ? now.Date : now;
+            _connectionLastCreationTime = _fromStartOfToday ? now.Date : now;
+
+            if (!_isRollable) { return; }
+
+            var rolledDbFile = GetRollingDataBaseFile(_connectionLastCreationTime, ++RollCount, _originalDbFile);
+            var newConnString = _originalConnString.Replace(_originalDbFile.FullName, rolledDbFile.FullName);
+            _connection = new SQLiteConnection(newConnString);
         }
 
         /// <summary>
@@ -180,7 +199,7 @@
 
         internal bool ShouldRoll()
         {
-            if (IsInMemory) { return false; }
+            if (!_isRollable) { return false; }
             return DateTime.Now - _connectionLastCreationTime >= RollEvery;
         }
 
@@ -188,9 +207,33 @@
         {
             var now = DateTime.Now;
 
-            if (State != ConnectionState.Open) { _connection.Open(); }
-            var sqliteObjects = await _connection.QueryAsync<SqliteObject>(SqliteSql.Master).ConfigureAwait(false);
+            var initializationQuery = await GetInitializationQuery(_connection);
+
+            var rolledDbFile = GetRollingDataBaseFile(now, ++RollCount, _originalDbFile);
+            var newConnString = _originalConnString.Replace(_originalDbFile.FullName, rolledDbFile.FullName);
+
+            _connection = new SQLiteConnection(newConnString).OpenAndReturn();
+            await _connection.ExecuteAsync(initializationQuery).ConfigureAwait(false);
             _connection.Close();
+            _connectionLastCreationTime = _fromStartOfToday ? now.Date : now;
+        }
+
+        private static FileInfo GetRollingDataBaseFile(DateTime dateTime, uint rollCount, FileInfo originalDbFile)
+        {
+            var dbFileName = Path.GetFileNameWithoutExtension(originalDbFile.FullName);
+            var dbDirectoryName = originalDbFile.DirectoryName;
+
+            // ReSharper disable once UseFormatSpecifierInInterpolation
+            // ReSharper disable once AssignNullToNotNullAttribute
+            var newDbFilePath = Path.Combine(dbDirectoryName, $"{dbFileName}_[{rollCount.ToString()}][{dateTime.ToString("yyyy-MM-dd-HH-mm-ss")}]{originalDbFile.Extension}");
+            return new FileInfo(newDbFilePath);
+        }
+
+        private async Task<string> GetInitializationQuery(IDbConnection connection)
+        {
+            if (State != ConnectionState.Open) { connection.Open(); }
+            var sqliteObjects = await connection.QueryAsync<SqliteObject>(SqliteSql.Master).ConfigureAwait(false);
+            connection.Close();
 
             var builder = new StringBuilder();
             foreach (var item in sqliteObjects)
@@ -198,21 +241,7 @@
                 builder.AppendLine(item.Sql + ";");
             }
 
-            var initializationQuery = builder.ToString();
-
-            var connString = ConnectionString;
-            var currentDbFile = SqliteHelper.GetDatabaseFile(connString);
-
-            var dbFileName = Path.GetFileNameWithoutExtension(currentDbFile.FullName);
-            // ReSharper disable once UseFormatSpecifierInInterpolation
-            var newName = $"{dbFileName}_[{(++RollCount).ToString()}][{now.ToString("yyyy-MM-dd-HH-mm-ss")}]{currentDbFile.Extension}";
-            
-            currentDbFile.Rename(newName);
-
-            _connection = new SQLiteConnection(connString).OpenAndReturn();
-            await _connection.ExecuteAsync(initializationQuery).ConfigureAwait(false);
-            _connection.Close();
-            _connectionLastCreationTime = now;
+            return builder.ToString();
         }
     }
 }
