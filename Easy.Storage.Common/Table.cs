@@ -31,7 +31,7 @@
         {
             Dialect = key.Dialect;
             Name = GetModelName(key.Type);
-            var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             PrimaryKey = GetPrimaryKey(props);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);

@@ -1,6 +1,7 @@
 ﻿namespace Easy.Storage.Tests.Unit.Sqlite
 {
     using System.Collections.Generic;
+    using Easy.Storage.Common.Attributes;
     using Easy.Storage.Sqlite;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
@@ -51,6 +52,47 @@
                         + "CREATE TRIGGER IF NOT EXISTS SampleModel_ai AFTER INSERT ON SampleModel BEGIN\r\n"
                         + "    INSERT INTO SampleModel_fts (docId, [Flag], [Text], [Key]) VALUES (new.rowId, new.[Flag], new.[Text], new.[Key]);\r\n"
                         + "END;");
+        }
+
+        [Test]
+        public void When_generating_table_for_model_with_inheritance()
+        {
+            var parentTableSql = SqliteSqlGenerator.Table<Parent>();
+
+            parentTableSql.ShouldNotBeNullOrWhiteSpace();
+            parentTableSql.ShouldBe("CREATE TABLE IF NOT EXISTS Parent (\r\n"
+                       + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),\r\n"
+                       + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
+                       + "    [Name] TEXT NOT NULL,\r\n"
+                       + "    [Age] INTEGER NOT NULL\r\n);");
+
+            var childTableSql = SqliteSqlGenerator.Table<Child>();
+
+            childTableSql.ShouldNotBeNullOrWhiteSpace();
+            childTableSql.ShouldBe("CREATE TABLE IF NOT EXISTS Child (\r\n"
+                       + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),\r\n"
+                       + "    [Toy] TEXT NOT NULL,\r\n"
+                       + "    [PetName] TEXT NOT NULL,\r\n"
+                       + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
+                       + "    [Name] TEXT NOT NULL,\r\n"
+                       + "    [Age] INTEGER NOT NULL\r\n);");
+        }
+
+        private class Parent
+        {
+            public long Id { get; set; }
+            public string Name { get; set; }
+            public int Age { get; set; }
+
+            private int PrivateProperty { get; set; }
+        }
+
+        private sealed class Child : Parent
+        {
+            public string Toy { get; set; }
+
+            [Alias("PetName")]
+            public string Pet { get; set; }
         }
     }
 }
