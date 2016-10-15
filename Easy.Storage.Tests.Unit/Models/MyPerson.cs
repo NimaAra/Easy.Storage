@@ -5,7 +5,7 @@
     [Alias("Person")]
     internal sealed class MyPerson
     {
-        [PrimaryKey]
+        [Identity]
         [Alias("Id")]
         public long SomeId { get; set; }
 

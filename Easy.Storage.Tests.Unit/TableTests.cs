@@ -11,10 +11,10 @@
     internal sealed class TableTests
     {
         [Test]
-        public void When_creating_table_for_model_with_no_id_or_primary_key_attribute()
+        public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
             Should.Throw<InvalidOperationException>(() => Table.Get<ModelWithNoIdOrPrimaryKey>())
-                .Message.ShouldBe("The model does not have a default 'Id' property specified or any it's members marked as primary key.");
+                .Message.ShouldBe("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
         }
 
         [Test]
@@ -46,7 +46,7 @@
                     + "    [DateTimeOffset] AS 'DateTimeOffset'\r\n"
                     + "FROM SampleModel\r\nWHERE\r\n    1 = 1;");
 
-            table.Insert.ShouldBe("INSERT INTO SampleModel\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO SampleModel\r\n"
                     + "(\r\n"
                     + "    [Text],\r\n"
                     + "    [Int],\r\n"

@@ -1,13 +1,11 @@
 ﻿namespace Easy.Storage.Tests.Unit.Models
 {
-    using Easy.Storage.Common.Attributes;
-
-    internal class Person
+    internal class Parent
     {
-        [Identity]
         public long Id { get; set; }
-
         public string Name { get; set; }
         public int Age { get; set; }
+
+        private int PrivateProperty { get; set; }
     }
 }

@@ -696,6 +696,53 @@
         }
 
         [Test]
+        public async Task When_inserting_model_with_no_identity_column()
+        {
+            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                var repo = db.GetRepository<Person>();
+
+                await db.Connection.ExecuteAsync(TableQueryWithNoIdentity);
+
+                (await repo.GetAsync()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new Person { Id = 1, Name = "P1", Age = 10 },
+                    new Person { Id = 2, Name = "P2", Age = 20 },
+                    new Person { Id = 3, Name = "P3", Age = 30 },
+                    new Person { Id = 7, Name = "P4", Age = 40 }
+                };
+
+                (await repo.InsertAsync(people, false)).ShouldBe(4);
+
+                var insertedPeople = (await repo.GetAsync()).ToArray();
+
+                insertedPeople.Length.ShouldBe(4);
+
+                var p1 = insertedPeople[0];
+                p1.Id.ShouldBe(1);
+                p1.Name.ShouldBe("P1");
+                p1.Age.ShouldBe(10);
+
+                var p2 = insertedPeople[1];
+                p2.Id.ShouldBe(2);
+                p2.Name.ShouldBe("P2");
+                p2.Age.ShouldBe(20);
+
+                var p3 = insertedPeople[2];
+                p3.Id.ShouldBe(3);
+                p3.Name.ShouldBe("P3");
+                p3.Age.ShouldBe(30);
+
+                var p4 = insertedPeople[3];
+                p4.Id.ShouldBe(7);
+                p4.Name.ShouldBe("P4");
+                p4.Age.ShouldBe(40);
+            }
+        }
+
+        [Test]
         public async Task When_updating_single_by_id_non_aliased_model()
         {
             using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
@@ -1784,6 +1831,57 @@
                 updatedSample1.DateTimeOffset.TimeOfDay.Hours.ShouldBe(insertedSample1.DateTimeOffset.TimeOfDay.Hours);
                 updatedSample1.DateTimeOffset.TimeOfDay.Minutes.ShouldBe(insertedSample1.DateTimeOffset.TimeOfDay.Minutes);
                 updatedSample1.DateTimeOffset.TimeOfDay.Seconds.ShouldBe(insertedSample1.DateTimeOffset.TimeOfDay.Seconds);
+            }
+        }
+
+        [Test]
+        public async Task When_working_with_inheritted_model()
+        {
+            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            {
+                (await db.ExistsAsync<Child>()).ShouldBeFalse();
+                await db.ExecuteAsync(SqliteSqlGenerator.Table<Child>());
+                (await db.ExistsAsync<Child>()).ShouldBeTrue();
+
+                var repo = db.GetRepository<Child>();
+
+                var child1 = new Child
+                {
+                    Id = 1,
+                    Name = "Child-1",
+                    Age = 10,
+                    Pet = "Pet-1",
+                    Toy = "Toy-1"
+                };
+
+                var insertedId1 = await repo.InsertAsync(child1);
+                insertedId1.ShouldBe(1);
+
+                var retrievedChild1 = (await repo.GetAsync(c => c.Id, insertedId1)).First();
+                retrievedChild1.Id.ShouldBe(1);
+                retrievedChild1.Name.ShouldBe("Child-1");
+                retrievedChild1.Age.ShouldBe(10);
+                retrievedChild1.Pet.ShouldBe("Pet-1");
+                retrievedChild1.Toy.ShouldBe("Toy-1");
+
+                var child2 = new Child
+                {
+                    Id = 1,
+                    Name = "Child-2",
+                    Age = 20,
+                    Pet = "Pet-2",
+                    Toy = "Toy-2"
+                };
+
+                var insertedId2 = await repo.InsertAsync(child2);
+                insertedId2.ShouldBe(2);
+
+                var retrievedChild2 = (await repo.GetAsync(c => c.Id, insertedId2)).First();
+                retrievedChild2.Id.ShouldBe(2);
+                retrievedChild2.Name.ShouldBe("Child-2");
+                retrievedChild2.Age.ShouldBe(20);
+                retrievedChild2.Pet.ShouldBe("Pet-2");
+                retrievedChild2.Toy.ShouldBe("Toy-2");
             }
         }
     }

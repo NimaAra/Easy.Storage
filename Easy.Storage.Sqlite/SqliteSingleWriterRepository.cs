@@ -12,14 +12,14 @@
     /// <summary>
     /// Represents a <see cref="Repository{T}"/> which allows a single writer/updater/deleter at a time.
     /// </summary>
-    public sealed class SingleWriterRepository<T> : Repository<T>
+    public sealed class SqliteSingleWriterRepository<T> : Repository<T>
     {
         private readonly SemaphoreSlim _writerSemaphore;
 
         /// <summary>
-        /// Creates an instance of the <see cref="SingleWriterRepository{T}"/>.
+        /// Creates an instance of the <see cref="SqliteSingleWriterRepository{T}"/>.
         /// </summary>
-        internal SingleWriterRepository(SemaphoreSlim semaphore, IDbConnection connection) : base(connection, Dialect.Sqlite)
+        internal SqliteSingleWriterRepository(SemaphoreSlim semaphore, IDbConnection connection) : base(connection, Dialect.Sqlite)
         {
             _writerSemaphore = Ensure.NotNull(semaphore, nameof(semaphore));
         }
@@ -27,14 +27,17 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
-        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        public override async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
+        /// <param name="item">The item to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <returns>The <c>row_id</c> of the <paramref name="item"/>.</returns>
+        public override async Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 RollIfYouShould();
-                return await base.InsertAsync(item, transaction).ConfigureAwait(false);
+                return await base.InsertAsync(item, modelHasIdentityColumn, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -44,14 +47,17 @@
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
+        /// <param name="items">The items to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction.</param>
         /// <returns>The number of inserted records.</returns>
-        public override async Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
+        public override async Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 RollIfYouShould();
-                return await base.InsertAsync(items, transaction).ConfigureAwait(false);
+                return await base.InsertAsync(items, modelHasIdentityColumn, transaction).ConfigureAwait(false);
             } finally
             {
                 _writerSemaphore.Release();
@@ -61,7 +67,9 @@
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
         /// </summary>
-        /// <returns>Number of rows affected</returns>
+        /// <param name="item">The item to be updated.</param>
+        /// <param name="transaction">The transaction.</param>
+        /// <returns>Number of rows affected.</returns>
         public override async Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
         {
             await _writerSemaphore.WaitAsync().ConfigureAwait(false);

@@ -50,8 +50,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Child.cs" />
     <Compile Include="Models\ModelWithNoIdOrPrimaryKey.cs" />
     <Compile Include="Models\MyPerson.cs" />
+    <Compile Include="Models\Parent.cs" />
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\SampleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

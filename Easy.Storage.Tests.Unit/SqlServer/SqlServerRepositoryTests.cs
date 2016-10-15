@@ -6,6 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Easy.Storage.Common;
+    using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SqlServer;
     using Easy.Storage.Tests.Unit.Models;
@@ -37,6 +38,7 @@
             await When_inserting_single_aliased_model();
             await When_inserting_multiple_non_aliased_model();
             await When_inserting_multiple_aliased_model();
+            await When_inserting_model_with_no_identity_column();
             await When_updating_single_by_id_non_aliased_model();
             await When_updating_single_by_id_aliased_model();
             await When_updating_custom_non_aliased_model();
@@ -58,6 +60,7 @@
             await When_avg_non_aliased_model();
             await When_avg_aliased_model();
             await When_doing_multiple_operations_with_sample_model();
+            await When_working_with_inheritted_model();
 
             await SqlServerRepositoryTranscationTests.Run();
         }
@@ -745,6 +748,60 @@
                 var p4 = insertedPeople[3];
                 p4.SomeId.ShouldBe(4);
                 p4.SomeName.ShouldBe("P4");
+                p4.Age.ShouldBe(40);
+            }
+        }
+
+        private async Task When_inserting_model_with_no_identity_column()
+        {
+            // ReSharper disable once InconsistentNaming
+            const string tableQuery = "IF OBJECT_ID('PersonTemp', 'U') IS NULL"
+                                              + " CREATE TABLE PersonTemp ("
+                                              + " Id INT NOT NULL,"
+                                              + " Name NVARCHAR(50) NULL,"
+                                              + " Age INTEGER NOT NULL);";
+
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            {
+                var repo = db.GetRepository<PersonTemp>();
+
+                await db.Connection.ExecuteAsync(tableQuery);
+                await repo.DeleteAllAsync();
+
+                (await repo.GetAsync()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new PersonTemp { Id = 1, Name = "P1", Age = 10 },
+                    new PersonTemp { Id = 2, Name = "P2", Age = 20 },
+                    new PersonTemp { Id = 3, Name = "P3", Age = 30 },
+                    new PersonTemp { Id = 7, Name = "P4", Age = 40 }
+                };
+
+                (await repo.InsertAsync(people, false)).ShouldBe(4);
+
+                var insertedPeople = (await repo.GetAsync()).ToArray();
+
+                insertedPeople.Length.ShouldBe(4);
+
+                var p1 = insertedPeople[0];
+                p1.Id.ShouldBe(1);
+                p1.Name.ShouldBe("P1");
+                p1.Age.ShouldBe(10);
+
+                var p2 = insertedPeople[1];
+                p2.Id.ShouldBe(2);
+                p2.Name.ShouldBe("P2");
+                p2.Age.ShouldBe(20);
+
+                var p3 = insertedPeople[2];
+                p3.Id.ShouldBe(3);
+                p3.Name.ShouldBe("P3");
+                p3.Age.ShouldBe(30);
+
+                var p4 = insertedPeople[3];
+                p4.Id.ShouldBe(7);
+                p4.Name.ShouldBe("P4");
                 p4.Age.ShouldBe(40);
             }
         }
@@ -1883,5 +1940,68 @@ CREATE TABLE SampleModel (
                 updatedSample1.DateTimeOffset.TimeOfDay.Seconds.ShouldBe(insertedSample1.DateTimeOffset.TimeOfDay.Seconds);
             }
         }
+
+        private async Task When_working_with_inheritted_model()
+        {
+            // ReSharper disable once InconsistentNaming
+            const string tableQuery = @"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Child' AND xtype='U')
+CREATE TABLE Child (
+	Id INT IDENTITY(1, 1) PRIMARY KEY NOT NULL,
+    [Name] VARCHAR(50) NOT NULL,
+    [Age] INTEGER NOT NULL,
+    [Toy] VARCHAR(50) NOT NULL,
+	[PetName] VARCHAR(50) NOT NULL);";
+
+            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            {
+                await db.ExecuteAsync(tableQuery);
+                (await db.ExistsAsync<Child>()).ShouldBeTrue();
+
+                var repo = db.GetRepository<Child>();
+                await repo.DeleteAllAsync();
+                await db.ExecuteAsync("DBCC CHECKIDENT (Child, RESEED, 0)");
+
+                var child1 = new Child
+                {
+                    Id = 1,
+                    Name = "Child-1",
+                    Age = 10,
+                    Pet = "Pet-1",
+                    Toy = "Toy-1"
+                };
+
+                var insertedId1 = await repo.InsertAsync(child1);
+                insertedId1.ShouldBe(1);
+
+                var retrievedChild1 = (await repo.GetAsync(c => c.Id, insertedId1)).First();
+                retrievedChild1.Id.ShouldBe(1);
+                retrievedChild1.Name.ShouldBe("Child-1");
+                retrievedChild1.Age.ShouldBe(10);
+                retrievedChild1.Pet.ShouldBe("Pet-1");
+                retrievedChild1.Toy.ShouldBe("Toy-1");
+
+                var child2 = new Child
+                {
+                    Id = 1,
+                    Name = "Child-2",
+                    Age = 20,
+                    Pet = "Pet-2",
+                    Toy = "Toy-2"
+                };
+
+                var insertedId2 = await repo.InsertAsync(child2);
+                insertedId2.ShouldBe(2);
+
+                var retrievedChild2 = (await repo.GetAsync(c => c.Id, insertedId2)).First();
+                retrievedChild2.Id.ShouldBe(2);
+                retrievedChild2.Name.ShouldBe("Child-2");
+                retrievedChild2.Age.ShouldBe(20);
+                retrievedChild2.Pet.ShouldBe("Pet-2");
+                retrievedChild2.Toy.ShouldBe("Toy-2");
+            }
+        }
+
+        [Alias("PersonTemp")]
+        private class PersonTemp : Person { }
     }
 }

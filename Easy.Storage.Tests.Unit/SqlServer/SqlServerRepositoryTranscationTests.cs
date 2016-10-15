@@ -71,7 +71,7 @@
 
                 using (var tran = db.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, tran);
+                    await repo.InsertAsync(person, transaction: tran);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                     tran.Commit();
 
@@ -100,7 +100,7 @@
 
                 using (var tran = db.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, tran);
+                    await repo.InsertAsync(person, transaction: tran);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
 
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
@@ -130,7 +130,7 @@
 
                 using (var tran = db.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, tran);
+                    await repo.InsertAsync(person, transaction: tran);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                 }
@@ -159,7 +159,7 @@
                 using (var tran = db.BeginTransaction())
                 {
                     var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2, tran);
+                    await repo.InsertAsync(person2, transaction: tran);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
                 }
@@ -188,7 +188,7 @@
                 using (var tran = db.BeginTransaction())
                 {
                     var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2, tran);
+                    await repo.InsertAsync(person2, transaction: tran);
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
 
                     (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);

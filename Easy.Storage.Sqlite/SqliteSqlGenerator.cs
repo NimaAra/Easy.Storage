@@ -33,7 +33,7 @@
             foreach (var pair in table.PropertyToColumns)
             {
                 var sqliteType = GetSqliteType(pair.Key.PropertyType).ToString();
-                var isIdColumn = table.PrimaryKey == pair.Key;
+                var isIdColumn = table.IdentityColumn == pair.Key;
 
                 builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
             }

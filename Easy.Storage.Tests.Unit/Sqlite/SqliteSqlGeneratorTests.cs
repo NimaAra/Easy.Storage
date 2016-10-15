@@ -1,7 +1,6 @@
 ﻿namespace Easy.Storage.Tests.Unit.Sqlite
 {
     using System.Collections.Generic;
-    using Easy.Storage.Common.Attributes;
     using Easy.Storage.Sqlite;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
@@ -76,23 +75,6 @@
                        + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
                        + "    [Name] TEXT NOT NULL,\r\n"
                        + "    [Age] INTEGER NOT NULL\r\n);");
-        }
-
-        private class Parent
-        {
-            public long Id { get; set; }
-            public string Name { get; set; }
-            public int Age { get; set; }
-
-            private int PrivateProperty { get; set; }
-        }
-
-        private sealed class Child : Parent
-        {
-            public string Toy { get; set; }
-
-            [Alias("PetName")]
-            public string Pet { get; set; }
         }
     }
 }

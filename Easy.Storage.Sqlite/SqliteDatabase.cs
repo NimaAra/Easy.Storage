@@ -48,7 +48,7 @@
         /// </summary>
         public override IRepository<T> GetRepository<T>()
         {
-            return new SingleWriterRepository<T>(_writerSemaphore, Connection);
+            return new SqliteSingleWriterRepository<T>(_writerSemaphore, Connection);
         }
 
         /// <summary>

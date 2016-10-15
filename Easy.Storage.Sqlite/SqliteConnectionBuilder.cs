@@ -52,7 +52,7 @@
                 DataSource = dataSource,
                 FailIfMissing = false,
                 Pooling = false,
-                BinaryGUID = true,
+                BinaryGUID = false,
                 DateTimeKind = DateTimeKind.Utc,
                 DateTimeFormat = SQLiteDateFormats.UnixEpoch,
                 JournalMode = SQLiteJournalModeEnum.Wal,

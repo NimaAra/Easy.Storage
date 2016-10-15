@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="Attributes\AliasAttribute.cs" />
     <Compile Include="Attributes\IgnoreAttribute.cs" />
-    <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\IdentityAttribute.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Dialect.cs" />
     <Compile Include="Extensions\DbConnectionExtensions.cs" />

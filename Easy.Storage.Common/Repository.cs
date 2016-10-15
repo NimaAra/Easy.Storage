@@ -95,21 +95,29 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
+        /// <param name="item">The item to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        public virtual async Task<long> InsertAsync(T item, IDbTransaction transaction = null)
+        public virtual async Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
-            return (await Connection.QueryAsync<long>(_table.Insert, item, transaction: transaction, buffered: true)
+            var insertSql = modelHasIdentityColumn ? _table.InsertIdentity : _table.InsertAll;
+            return (await Connection.QueryAsync<long>(insertSql, item, transaction: transaction, buffered: true)
                 .ConfigureAwait(false)).First();
         }
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
+        /// <param name="items">The items to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
-        public virtual Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null)
+        public virtual Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-            return DbConnectionExtensions.ExecuteAsync(Connection, _table.Insert, items, transaction: transaction);
+            var insertSql = modelHasIdentityColumn ? _table.InsertIdentity : _table.InsertAll;
+            return DbConnectionExtensions.ExecuteAsync(Connection, insertSql, items, transaction: transaction);
         }
 
         /// <summary>

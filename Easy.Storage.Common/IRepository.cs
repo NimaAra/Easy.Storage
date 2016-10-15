@@ -47,14 +47,20 @@
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
         /// </summary>
+        /// <param name="item">The item to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        Task<long> InsertAsync(T item, IDbTransaction transaction = null);
+        Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
         /// </summary>
+        /// <param name="items">The items to be inserted.</param>
+        /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
+        /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
-        Task<int> InsertAsync(IEnumerable<T> items, IDbTransaction transaction = null);
+        Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
