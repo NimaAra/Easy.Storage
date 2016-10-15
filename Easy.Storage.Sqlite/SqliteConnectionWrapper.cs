@@ -238,10 +238,33 @@
             var builder = new StringBuilder();
             foreach (var item in sqliteObjects)
             {
+                if (item.Sql.IsNullOrEmptyOrWhiteSpace()) { continue; }
+                if (IsFtsThreeOrFourTable(item) || IsFtsFiveTable(item)) { continue; }
+
                 builder.AppendLine(item.Sql + ";");
             }
 
             return builder.ToString();
+        }
+
+        private static bool IsFtsThreeOrFourTable(SqliteObject sqliteObject)
+        {
+            if (sqliteObject.Type != SqliteObjectType.Table) { return false; }
+
+            var tableName = sqliteObject.Name;
+            return tableName.EndsWith("_content") || tableName.EndsWith("_segments")
+                   || tableName.EndsWith("_segdir") || tableName.EndsWith("_docsize")
+                   || tableName.EndsWith("_stat");
+        }
+
+        private static bool IsFtsFiveTable(SqliteObject sqliteObject)
+        {
+            if (sqliteObject.Type != SqliteObjectType.Table) { return false; }
+
+            var tableName = sqliteObject.Name;
+            return tableName.EndsWith("_data") || tableName.EndsWith("_idx")
+                   || tableName.EndsWith("_content") || tableName.EndsWith("_docsize")
+                   || tableName.EndsWith("_config");
         }
     }
 }
