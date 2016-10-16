@@ -26,6 +26,8 @@
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
+        private readonly string _sqlServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
+        private readonly string _sqlServerSelectInsertedRowClause = $"{Formatter.NewLine}SELECT Id FROM @InsertedRows;";
 
         private Table(TableKey key)
         {
@@ -143,21 +145,18 @@
             throw new InvalidOperationException("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
         }
 
-        private static string GetInsertQueries(Dialect dialect, string insertSegment, string valuesSegment)
+        private string GetInsertQueries(Dialect dialect, string insertSegment, string valuesSegment)
         {
             switch (dialect)
             {
                 case Dialect.Sqlite:
-
                     return $"{insertSegment}{valuesSegment}{Formatter.NewLine}SELECT last_insert_rowid();";
-                case Dialect.SqlServer:
-                    var idColumnName = "Id"; // [ToDo] - is this correct? write test for both aliased model and non aliased
-                    var declarationClause = $"DECLARE @InsertedRows AS TABLE ({idColumnName} BIGINT);";
-                    var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
-                    var selectInsertedIdClause = $"SELECT {idColumnName} FROM @InsertedRows;";
 
-                    var third = $"{Formatter.NewLine}{selectInsertedIdClause}";
-                    return $"{declarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{third}";
+                case Dialect.SqlServer:
+                    var idColumnName = PropertyToColumns[IdentityColumn];
+                    var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
+                    return $"{_sqlServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{_sqlServerSelectInsertedRowClause}";
+
                 case Dialect.Generic:
                     return $"{insertSegment}{valuesSegment}";
             }

@@ -752,12 +752,12 @@
             }
         }
 
-        private async Task When_inserting_model_with_no_identity_column()
+        private static async Task When_inserting_model_with_no_identity_column()
         {
             // ReSharper disable once InconsistentNaming
             const string tableQuery = "IF OBJECT_ID('PersonTemp', 'U') IS NULL"
                                               + " CREATE TABLE PersonTemp ("
-                                              + " Id INT NOT NULL,"
+                                              + " [Key] INTEGER NOT NULL,"
                                               + " Name NVARCHAR(50) NULL,"
                                               + " Age INTEGER NOT NULL);";
 
@@ -1941,7 +1941,7 @@ CREATE TABLE SampleModel (
             }
         }
 
-        private async Task When_working_with_inheritted_model()
+        private static async Task When_working_with_inheritted_model()
         {
             // ReSharper disable once InconsistentNaming
             const string tableQuery = @"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Child' AND xtype='U')
@@ -2002,6 +2002,14 @@ CREATE TABLE Child (
         }
 
         [Alias("PersonTemp")]
-        private class PersonTemp : Person { }
+        private class PersonTemp
+        {
+            [Identity]
+            [Alias("Key")]
+            public long Id { get; set; }
+
+            public string Name { get; set; }
+            public int Age { get; set; }
+        }
     }
 }
