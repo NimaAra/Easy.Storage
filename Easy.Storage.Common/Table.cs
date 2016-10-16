@@ -26,8 +26,8 @@
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
-        private readonly string _sqlServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
-        private readonly string _sqlServerSelectInsertedRowClause = $"{Formatter.NewLine}SELECT Id FROM @InsertedRows;";
+        private const string SqlServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
+        private const string SqlServerSelectInsertedRowClause = "SELECT Id FROM @InsertedRows;";
 
         private Table(TableKey key)
         {
@@ -155,7 +155,7 @@
                 case Dialect.SqlServer:
                     var idColumnName = PropertyToColumns[IdentityColumn];
                     var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
-                    return $"{_sqlServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{_sqlServerSelectInsertedRowClause}";
+                    return $"{SqlServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{Formatter.NewLine}{SqlServerSelectInsertedRowClause}";
 
                 case Dialect.Generic:
                     return $"{insertSegment}{valuesSegment}";
