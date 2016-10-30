@@ -61,22 +61,32 @@
     <Compile Include="Sqlite\FTS\FtsContext.cs" />
     <Compile Include="Sqlite\FTS\FtsTests.cs" />
     <Compile Include="Sqlite\FTS\TermTests.cs" />
-    <Compile Include="Sqlite\SqliteDatabaseTests.cs" />
-    <Compile Include="Sqlite\SqliteRollingRepositoryTests.cs" />
+    <Compile Include="Sqlite\SqliteConnections\SqliteAttachedConnectionTests.cs" />
+    <Compile Include="Sqlite\SqliteConnections\SqliteFileConnectionTests.cs" />
+    <Compile Include="Sqlite\SqliteConnections\SqliteInMemoryConnectionTests.cs" />
+    <Compile Include="Sqlite\SqliteExtensionsTests.cs" />
     <Compile Include="Sqlite\SqliteRepositoryTests.cs" />
-    <Compile Include="Sqlite\SqliteConnectionWrapperTests.cs" />
+    <Compile Include="Sqlite\SqliteHelperTests.cs" />
     <Compile Include="Sqlite\SqliteRepositoryTranscationTests.cs" />
-    <Compile Include="Sqlite\SqliteRollingDatabaseTests.cs" />
     <Compile Include="Sqlite\SqliteSqlGeneratorTests.cs" />
     <Compile Include="SqlServer\Context.cs" />
     <Compile Include="SqlServer\SqlServerColumnTypeParsingTests.cs" />
     <Compile Include="SqlServer\SqlServerRepositoryTests.cs" />
     <Compile Include="SqlServer\SqlServerRepositoryTranscationTests.cs" />
-    <Compile Include="SqlServer\SqlServerDatabaseTests.cs" />
+    <Compile Include="SqlServer\SqlServerExtensionsTests.cs" />
     <Compile Include="TableTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Sqlite\SampleDBs\1.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Sqlite\SampleDBs\2.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Sqlite\SampleDBs\3.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj">
