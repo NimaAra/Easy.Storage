@@ -10,7 +10,7 @@
     /// </summary>
     internal static class SqliteHelper
     {
-        private const string DataSourceToken = "data source=";
+        private const string DataSourceToken = "Data Source=";
         private const string InMemoryToken = ":memory:";
         private static readonly char[] TrimCharacters = {'"'};
 

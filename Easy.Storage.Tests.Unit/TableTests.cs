@@ -11,6 +11,42 @@
     internal sealed class TableTests
     {
         [Test]
+        public void When_creating_table()
+        {
+            var table = Table.Get<Person>();
+            table.Dialect.ShouldBe(Dialect.Generic);
+            table.Name.ShouldBe("Person");
+            table.Select.ShouldBe("SELECT\r\n"
+                    + "    [Id] AS 'Id',\r\n"
+                    + "    [Name] AS 'Name',\r\n"
+                    + "    [Age] AS 'Age'\r\n"
+                    + "FROM Person\r\nWHERE\r\n    1 = 1;");
+
+            table.InsertIdentity.ShouldBe("INSERT INTO Person\r\n"
+                    + "(\r\n"
+                    + "    [Name],\r\n"
+                    + "    [Age]\r\n"
+                    + ")\r\n"
+                    + "VALUES\r\n"
+                    + "(\r\n"
+                    + "    @Name,\r\n"
+                    + "    @Age\r\n"
+                    + ");");
+
+            table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+                    + "    [Name] = @Name,\r\n"
+                    + "    [Age] = @Age\r\n"
+                    + "WHERE\r\n    [Id] = @Id;");
+
+            table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+                    + "    [Name] = @Name,\r\n"
+                    + "    [Age] = @Age\r\n"
+                    + "WHERE\r\n    1 = 1;");
+
+            table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
+        }
+
+        [Test]
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
             Should.Throw<InvalidOperationException>(() => Table.Get<ModelWithNoIdOrPrimaryKey>())

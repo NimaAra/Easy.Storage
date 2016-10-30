@@ -47,6 +47,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Connections\SqliteConnectionBase.cs" />
+    <Compile Include="Connections\SqliteFileConnection.cs" />
+    <Compile Include="Connections\SqliteInMemoryConnection.cs" />
+    <Compile Include="Extensions\SqliteExtensions.cs" />
     <Compile Include="FTS\ITerm.cs" />
     <Compile Include="FTS\JoinClauses.cs" />
     <Compile Include="FTS\Match.cs" />
@@ -55,15 +59,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RollingPolicy.cs" />
     <Compile Include="Models\SqliteColumnInfo.cs" />
-    <Compile Include="SqliteSingleWriterRepository.cs" />
-    <Compile Include="SqliteConnectionBuilder.cs" />
+    <Compile Include="Connections\SqliteAttachedConnection.cs" />
+    <Compile Include="SqliteConnectionStringBuilder.cs" />
     <Compile Include="Models\SqliteDataType.cs" />
     <Compile Include="Models\SqliteObject.cs" />
     <Compile Include="Models\SqliteObjectType.cs" />
-    <Compile Include="SqliteConnectionWrapper.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SqliteDatabase.cs" />
     <Compile Include="SqliteHelper.cs" />
     <Compile Include="Models\SqliteTableInfo.cs" />
     <Compile Include="SqliteSql.cs" />

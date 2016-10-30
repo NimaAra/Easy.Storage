@@ -16,7 +16,6 @@
     public static class SqliteSqlGenerator
     {
         private const string PrimaryKey = " PRIMARY KEY";
-
         private const string NotNull = " NOT NULL";
 
         /// <summary>

@@ -11,6 +11,11 @@
         public const string Master = "SELECT * FROM SQLITE_MASTER";
 
         /// <summary>
+        /// Query all the attached databases.
+        /// </summary>
+        public const string AttachedDatabases = "PRAGMA database_list";
+
+        /// <summary>
         /// Query to find if a given table exists.
         /// </summary>
         public const string TableExists = "SELECT 1 FROM SQLITE_MASTER WHERE type='table' AND name=@tableName";

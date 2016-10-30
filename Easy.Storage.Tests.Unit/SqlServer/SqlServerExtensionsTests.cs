@@ -1,19 +1,18 @@
 ﻿namespace Easy.Storage.Tests.Unit.SqlServer
 {
     using System;
-    using System.Data;
     using System.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.SqlServer;
+    using Easy.Storage.SqlServer.Extensions;
     using Easy.Storage.SqlServer.Models;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqlServerDatabaseTests : Context
+    internal sealed class SqlServerExtensionsTests : Context
     {
         [OneTimeSetUp]
         public void SetUp()
@@ -22,55 +21,48 @@
         }
 
         [Test]
-        public void When_creating_a_database_from_connection_string()
+        public static async Task When_checking_if_table_exists_non_aliased_models()
         {
-            var db = new SqlServerDatabase(ConnectionString);
-            db.Connection.State.ShouldBe(ConnectionState.Closed);
-            db.Connection.Open();
-            db.Connection.State.ShouldBe(ConnectionState.Open);
-            db.Connection.Dispose();
-            db.Connection.State.ShouldBe(ConnectionState.Closed);
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+            }
         }
 
         [Test]
-        public void When_creating_a_database_from_connection()
+        public static async Task When_checking_if_table_exists_aliased_models()
         {
-            var db = new SqlServerDatabase(new SqlConnection(ConnectionString));
-            db.Connection.State.ShouldBe(ConnectionState.Closed);
-            db.Connection.Open();
-            db.Connection.State.ShouldBe(ConnectionState.Open);
-            db.Connection.Dispose();
-            db.Connection.State.ShouldBe(ConnectionState.Closed);
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                (await conn.ExistsAsync<MyPerson>()).ShouldBeTrue();
+            }
         }
 
         [Test]
         public async Task When_checking_table_exists()
         {
-            using (var db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                (await db.ExistsAsync<NonExistingTable>()).ShouldBeFalse();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.ExistsAsync<NonExistingTable>()).ShouldBeFalse();
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
             }
         }
 
         [Test]
         public async Task When_executing_some_sql()
         {
-            using (var db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                (await db.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new {name = "Users"}))
+                (await conn.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new {name = "Users"}))
                     .ShouldBe(1);
-                (await db.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new { name = "Bambolini" }))
+                (await conn.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new { name = "Bambolini" }))
                     .ShouldBe(0);
 
-                var allObjects = await db.QueryAsync<dynamic>("SELECT * FROM sys.all_objects");
+                var allObjects = await conn.QueryAsync<dynamic>("SELECT * FROM sys.all_objects");
                 allObjects.Count().ShouldBeGreaterThan(10);
 
-                var ex = Should.Throw<SqlException>(async () =>
-                    await db.ExecuteAsync("SELECT * FROM SomeTable;"));
+                var ex = Should.Throw<SqlException>(async () => await conn.ExecuteAsync("SELECT * FROM SomeTable;"));
                 ex.Message.ShouldBe("Invalid object name 'SomeTable'.");
                 ex.InnerException.ShouldBeNull();
             }
@@ -79,12 +71,12 @@
         [Test]
         public async Task When_getting_database_objects()
         {
-            using (var db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-                await db.Connection.ExecuteAsync(ViewQuery);
+                await conn.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(ViewQuery);
 
-                var dbObjects = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var dbObjects = (await conn.GetDatabaseObjectsAsync()).ToArray();
 
                 dbObjects.ShouldNotBeEmpty();
                 dbObjects.Length.ShouldBeGreaterThan(2);
@@ -110,11 +102,11 @@
         [Test]
         public async Task When_getting_details_of_a_table()
         {
-            using (var db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
 
-                var tableInfo = await db.GetTableInfoAsync<Person>();
+                var tableInfo = await conn.GetTableInfoAsync<Person>();
                 tableInfo.ShouldNotBeNull();
                 tableInfo.Database.ShouldBe("SandBox");
                 tableInfo.Schema.ShouldBe("dbo");
@@ -151,7 +143,7 @@
                 tableInfo.Columns[2].Collation.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
 
-                var exception = Should.Throw<InvalidOperationException>(async () => await db.GetTableInfoAsync("Bambolini"));
+                var exception = Should.Throw<InvalidOperationException>(async () => await conn.GetTableInfoAsync("Bambolini"));
                 exception.Message.ShouldBe("Table: Bambolini does not seem to exist.");
             }
         }

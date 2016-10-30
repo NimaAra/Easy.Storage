@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Common
+﻿// ReSharper disable RedundantArgumentDefaultValue
+namespace Easy.Storage.Common
 {
     using System;
     using System.Collections.Generic;
@@ -6,30 +7,32 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Dapper;
     using Easy.Common;
     using Easy.Storage.Common.Extensions;
 
     /// <summary>
     /// Represents a repository for retrieving records of the given <typeparamref name="T"/> type.
     /// </summary>
-    public class Repository<T> : IRepository<T>
+    public sealed class Repository<T> : IRepository<T>
     {
-        private readonly Table _table;
-
         /// <summary>
         /// The <see cref="IDbConnection"/> used by the <see cref="Repository{T}"/>.
         /// </summary>
-        protected readonly IDbConnection Connection;
+        private readonly IDbConnection _connection;
 
         /// <summary>
         /// Creates an instance of the <see cref="Repository{T}"/>.
         /// </summary>
         internal Repository(IDbConnection dbConnection, Dialect dialect = Dialect.Generic)
         {
-            Connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
-            _table = Table.Get<T>(dialect);
+            _connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
+            Table = Table.Get<T>(dialect);
         }
+
+        /// <summary>
+        /// Gets the abstraction used for working with the model.
+        /// </summary>
+        public Table Table { get; }
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
@@ -37,7 +40,7 @@
         /// </summary>
         public Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null)
         {
-            return Connection.QueryAsync<T>(_table.Select, transaction: transaction, buffered: true);
+            return _connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: true);
         }
 
         /// <summary>
@@ -46,7 +49,7 @@
         /// </summary>
         public Task<IEnumerable<T>> GetLazyAsync(IDbTransaction transaction = null)
         {
-            return Connection.QueryAsync<T>(_table.Select, transaction: transaction, buffered: false);
+            return _connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: false);
         }
 
         /// <summary>
@@ -60,8 +63,8 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var query = _table.GetSqlWithClause(selector, _table.Select, true);
-            return Connection.QueryAsync<T>(query, new { Value = value }, transaction: transaction, buffered: true);
+            var query = Table.GetSqlWithClause(selector, Table.Select, true);
+            return _connection.QueryAsync<T>(query, new { Value = value }, transaction, buffered: true);
         }
 
         /// <summary>
@@ -76,8 +79,8 @@
             Ensure.NotNull(selector, nameof(selector));
             Ensure.NotNull(values, nameof(values));
 
-            var query = _table.GetSqlWithClause(selector, _table.Select, false);
-            return Connection.QueryAsync<T>(query, new { Values = values }, transaction: transaction, buffered: true);
+            var query = Table.GetSqlWithClause(selector, Table.Select, false);
+            return _connection.QueryAsync<T>(query, new { Values = values }, transaction, buffered: true);
         }
 
         /// <summary>
@@ -89,7 +92,7 @@
         public Task<IEnumerable<T>> GetAsync(QueryFilter<T> queryFilter, IDbTransaction transaction = null)
         {
             Ensure.NotNull(queryFilter, nameof(queryFilter));
-            return Connection.QueryAsync<T>(queryFilter.Query, queryFilter.Parameters, transaction: transaction, buffered: true);
+            return _connection.QueryAsync<T>(queryFilter.Query, queryFilter.Parameters, transaction, buffered: true);
         }
 
         /// <summary>
@@ -99,10 +102,10 @@
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        public virtual async Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
+        public async Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
-            var insertSql = modelHasIdentityColumn ? _table.InsertIdentity : _table.InsertAll;
-            return (await Connection.QueryAsync<long>(insertSql, item, transaction: transaction, buffered: true)
+            var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
+            return (await _connection.QueryAsync<long>(insertSql, item, transaction, buffered: true)
                 .ConfigureAwait(false)).First();
         }
 
@@ -113,55 +116,55 @@
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
-        public virtual Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
+        public Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-            var insertSql = modelHasIdentityColumn ? _table.InsertIdentity : _table.InsertAll;
-            return DbConnectionExtensions.ExecuteAsync(Connection, insertSql, items, transaction: transaction);
+            var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
+            return _connection.ExecuteAsync(insertSql, items, transaction);
         }
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
+        public Task<int> UpdateAsync(T item, IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(Connection, _table.UpdateDefault, item, transaction: transaction);
+            return _connection.ExecuteAsync(Table.UpdateDefault, item, transaction);
         }
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the <paramref name="selector"/>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
+        public Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
-            var parameters = new DynamicParameters(item);
+            var parameters = new Dapper.DynamicParameters(item);
             parameters.Add("Value", value);
-            var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, true);
+            var query = Table.GetSqlWithClause(selector, Table.UpdateCustom, true);
 
-            return DbConnectionExtensions.ExecuteAsync(Connection, query, parameters, transaction: transaction);
+            return _connection.ExecuteAsync(query, parameters, transaction);
         }
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the values of the <paramref name="selector"/>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
+        public Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
-            var parameters = new DynamicParameters(item);
+            var parameters = new Dapper.DynamicParameters(item);
             parameters.Add("Values", values);
-            var query = _table.GetSqlWithClause(selector, _table.UpdateCustom, false);
+            var query = Table.GetSqlWithClause(selector, Table.UpdateCustom, false);
 
-            return DbConnectionExtensions.ExecuteAsync(Connection, query, parameters, transaction: transaction);
+            return _connection.ExecuteAsync(query, parameters, transaction);
         }
 
         /// <summary>
         /// Updates the given <paramref name="items"/> based on the value of their ids in the storage.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null)
+        public Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(Connection, _table.UpdateDefault, items, transaction: transaction);
+            return _connection.ExecuteAsync(Table.UpdateDefault, items, transaction);
         }
 
         /// <summary>
@@ -171,12 +174,12 @@
         /// <param name="value">The value associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
+        public Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var query = _table.GetSqlWithClause(selector, _table.Delete, true);
-            return DbConnectionExtensions.ExecuteAsync(Connection, query, new { Value = value }, transaction: transaction);
+            var query = Table.GetSqlWithClause(selector, Table.Delete, true);
+            return _connection.ExecuteAsync(query, new { Value = value }, transaction);
         }
 
         /// <summary>
@@ -186,21 +189,21 @@
         /// <param name="transaction">The transaction</param>
         /// <param name="values">The values associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <returns>Number of rows affected</returns>
-        public virtual Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
+        public Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
             Ensure.NotNull(selector, nameof(selector));
             Ensure.NotNull(values, nameof(values));
 
-            var query = _table.GetSqlWithClause(selector, _table.Delete, false);
-            return DbConnectionExtensions.ExecuteAsync(Connection, query, new { Values = values }, transaction: transaction);
+            var query = Table.GetSqlWithClause(selector, Table.Delete, false);
+            return _connection.ExecuteAsync(query, new { Values = values }, transaction);
         }
 
         /// <summary>
         /// Deletes all the records.
         /// </summary>
-        public virtual Task<int> DeleteAllAsync(IDbTransaction transaction = null)
+        public Task<int> DeleteAllAsync(IDbTransaction transaction = null)
         {
-            return DbConnectionExtensions.ExecuteAsync(Connection, _table.Delete, transaction: transaction);
+            return _connection.ExecuteAsync(Table.Delete, transaction: transaction);
         }
 
         /// <summary>
@@ -213,9 +216,9 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
-            var query = $"SELECT COUNT ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<ulong>(Connection, query, transaction: transaction);
+            var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
+            var query = $"SELECT COUNT ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {Table.Name}";
+            return _connection.ExecuteScalarAsync<ulong>(query, transaction: transaction);
         }
 
         /// <summary>
@@ -228,9 +231,9 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
-            var query = $"SELECT SUM ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<long>(Connection, query, transaction: transaction);
+            var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
+            var query = $"SELECT SUM ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {Table.Name}";
+            return _connection.ExecuteScalarAsync<long>(query, transaction: transaction);
         }
 
         /// <summary>
@@ -243,9 +246,9 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
-            var query = $"SELECT AVG ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<decimal>(Connection, query, transaction: transaction);
+            var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
+            var query = $"SELECT AVG ({(distinct ? "DISTINCT" : string.Empty)} {column}) FROM {Table.Name}";
+            return _connection.ExecuteScalarAsync<decimal>(query, transaction: transaction);
         }
 
         /// <summary>
@@ -255,9 +258,9 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
-            var query = $"SELECT MIN ({column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(Connection, query, transaction: transaction);
+            var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
+            var query = $"SELECT MIN ({column}) FROM {Table.Name}";
+            return _connection.ExecuteScalarAsync<TProperty>(query, transaction: transaction);
         }
 
         /// <summary>
@@ -267,9 +270,9 @@
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var column = _table.PropertyNamesToColumns[selector.GetPropertyName()];
-            var query = $"SELECT MAX ({column}) FROM {_table.Name}";
-            return DbConnectionExtensions.ExecuteScalarAsync<TProperty>(Connection, query, transaction: transaction);
+            var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
+            var query = $"SELECT MAX ({column}) FROM {Table.Name}";
+            return _connection.ExecuteScalarAsync<TProperty>(query, transaction: transaction);
         }
     }
 }

@@ -9,6 +9,7 @@
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SqlServer;
+    using Easy.Storage.SqlServer.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
@@ -25,8 +26,7 @@
         [Test]
         public async Task Run()
         {
-            await When_checking_if_table_exists_non_aliased_models();
-            await When_checking_if_table_exists_aliased_models();
+            When_checking_table();
             await When_getting_non_aliased_models_lazily();
             await When_getting_aliased_models_lazily();
             await When_getting_non_aliased_models();
@@ -65,31 +65,56 @@
             await SqlServerRepositoryTranscationTests.Run();
         }
 
-        private static async Task When_checking_if_table_exists_non_aliased_models()
+        private static void When_checking_table()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
-            }
-        }
+                var repo = conn.GetRepository<Person>();
+                var table = repo.Table;
+                table.Dialect.ShouldBe(Dialect.SqlServer);
+                table.Name.ShouldBe("Person");
+                table.Select.ShouldBe("SELECT\r\n"
+                        + "    [Id] AS 'Id',\r\n"
+                        + "    [Name] AS 'Name',\r\n"
+                        + "    [Age] AS 'Age'\r\n"
+                        + "FROM Person\r\nWHERE\r\n    1 = 1;");
 
-        private static async Task When_checking_if_table_exists_aliased_models()
-        {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
-            {
-                (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
+                table.InsertIdentity.ShouldBe("DECLARE @InsertedRows AS TABLE (Id BIGINT);\r\n"
+                    + "INSERT INTO Person\r\n"
+                        + "(\r\n"
+                        + "    [Name],\r\n"
+                        + "    [Age]\r\n"
+                        + ") OUTPUT Inserted.[Id] INTO @InsertedRows\r\n"
+                        + "VALUES\r\n"
+                        + "(\r\n"
+                        + "    @Name,\r\n"
+                        + "    @Age\r\n"
+                        + ");\r\n"
+                        + "SELECT Id FROM @InsertedRows;");
+
+                table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+                        + "    [Name] = @Name,\r\n"
+                        + "    [Age] = @Age\r\n"
+                        + "WHERE\r\n    [Id] = @Id;");
+
+                table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+                        + "    [Name] = @Name,\r\n"
+                        + "    [Age] = @Age\r\n"
+                        + "WHERE\r\n    1 = 1;");
+
+                table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
             }
         }
 
         private static async Task When_getting_non_aliased_models_lazily()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
@@ -145,13 +170,13 @@
                 
         private static async Task When_getting_aliased_models_lazily()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
@@ -207,13 +232,13 @@
                 
         private static async Task When_getting_non_aliased_models()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -269,13 +294,13 @@
                 
         private static async Task When_getting_aliased_models()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -331,13 +356,13 @@
 
         private static async Task When_getting_non_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -406,13 +431,13 @@
 
         private static async Task When_getting_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -482,13 +507,13 @@
         // [ToDo] - Add more filters then do the same for aliased
         private static async Task When_getting_non_aliased_models_by_filter()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -542,13 +567,13 @@
 
         private static async Task When_inserting_single_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -600,13 +625,13 @@
 
         private static async Task When_inserting_single_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -658,13 +683,13 @@
 
         private static async Task When_inserting_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -706,13 +731,13 @@
 
         private static async Task When_inserting_multiple_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -761,11 +786,11 @@
                                               + " Name NVARCHAR(50) NULL,"
                                               + " Age INTEGER NOT NULL);";
 
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<PersonTemp>();
+                var repo = conn.GetRepository<PersonTemp>();
 
-                await db.Connection.ExecuteAsync(tableQuery);
+                await conn.ExecuteAsync(tableQuery);
                 await repo.DeleteAllAsync();
 
                 (await repo.GetAsync()).ShouldBeEmpty();
@@ -808,13 +833,13 @@
 
         private static async Task When_updating_single_by_id_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -861,13 +886,13 @@
 
         private static async Task When_updating_single_by_id_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -914,13 +939,13 @@
 
         private static async Task When_updating_custom_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1010,13 +1035,13 @@
 
         private static async Task When_updating_custom_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1106,13 +1131,13 @@
 
         private static async Task When_updating_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1177,13 +1202,13 @@
 
         private static async Task When_updating_multiple_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1248,13 +1273,13 @@
 
         private static async Task When_deleting_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1325,13 +1350,13 @@
 
         private static async Task When_deleting_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1402,16 +1427,15 @@
 
         private static async Task When_deleting_all_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
-                
                 (await repo.DeleteAllAsync()).ShouldBe(0);
 
                 var people = new[]
@@ -1434,14 +1458,12 @@
 
         private static async Task When_deleting_all_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
                 (await repo.GetAsync()).ShouldBeEmpty();
-
                 (await repo.DeleteAllAsync()).ShouldBe(0);
 
                 var people = new[]
@@ -1464,12 +1486,11 @@
 
         private static async Task When_counting_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                await conn.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
+                
                 (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)0);
@@ -1510,12 +1531,11 @@
 
         private static async Task When_counting_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
 
-                await db.Connection.ExecuteAsync(TableQuery);
-                
                 (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)0);
@@ -1556,13 +1576,13 @@
 
         private static async Task When_min_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MinAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1586,13 +1606,13 @@
 
         private static async Task When_min_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MinAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1616,13 +1636,13 @@
 
         private static async Task When_max_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MaxAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1646,13 +1666,13 @@
 
         private static async Task When_max_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.MaxAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1676,13 +1696,13 @@
 
         private static async Task When_sum_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1716,13 +1736,13 @@
 
         private static async Task When_sum_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1756,13 +1776,13 @@
 
         private static async Task When_avg_non_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1801,13 +1821,13 @@
 
         private static async Task When_avg_aliased_model()
         {
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = db.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1861,13 +1881,14 @@ CREATE TABLE SampleModel (
 	[DateTime] DATETIME2(7) NOT NULL,
 	[DateTimeOffset] DATETIMEOFFSET(7) NOT NULL);";
 
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                await db.Connection.ExecuteAsync(tableQuery);
-                (await db.ExistsAsync<SampleModel>()).ShouldBeTrue();
+                await conn.ExecuteAsync(tableQuery);
 
-                await db.Connection.ExecuteAsync("DELETE FROM SampleModel");
-                await db.ExecuteAsync("DBCC CHECKIDENT (SampleModel, RESEED, 0)");
+                (await conn.ExistsAsync<SampleModel>()).ShouldBeTrue();
+
+                await conn.ExecuteAsync("DELETE FROM SampleModel");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (SampleModel, RESEED, 0)");
 
                 var binaryData = new byte[100];
                 Encoding.UTF8.GetBytes("Hidden Message!").CopyTo(binaryData, 0);
@@ -1887,7 +1908,7 @@ CREATE TABLE SampleModel (
                     Composite = null
                 };
 
-                var repo = db.GetRepository<SampleModel>();
+                var repo = conn.GetRepository<SampleModel>();
 
                 (await repo.InsertAsync(sample1)).ShouldBe(1);
 
@@ -1952,14 +1973,14 @@ CREATE TABLE Child (
     [Toy] VARCHAR(50) NOT NULL,
 	[PetName] VARCHAR(50) NOT NULL);";
 
-            using (IDatabase db = new SqlServerDatabase(ConnectionString))
+            using (var conn = new SqlConnection(ConnectionString))
             {
-                await db.ExecuteAsync(tableQuery);
-                (await db.ExistsAsync<Child>()).ShouldBeTrue();
+                await conn.ExecuteAsync(tableQuery);
+                (await conn.ExistsAsync<Child>()).ShouldBeTrue();
 
-                var repo = db.GetRepository<Child>();
+                var repo = conn.GetRepository<Child>();
                 await repo.DeleteAllAsync();
-                await db.ExecuteAsync("DBCC CHECKIDENT (Child, RESEED, 0)");
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Child, RESEED, 0)");
 
                 var child1 = new Child
                 {

@@ -10,41 +10,60 @@
     using NUnit.Framework;
     using Shouldly;
     using Easy.Storage.Common.Extensions;
+    using Easy.Storage.Sqlite.Connections;
+    using Easy.Storage.Sqlite.Extensions;
 
     [TestFixture]
     internal sealed class SqliteRepositoryTests : Context
     {
         [Test]
-        public async Task When_checking_if_table_exists_non_aliased_models()
+        public void When_checking_table()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                (await db.ExistsAsync<Person>()).ShouldBeFalse();
-                await db.Connection.ExecuteAsync(TableQuery);
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
-            }
-        }
+                var repo = conn.GetRepository<Person>();
+                var table = repo.Table;
+                table.Dialect.ShouldBe(Dialect.Sqlite);
+                table.Name.ShouldBe("Person");
+                table.Select.ShouldBe("SELECT\r\n"
+                        + "    [Id] AS 'Id',\r\n"
+                        + "    [Name] AS 'Name',\r\n"
+                        + "    [Age] AS 'Age'\r\n"
+                        + "FROM Person\r\nWHERE\r\n    1 = 1;");
 
-        [Test]
-        public async Task When_checking_if_table_exists_aliased_models()
-        {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
-            {
-                (await db.ExistsAsync<MyPerson>()).ShouldBeFalse();
-                await db.Connection.ExecuteAsync(TableQuery);
-                (await db.ExistsAsync<MyPerson>()).ShouldBeTrue();
+                table.InsertIdentity.ShouldBe("INSERT INTO Person\r\n"
+                        + "(\r\n"
+                        + "    [Name],\r\n"
+                        + "    [Age]\r\n"
+                        + ")\r\n"
+                        + "VALUES\r\n"
+                        + "(\r\n"
+                        + "    @Name,\r\n"
+                        + "    @Age\r\n"
+                        + ");\r\n" 
+                        + "SELECT last_insert_rowid();");
+
+                table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+                        + "    [Name] = @Name,\r\n"
+                        + "    [Age] = @Age\r\n"
+                        + "WHERE\r\n    [Id] = @Id;");
+
+                table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+                        + "    [Name] = @Name,\r\n"
+                        + "    [Age] = @Age\r\n"
+                        + "WHERE\r\n    1 = 1;");
+
+                table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
             }
         }
 
         [Test]
         public async Task When_getting_non_aliased_models_lazily()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -100,12 +119,10 @@
         [Test]
         public async Task When_getting_aliased_models_lazily()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetLazyAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -161,12 +178,10 @@
         [Test]
         public async Task When_getting_non_aliased_models()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -222,12 +237,10 @@
         [Test]
         public async Task When_getting_aliased_models()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -283,12 +296,10 @@
         [Test]
         public async Task When_getting_non_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -357,12 +368,10 @@
         [Test]
         public async Task When_getting_aliased_models_by_selector()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -431,12 +440,10 @@
         [Test] // [ToDo] - Add more filters then do the same for aliased
         public async Task When_getting_non_aliased_models_by_filter()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -490,12 +497,10 @@
         [Test]
         public async Task When_inserting_single_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
@@ -547,12 +552,10 @@
         [Test]
         public async Task When_inserting_single_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
@@ -604,12 +607,10 @@
         [Test]
         public async Task When_inserting_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -651,12 +652,10 @@
         [Test]
         public async Task When_inserting_multiple_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -698,12 +697,10 @@
         [Test]
         public async Task When_inserting_model_with_no_identity_column()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQueryWithNoIdentity);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQueryWithNoIdentity);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -745,12 +742,10 @@
         [Test]
         public async Task When_updating_single_by_id_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
@@ -797,12 +792,10 @@
         [Test]
         public async Task When_updating_single_by_id_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
@@ -849,12 +842,10 @@
         [Test]
         public async Task When_updating_custom_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -944,12 +935,10 @@
         [Test]
         public async Task When_updating_custom_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1039,12 +1028,10 @@
         [Test]
         public async Task When_updating_multiple_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1109,12 +1096,10 @@
         [Test]
         public async Task When_updating_multiple_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1179,12 +1164,10 @@
         [Test]
         public async Task When_deleting_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1255,12 +1238,10 @@
         [Test]
         public async Task When_deleting_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1331,12 +1312,10 @@
         [Test]
         public async Task When_deleting_all_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-                
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
                 
                 (await repo.DeleteAllAsync()).ShouldBe(0);
@@ -1362,12 +1341,10 @@
         [Test]
         public async Task When_deleting_all_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 (await repo.DeleteAllAsync()).ShouldBe(0);
@@ -1393,11 +1370,10 @@
         [Test]
         public async Task When_counting_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
@@ -1440,11 +1416,10 @@
         [Test]
         public async Task When_counting_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 
                 (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)0);
                 (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
@@ -1487,11 +1462,10 @@
         [Test]
         public async Task When_min_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.MinAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1516,11 +1490,10 @@
         [Test]
         public async Task When_min_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.MinAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MinAsync(p => p.Age)).ShouldBe(0);
@@ -1545,11 +1518,10 @@
         [Test]
         public async Task When_max_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.MaxAsync(p => p.Id)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1574,11 +1546,10 @@
         [Test]
         public async Task When_max_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.MaxAsync(p => p.SomeId)).ShouldBe(0);
                 (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
@@ -1603,11 +1574,10 @@
         [Test]
         public async Task When_sum_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
 
                 (await repo.GetAsync()).ShouldBeEmpty();
 
@@ -1639,12 +1609,10 @@
         [Test]
         public async Task When_sum_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1675,12 +1643,10 @@
         [Test]
         public async Task When_avg_non_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<Person>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1716,12 +1682,10 @@
         [Test]
         public async Task When_avg_aliased_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var repo = db.GetRepository<MyPerson>();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
                 (await repo.GetAsync()).ShouldBeEmpty();
 
                 var people = new[]
@@ -1759,11 +1723,11 @@
         {
             var tableQuery = SqliteSqlGenerator.Table<SampleModel>();
 
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:;binaryguid=False;"))
+            using (var conn = new SqliteInMemoryConnection("Data Source=:memory:;BinaryGUID=False;"))
             {
-                (await db.ExistsAsync<SampleModel>()).ShouldBeFalse();
-                await db.Connection.ExecuteAsync(tableQuery);
-                (await db.ExistsAsync<SampleModel>()).ShouldBeTrue();
+                (await conn.ExistsAsync<SampleModel>()).ShouldBeFalse();
+                await conn.ExecuteAsync(tableQuery);
+                (await conn.ExistsAsync<SampleModel>()).ShouldBeTrue();
 
                 var sample1 = new SampleModel
                 {
@@ -1780,7 +1744,7 @@
                     Composite = null
                 };
 
-                var repo = db.GetRepository<SampleModel>();
+                var repo = conn.GetRepository<SampleModel>();
 
                 (await repo.InsertAsync(sample1)).ShouldBe(1);
 
@@ -1837,14 +1801,14 @@
         [Test]
         public async Task When_working_with_inheritted_model()
         {
-            using (IDatabase db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                (await db.ExistsAsync<Child>()).ShouldBeFalse();
-                await db.ExecuteAsync(SqliteSqlGenerator.Table<Child>());
-                (await db.ExistsAsync<Child>()).ShouldBeTrue();
+                (await conn.ExistsAsync<Child>()).ShouldBeFalse();
+                await conn.ExecuteAsync(SqliteSqlGenerator.Table<Child>());
+                (await conn.ExistsAsync<Child>()).ShouldBeTrue();
 
-                var repo = db.GetRepository<Child>();
-
+                var repo = conn.GetRepository<Child>();
+                
                 var child1 = new Child
                 {
                     Id = 1,

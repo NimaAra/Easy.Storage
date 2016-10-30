@@ -12,6 +12,11 @@
     public interface IRepository<T>
     {
         /// <summary>
+        /// Gets the abstraction used for working with the model.
+        /// </summary>
+        Table Table { get; }
+
+        /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// </summary>
         Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null);

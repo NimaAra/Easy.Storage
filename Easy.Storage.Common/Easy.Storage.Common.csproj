@@ -50,15 +50,13 @@
     <Compile Include="Attributes\AliasAttribute.cs" />
     <Compile Include="Attributes\IgnoreAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
-    <Compile Include="Database.cs" />
     <Compile Include="Dialect.cs" />
     <Compile Include="Extensions\DbConnectionExtensions.cs" />
+    <Compile Include="Extensions\Reader.cs" />
     <Compile Include="TypeHandlers\DateTimeOffsetHandler.cs" />
-    <Compile Include="Extensions\DatabaseExtensions.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\ExpressionExtensions.cs" />
     <Compile Include="TypeHandlers\GuidHandler.cs" />
-    <Compile Include="IDatabase.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryFilter.cs" />

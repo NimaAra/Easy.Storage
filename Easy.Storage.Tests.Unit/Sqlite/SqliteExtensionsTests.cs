@@ -1,31 +1,56 @@
 ﻿namespace Easy.Storage.Tests.Unit.Sqlite
 {
     using System;
+    using System.Data;
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Sqlite;
     using Easy.Storage.Sqlite.Models;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
     using Easy.Storage.Common.Extensions;
+    using Easy.Storage.Sqlite;
+    using Easy.Storage.Sqlite.Connections;
+    using Easy.Storage.Sqlite.Extensions;
 
     [TestFixture]
-    internal sealed class SqliteDatabaseTests : Context
+    internal sealed class SqliteExtensionsTests : Context
     {
+        [Test]
+        public async Task When_checking_if_table_exists_non_aliased_models()
+        {
+            using (var conn = new SqliteInMemoryConnection())
+            {
+                (await conn.ExistsAsync<Person>()).ShouldBeFalse();
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+            }
+        }
+
+        [Test]
+        public async Task When_checking_if_table_exists_aliased_models()
+        {
+            using (var conn = new SqliteInMemoryConnection())
+            {
+                (await conn.ExistsAsync<MyPerson>()).ShouldBeFalse();
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.ExistsAsync<MyPerson>()).ShouldBeTrue();
+            }
+        }
+
         [Test]
         public async Task When_getting_objects_of_a_table()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var snapshot1 = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot1 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot1.ShouldNotBeNull();
                 snapshot1.ShouldBeEmpty();
 
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
 
-                var snapshot2 = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot2 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot2.ShouldNotBeNull();
                 snapshot2.Length.ShouldBe(1);
 
@@ -33,9 +58,9 @@
                 snapshot2[0].Name.ShouldBe("Person");
                 snapshot2[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                await db.Connection.ExecuteAsync(ViewQuery);
+                await conn.ExecuteAsync(ViewQuery);
 
-                var snapshot3 = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot3 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot3.ShouldNotBeNull();
                 snapshot3.Length.ShouldBe(2);
 
@@ -47,9 +72,9 @@
                 snapshot3[1].Name.ShouldBe("Person_view");
                 snapshot3[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                await db.Connection.ExecuteAsync(TriggerQuery);
+                await conn.ExecuteAsync(TriggerQuery);
 
-                var snapshot4 = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot4 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot4.ShouldNotBeNull();
                 snapshot4.Length.ShouldBe(3);
 
@@ -65,9 +90,9 @@
                 snapshot4[2].Name.ShouldBe("Person_bu");
                 snapshot4[2].Sql.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
 
-                await db.Connection.ExecuteAsync(IndexQuery);
+                await conn.ExecuteAsync(IndexQuery);
 
-                var snapshot5 = (await db.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot5 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot5.ShouldNotBeNull();
                 snapshot5.Length.ShouldBe(4);
 
@@ -92,10 +117,10 @@
         [Test]
         public async Task When_getting_table_info_of_non_aliased_model()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-                var tableInfo = await db.GetTableInfoAsync<Person>();
+                await conn.ExecuteAsync(TableQuery);
+                var tableInfo = await conn.GetTableInfoAsync<Person>();
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
@@ -130,10 +155,10 @@
         [Test]
         public async Task When_getting_table_info_of_aliased_model()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-                var tableInfo = await db.GetTableInfoAsync<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                var tableInfo = await conn.GetTableInfoAsync<MyPerson>();
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
@@ -168,15 +193,15 @@
         [Test]
         public void When_getting_table_info_of_a_non_existing_table()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                var ex1 = Should.Throw<InvalidOperationException>(() => db.GetTableInfoAsync<Person>());
-                ex1.Message.ShouldBe("Table: Person does not seem to exist.");
+                var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfoAsync<Person>());
+                ex1.Message.ShouldBe("Table: Person does not exist.");
                 ex1.InnerException.ShouldBeOfType<InvalidOperationException>();
                 ex1.InnerException?.Message.ShouldBe("No columns were selected");
 
-                var ex2 = Should.Throw<InvalidOperationException>(() => db.GetTableInfoAsync("Bambolini"));
-                ex2.Message.ShouldBe("Table: Bambolini does not seem to exist.");
+                var ex2 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfoAsync("Bambolini"));
+                ex2.Message.ShouldBe("Table: Bambolini does not exist.");
                 ex2.InnerException.ShouldBeOfType<InvalidOperationException>();
                 ex2.InnerException?.Message.ShouldBe("No columns were selected");
             }
@@ -185,34 +210,122 @@
         [Test]
         public async Task When_checking_table_exists()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                (await db.ExistsAsync<Person>()).ShouldBeFalse();
-
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                (await db.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.ExistsAsync<Person>()).ShouldBeFalse();
+                conn.State.ShouldBe(ConnectionState.Open);
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
             }
         }
 
         [Test]
         public async Task When_executing_some_sql()
         {
-            using (var db = new SqliteDatabase("Data Source=:memory:"))
+            using (var conn = new SqliteInMemoryConnection())
             {
-                await db.Connection.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Person")).ShouldBe(0);
 
-                (await db.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Person"))
-                    .ShouldBe(0);
-
-                var allRows = await db.QueryAsync<dynamic>("SELECT * FROM Person");
+                var allRows = await conn.QueryAsync<dynamic>("SELECT * FROM Person");
                 allRows.ShouldBeEmpty();
 
-                var ex = Should.Throw<SQLiteException>(async () => 
-                    await db.ExecuteAsync("SELECT * FROM SomeTable;"));
+                var ex = Should.Throw<SQLiteException>(async () =>  await conn.ExecuteAsync("SELECT * FROM SomeTable;"));
                 ex.Message.ShouldBe("SQL logic error or missing database\r\nno such table: SomeTable");
                 ex.InnerException.ShouldBeNull();
             }
+        }
+
+        [Test]
+        public async Task When_querying_multiple_single_rows()
+        {
+            using (var conn = new SqliteInMemoryConnection())
+            using(var reader = await conn.QueryMultipleAsync("SELECT 'Foo'; SELECT 666; SELECT 3.43;"))
+            {
+                reader.IsConsumed.ShouldBeFalse();
+
+                var first = await reader.ReadFirstOrDefaultAsync<string>();
+                reader.IsConsumed.ShouldBeFalse();
+                first.ShouldBe("Foo");
+
+                var second = await reader.ReadFirstOrDefaultAsync<dynamic>();
+                reader.IsConsumed.ShouldBeFalse();
+                second.ShouldBe(100);
+
+                var three = await reader.ReadFirstOrDefaultAsync<double>();
+                reader.IsConsumed.ShouldBeTrue();
+                three.ShouldBe(3.43);
+            }
+        }
+
+        [Test]
+        public async Task When_querying_multiple_multiple_rows()
+        {
+            using (var conn = new SqliteInMemoryConnection())
+            {
+                await conn.ExecuteAsync(SqliteSqlGenerator.Table<ModelOne>());
+                await conn.ExecuteAsync(SqliteSqlGenerator.Table<ModelTwo>());
+
+                var repoOne = conn.GetRepository<ModelOne>();
+                var repoTwo = conn.GetRepository<ModelTwo>();
+
+                await repoOne.InsertAsync(new[]
+                {
+                    new ModelOne {Name = "M1-A"},
+                    new ModelOne {Name = "M1-B"},
+                    new ModelOne {Name = "M1-C"}
+                });
+
+                await repoTwo.InsertAsync(new[]
+                {
+                    new ModelTwo {Category = "M2-C-A", Number = 1},
+                    new ModelTwo {Category = "M2-C-B", Number = 2},
+                    new ModelTwo {Category = "M2-C-C", Number = 3},
+                    new ModelTwo {Category = "M2-C-D", Number = 4}
+                });
+
+                using (var reader = await conn.QueryMultipleAsync("SELECT Id, Name FROM ModelOne; SELECT Id, Number, Category FROM ModelTwo;"))
+                {
+                    reader.IsConsumed.ShouldBeFalse();
+
+                    var modelOnes = (await reader.ReadAsync<ModelOne>(false)).ToArray();
+                    reader.IsConsumed.ShouldBeFalse();
+                    
+                    modelOnes.Length.ShouldBe(3);
+                    modelOnes[0].Name.ShouldBe("M1-A");
+                    modelOnes[1].Name.ShouldBe("M1-B");
+                    modelOnes[2].Name.ShouldBe("M1-C");
+
+                    var modelTwos = (await reader.ReadAsync<ModelTwo>()).ToArray();
+                    reader.IsConsumed.ShouldBeTrue();
+
+                    modelTwos.Length.ShouldBe(4);
+                    modelTwos[0].Number.ShouldBe(1);
+                    modelTwos[0].Category.ShouldBe("M2-C-A");
+
+                    modelTwos[1].Number.ShouldBe(2);
+                    modelTwos[1].Category.ShouldBe("M2-C-B");
+
+                    modelTwos[2].Number.ShouldBe(3);
+                    modelTwos[2].Category.ShouldBe("M2-C-C");
+
+                    modelTwos[3].Number.ShouldBe(4);
+                    modelTwos[3].Category.ShouldBe("M2-C-D");
+                }
+            }
+        }
+
+        private sealed class ModelOne
+        {
+            public long Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        private sealed class ModelTwo
+        {
+            public long Id { get; set; }
+            public int Number { get; set; }
+            public string Category { get; set; }
         }
     }
 }

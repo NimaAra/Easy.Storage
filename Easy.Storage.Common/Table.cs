@@ -17,6 +17,7 @@
     public sealed class Table
     {
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
+        
         internal static Table Get<TItem>(Dialect dialect = Dialect.Generic)
         {
             var key = new TableKey(typeof(TItem), dialect);
@@ -77,42 +78,42 @@
         /// <summary>
         /// Gets the type of the <c>SQL</c> database.
         /// </summary>
-        internal Dialect Dialect { get; }
+        public Dialect Dialect { get; }
 
         /// <summary>
         /// Gets the name by which the model will be stored as.
         /// </summary>
-        internal string Name { get; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the <c>SELECt</c> query to retrieve the model.
         /// </summary>
-        internal string Select { get; }
+        public string Select { get; }
 
         /// <summary>
         /// Gets the <c>INSERT</c> query to store the model with an identity column defined.
         /// </summary>
-        internal string InsertIdentity { get; }
-        
+        public string InsertIdentity { get; }
+
         /// <summary>
         /// Gets the <c>INSERT</c> query to store all the columns of the model.
         /// </summary>
-        internal string InsertAll { get; }
+        public string InsertAll { get; }
 
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on the model's Ids.
         /// </summary>
-        internal string UpdateDefault { get; }
+        public string UpdateDefault { get; }
 
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on any of the model's columns.
         /// </summary>
-        internal string UpdateCustom { get; }
+        public string UpdateCustom { get; }
 
         /// <summary>
         /// Gets the <c>DELETE</c> query to delete the model.
         /// </summary>
-        internal string Delete { get; }
+        public string Delete { get; }
 
         internal string GetSqlWithClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string baseQuery, bool single)
         {

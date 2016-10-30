@@ -4,9 +4,9 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite;
+    using Easy.Storage.Sqlite.Connections;
+    using Easy.Storage.Sqlite.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
@@ -19,24 +19,30 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person);
-
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    conn.Open();
+
+                    await conn.ExecuteAsync(TableQuery);
+
+                    var person = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person);
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -44,26 +50,33 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.InsertAsync(person);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
-                    tran.Commit();
+                    conn.Open();
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                    await conn.ExecuteAsync(TableQuery);
+
+                    var person = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        await repo.InsertAsync(person);
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                        tran.Commit();
+
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -71,27 +84,32 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.InsertAsync(person);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
-                    tran.Rollback();
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+                    var person = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        await repo.InsertAsync(person);
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                        tran.Rollback();
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -99,25 +117,30 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.InsertAsync(person);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                    var person = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        await repo.InsertAsync(person);
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -125,28 +148,33 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person1 = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person1);
-
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)2);
+                    var person1 = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person1);
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        var person2 = new Person {Name = "P2", Age = 20};
+                        await repo.InsertAsync(person2);
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
+
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -154,30 +182,35 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person1 = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person1);
-
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)2);
-                    tran.Commit();
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)2);
+                    var person1 = new Person {Name = "P1", Age = 10};
+
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person1);
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        var person2 = new Person {Name = "P2", Age = 20};
+                        await repo.InsertAsync(person2);
+                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
+
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                        tran.Commit();
+                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                    }
+
+                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
                 }
-
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)2);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -185,43 +218,48 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person);
-
-                var insertedPerson = (await repo.GetAsync()).Single();
-
-                var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
-
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.UpdateAsync(updatedPerson);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    var snapshot1 = (await repo.GetAsync()).Single();
-                    snapshot1.Id.ShouldBe(insertedPerson.Id);
-                    snapshot1.Name.ShouldBe(updatedPerson.Name);
-                    snapshot1.Age.ShouldBe(updatedPerson.Age);
+                    var person = new Person {Name = "P1", Age = 10};
 
-                    tran.Commit();
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person);
 
-                    var snapshot2 = (await repo.GetAsync()).Single();
-                    snapshot2.Id.ShouldBe(insertedPerson.Id);
-                    snapshot2.Name.ShouldBe(updatedPerson.Name);
-                    snapshot2.Age.ShouldBe(updatedPerson.Age);
+                    var insertedPerson = (await repo.GetAsync()).Single();
+
+                    var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        await repo.UpdateAsync(updatedPerson);
+
+                        var snapshot1 = (await repo.GetAsync()).Single();
+                        snapshot1.Id.ShouldBe(insertedPerson.Id);
+                        snapshot1.Name.ShouldBe(updatedPerson.Name);
+                        snapshot1.Age.ShouldBe(updatedPerson.Age);
+
+                        tran.Commit();
+
+                        var snapshot2 = (await repo.GetAsync()).Single();
+                        snapshot2.Id.ShouldBe(insertedPerson.Id);
+                        snapshot2.Name.ShouldBe(updatedPerson.Name);
+                        snapshot2.Age.ShouldBe(updatedPerson.Age);
+                    }
+
+                    var snapshot3 = (await repo.GetAsync()).Single();
+                    snapshot3.Id.ShouldBe(insertedPerson.Id);
+                    snapshot3.Name.ShouldBe(updatedPerson.Name);
+                    snapshot3.Age.ShouldBe(updatedPerson.Age);
                 }
-
-                var snapshot3 = (await repo.GetAsync()).Single();
-                snapshot3.Id.ShouldBe(insertedPerson.Id);
-                snapshot3.Name.ShouldBe(updatedPerson.Name);
-                snapshot3.Age.ShouldBe(updatedPerson.Age);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -229,43 +267,48 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person);
-
-                var insertedPerson = (await repo.GetAsync()).Single();
-
-                var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
-
-                using (var tran = db.BeginTransaction())
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.UpdateAsync(updatedPerson);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    var snapshot1 = (await repo.GetAsync()).Single();
-                    snapshot1.Id.ShouldBe(insertedPerson.Id);
-                    snapshot1.Name.ShouldBe(updatedPerson.Name);
-                    snapshot1.Age.ShouldBe(updatedPerson.Age);
+                    var person = new Person {Name = "P1", Age = 10};
 
-                    tran.Rollback();
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person);
 
-                    var snapshot2 = (await repo.GetAsync()).Single();
-                    snapshot2.Id.ShouldBe(insertedPerson.Id);
-                    snapshot2.Name.ShouldBe(insertedPerson.Name);
-                    snapshot2.Age.ShouldBe(insertedPerson.Age);
+                    var insertedPerson = (await repo.GetAsync()).Single();
+
+                    var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
+
+                    using (var tran = conn.BeginTransaction())
+                    {
+                        await repo.UpdateAsync(updatedPerson);
+
+                        var snapshot1 = (await repo.GetAsync()).Single();
+                        snapshot1.Id.ShouldBe(insertedPerson.Id);
+                        snapshot1.Name.ShouldBe(updatedPerson.Name);
+                        snapshot1.Age.ShouldBe(updatedPerson.Age);
+
+                        tran.Rollback();
+
+                        var snapshot2 = (await repo.GetAsync()).Single();
+                        snapshot2.Id.ShouldBe(insertedPerson.Id);
+                        snapshot2.Name.ShouldBe(insertedPerson.Name);
+                        snapshot2.Age.ShouldBe(insertedPerson.Age);
+                    }
+
+                    var snapshot3 = (await repo.GetAsync()).Single();
+                    snapshot3.Id.ShouldBe(insertedPerson.Id);
+                    snapshot3.Name.ShouldBe(insertedPerson.Name);
+                    snapshot3.Age.ShouldBe(insertedPerson.Age);
                 }
-
-                var snapshot3 = (await repo.GetAsync()).Single();
-                snapshot3.Id.ShouldBe(insertedPerson.Id);
-                snapshot3.Name.ShouldBe(insertedPerson.Name);
-                snapshot3.Age.ShouldBe(insertedPerson.Age);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
 
         [Test]
@@ -273,43 +316,49 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person);
-
-                var insertedPerson = (await repo.GetAsync()).Single();
-
-                var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
-
-                using (var tran = db.BeginTransaction(IsolationLevel.ReadCommitted))
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.UpdateAsync(updatedPerson);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    var snapshot1 = (await repo.GetAsync()).Single();
-                    snapshot1.Id.ShouldBe(insertedPerson.Id);
-                    snapshot1.Name.ShouldBe(updatedPerson.Name);
-                    snapshot1.Age.ShouldBe(updatedPerson.Age);
+                    var person = new Person {Name = "P1", Age = 10};
 
-                    tran.Commit();
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person);
 
-                    var snapshot2 = (await repo.GetAsync()).Single();
-                    snapshot2.Id.ShouldBe(insertedPerson.Id);
-                    snapshot2.Name.ShouldBe(updatedPerson.Name);
-                    snapshot2.Age.ShouldBe(updatedPerson.Age);
+                    var insertedPerson = (await repo.GetAsync()).Single();
+
+                    var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
+
+                    using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
+                    {
+                        await repo.UpdateAsync(updatedPerson);
+
+                        var snapshot1 = (await repo.GetAsync()).Single();
+                        snapshot1.Id.ShouldBe(insertedPerson.Id);
+                        snapshot1.Name.ShouldBe(updatedPerson.Name);
+                        snapshot1.Age.ShouldBe(updatedPerson.Age);
+
+                        tran.Commit();
+
+                        var snapshot2 = (await repo.GetAsync()).Single();
+                        snapshot2.Id.ShouldBe(insertedPerson.Id);
+                        snapshot2.Name.ShouldBe(updatedPerson.Name);
+                        snapshot2.Age.ShouldBe(updatedPerson.Age);
+                    }
+
+                    var snapshot3 = (await repo.GetAsync()).Single();
+                    snapshot3.Id.ShouldBe(insertedPerson.Id);
+                    snapshot3.Name.ShouldBe(updatedPerson.Name);
+                    snapshot3.Age.ShouldBe(updatedPerson.Age);
                 }
-
-                var snapshot3 = (await repo.GetAsync()).Single();
-                snapshot3.Id.ShouldBe(insertedPerson.Id);
-                snapshot3.Name.ShouldBe(updatedPerson.Name);
-                snapshot3.Age.ShouldBe(updatedPerson.Age);
+            } finally
+            {
+                fileInfo.Delete();
             }
 
-            fileInfo.Delete();
         }
 
         [Test]
@@ -317,43 +366,48 @@
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
-            using (IDatabase db = new SqliteDatabase("Data Source=" + fileInfo.FullName))
+            try
             {
-                await db.Connection.ExecuteAsync(TableQuery);
-
-                var person = new Person { Name = "P1", Age = 10 };
-
-                var repo = db.GetRepository<Person>();
-                await repo.InsertAsync(person);
-
-                var insertedPerson = (await repo.GetAsync()).Single();
-
-                var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
-
-                using (var tran = db.BeginTransaction(IsolationLevel.ReadCommitted))
+                using (var conn = new SqliteFileConnection(fileInfo))
                 {
-                    await repo.UpdateAsync(updatedPerson);
+                    conn.Open();
+                    await conn.ExecuteAsync(TableQuery);
 
-                    var snapshot1 = (await repo.GetAsync()).Single();
-                    snapshot1.Id.ShouldBe(insertedPerson.Id);
-                    snapshot1.Name.ShouldBe(updatedPerson.Name);
-                    snapshot1.Age.ShouldBe(updatedPerson.Age);
+                    var person = new Person { Name = "P1", Age = 10 };
 
-                    tran.Rollback();
+                    var repo = conn.GetRepository<Person>();
+                    await repo.InsertAsync(person);
 
-                    var snapshot2 = (await repo.GetAsync()).Single();
-                    snapshot2.Id.ShouldBe(insertedPerson.Id);
-                    snapshot2.Name.ShouldBe(insertedPerson.Name);
-                    snapshot2.Age.ShouldBe(insertedPerson.Age);
+                    var insertedPerson = (await repo.GetAsync()).Single();
+
+                    var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
+
+                    using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
+                    {
+                        await repo.UpdateAsync(updatedPerson);
+
+                        var snapshot1 = (await repo.GetAsync()).Single();
+                        snapshot1.Id.ShouldBe(insertedPerson.Id);
+                        snapshot1.Name.ShouldBe(updatedPerson.Name);
+                        snapshot1.Age.ShouldBe(updatedPerson.Age);
+
+                        tran.Rollback();
+
+                        var snapshot2 = (await repo.GetAsync()).Single();
+                        snapshot2.Id.ShouldBe(insertedPerson.Id);
+                        snapshot2.Name.ShouldBe(insertedPerson.Name);
+                        snapshot2.Age.ShouldBe(insertedPerson.Age);
+                    }
+
+                    var snapshot3 = (await repo.GetAsync()).Single();
+                    snapshot3.Id.ShouldBe(insertedPerson.Id);
+                    snapshot3.Name.ShouldBe(insertedPerson.Name);
+                    snapshot3.Age.ShouldBe(insertedPerson.Age);
                 }
-
-                var snapshot3 = (await repo.GetAsync()).Single();
-                snapshot3.Id.ShouldBe(insertedPerson.Id);
-                snapshot3.Name.ShouldBe(insertedPerson.Name);
-                snapshot3.Age.ShouldBe(insertedPerson.Age);
+            } finally
+            {
+                fileInfo.Delete();
             }
-
-            fileInfo.Delete();
         }
     }
 }
