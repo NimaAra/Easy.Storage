@@ -33,8 +33,8 @@
     <DocumentationFile>bin\Release\Easy.Storage.Sqlite.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Easy.Common, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Easy.Common.1.2.0\lib\net452\Easy.Common.dll</HintPath>
+    <Reference Include="Easy.Common, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Easy.Common.1.3.0\lib\net452\Easy.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -51,6 +51,7 @@
     <Compile Include="Connections\SqliteFileConnection.cs" />
     <Compile Include="Connections\SqliteInMemoryConnection.cs" />
     <Compile Include="Extensions\SqliteExtensions.cs" />
+    <Compile Include="Models\FTSTableType.cs" />
     <Compile Include="FTS\ITerm.cs" />
     <Compile Include="FTS\JoinClauses.cs" />
     <Compile Include="FTS\Match.cs" />

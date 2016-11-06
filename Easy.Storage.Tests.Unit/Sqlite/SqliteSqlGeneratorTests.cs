@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using Easy.Storage.Sqlite;
+    using Easy.Storage.Sqlite.Models;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
@@ -31,14 +32,36 @@
         }
 
         [Test]
-        public void When_generating_full_text_search_table_sql()
+        public void When_generating_full_text_search_with_content_table_sql()
         {
-            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FtsTable<SampleModel>(m => m.Composite))
+            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Composite))
                 .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
 
-            var ftsTableSql = SqliteSqlGenerator.FtsTable<SampleModel>(m => m.Flag, m => m.Text, m => m.Guid);
+            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Flag, m => m.Text, m => m.Guid);
             ftsTableSql.ShouldNotBeNullOrWhiteSpace();
-            ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content='SampleModel', [Flag], [Text], [Key]);\r\n\r\n"
+            ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 ([Flag], [Text], [Key]);");
+        }
+
+        [Test]
+        public void When_generating_full_text_search_content_less_table_sql()
+        {
+            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Composite))
+                .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
+
+            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Flag, m => m.Text, m => m.Guid);
+            ftsTableSql.ShouldNotBeNullOrWhiteSpace();
+            ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content=\"\", [Flag], [Text], [Key]);");
+        }
+
+        [Test]
+        public void When_generating_full_text_search_external_content_table_sql()
+        {
+            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Composite))
+                .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
+
+            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Flag, m => m.Text, m => m.Guid);
+            ftsTableSql.ShouldNotBeNullOrWhiteSpace();
+            ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content=\"SampleModel\", [Flag], [Text], [Key]);\r\n\r\n"
                         + "CREATE TRIGGER IF NOT EXISTS SampleModel_bu BEFORE UPDATE ON SampleModel BEGIN\r\n"
                         + "    DELETE FROM SampleModel_fts WHERE docId = old.rowId;\r\n"
                         + "END;\r\n\r\n"

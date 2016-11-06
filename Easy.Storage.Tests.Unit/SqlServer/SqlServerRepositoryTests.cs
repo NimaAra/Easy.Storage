@@ -74,9 +74,9 @@
                 table.Dialect.ShouldBe(Dialect.SqlServer);
                 table.Name.ShouldBe("Person");
                 table.Select.ShouldBe("SELECT\r\n"
-                        + "    [Id] AS 'Id',\r\n"
-                        + "    [Name] AS 'Name',\r\n"
-                        + "    [Age] AS 'Age'\r\n"
+                        + "    [Person].[Id] AS 'Id',\r\n"
+                        + "    [Person].[Name] AS 'Name',\r\n"
+                        + "    [Person].[Age] AS 'Age'\r\n"
                         + "FROM Person\r\nWHERE\r\n    1 = 1;");
 
                 table.InsertIdentity.ShouldBe("DECLARE @InsertedRows AS TABLE (Id BIGINT);\r\n"

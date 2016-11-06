@@ -46,7 +46,8 @@
         /// <summary>
         /// Returns a <c>CREATE TABLE</c> script for the given <typeparamref name="T"/>.
         /// </summary>
-        public static string FtsTable<T>(params Expression<Func<T, object>>[] selector)
+        // ReSharper disable once InconsistentNaming
+        public static string FTSTable<T>(FTSTableType type, params Expression<Func<T, object>>[] selector)
         {
             var table = Common.Table.Get<T>();
             var propNameToColumn = table.PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
@@ -76,27 +77,38 @@
 
             var ftsTableName = string.Concat(table.Name, "_fts");
             var ftsColumns = string.Join(", ", columns);
-            var ftsTriggerColumns = string.Join(", ", columns.Select(c => "new." + c));
-            var builder = new StringBuilder();
 
-            builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content='{table.Name}', {ftsColumns});");
-            builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bu BEFORE UPDATE ON {table.Name} BEGIN");
-            builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
-            builder.AppendLine("END;");
-            builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bd BEFORE DELETE ON {table.Name} BEGIN");
-            builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
-            builder.AppendLine("END;");
-            builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_au AFTER UPDATE ON {table.Name} BEGIN");
-            builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
-            builder.AppendLine("END;");
-            builder.AppendLine();
-            builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_ai AFTER INSERT ON {table.Name} BEGIN");
-            builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
-            builder.Append("END;");
-            return builder.ToString();
+            switch (type)
+            {
+                case FTSTableType.Content:
+                    return $"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 ({ftsColumns});";
+                case FTSTableType.ContentLess:
+                    return $"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"\", {ftsColumns});";
+                case FTSTableType.ExternalContent:
+                    var builder = new StringBuilder();
+                    builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"{table.Name}\", {ftsColumns});");
+                    builder.AppendLine();
+
+                    var ftsTriggerColumns = string.Join(", ", columns.Select(c => "new." + c));
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bu BEFORE UPDATE ON {table.Name} BEGIN");
+                    builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
+                    builder.AppendLine("END;");
+                    builder.AppendLine();
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bd BEFORE DELETE ON {table.Name} BEGIN");
+                    builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
+                    builder.AppendLine("END;");
+                    builder.AppendLine();
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_au AFTER UPDATE ON {table.Name} BEGIN");
+                    builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
+                    builder.AppendLine("END;");
+                    builder.AppendLine();
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_ai AFTER INSERT ON {table.Name} BEGIN");
+                    builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
+                    builder.Append("END;");
+                    return builder.ToString();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
 
         private static SqliteDataType GetSqliteType(Type type)

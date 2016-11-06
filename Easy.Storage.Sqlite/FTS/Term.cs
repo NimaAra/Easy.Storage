@@ -46,6 +46,8 @@
         /// </summary>
         public override string ToString()
         {
+            // Can also do the following format: 
+            // SELECT [Log].* FROM Log, Log_fts WHERE [Log_fts].[Foo] MATCH '"bar" OR "baz"' AND Log.Id = [Log_fts].[docId]
             var builder = new StringBuilder();
 
             if (!_terms.Any())
@@ -70,15 +72,6 @@
                     throw new ArgumentOutOfRangeException(nameof(term.Type));
                 }
 
-                var keywordsQuery = $"'{string.Join(separator, term.Keywords.Select(kw => "\"" + kw + "\""))}'";
-                var ftsQuery = $"{_config.PrefixQuery} {term.ColumnName} MATCH {keywordsQuery}";
-                var query = ftsQuery;
-
-                if (term.IsNegation)
-                {
-                    query = $"{_config.PrefixQuery} docId NOT IN{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{ftsQuery}{Formatter.NewLine})";
-                }
-
                 if (term.JoinClause == JoinClauses.Intersect)
                 {
                     builder.Append(IntersectClause);
@@ -88,7 +81,18 @@
                     builder.Append(UnionClause);
                 }
 
-                builder.Append(query);
+                var keywordsQuery = string.Join(separator, term.Keywords.Select(kw => "\"" + kw + "\""));
+                
+                if (term.IsNegation)
+                {
+                    builder.AppendFormat("{0} [{1}].[docId] NOT IN{2}({2}{3}{0} [{1}].{4} MATCH '{5}'{6})",
+                        _config.PrefixQuery, _config.TableName, Formatter.NewLine, Formatter.Spacer, term.ColumnName, keywordsQuery, Formatter.NewLine);
+                } else
+                {
+
+                    builder.AppendFormat("{0} [{1}].{2} MATCH '{3}'", 
+                        _config.PrefixQuery, _config.TableName, term.ColumnName, keywordsQuery);
+                }
             }
 
             return builder.ToString();
@@ -137,10 +141,12 @@
             private TermConfig()
             {
                 _table = Table.Get<T>();
-                PrefixQuery = $"SELECT docId FROM {_table.Name}_fts WHERE";
+                TableName = _table.Name + "_fts";
+                PrefixQuery = $"SELECT [{TableName}].[docId] FROM {TableName} WHERE";
             }
 
             internal string PrefixQuery { get; }
+            internal string TableName { get; }
 
             internal string GetColumnName(string getPropertyName)
             {

@@ -17,9 +17,9 @@
             table.Dialect.ShouldBe(Dialect.Generic);
             table.Name.ShouldBe("Person");
             table.Select.ShouldBe("SELECT\r\n"
-                    + "    [Id] AS 'Id',\r\n"
-                    + "    [Name] AS 'Name',\r\n"
-                    + "    [Age] AS 'Age'\r\n"
+                    + "    [Person].[Id] AS 'Id',\r\n"
+                    + "    [Person].[Name] AS 'Name',\r\n"
+                    + "    [Person].[Age] AS 'Age'\r\n"
                     + "FROM Person\r\nWHERE\r\n    1 = 1;");
 
             table.InsertIdentity.ShouldBe("INSERT INTO Person\r\n"
@@ -69,17 +69,17 @@
             sqlQuery.ShouldBe("SELECT * FROM SampleModel\r\nAND\r\n    ([Text]  = @Value);");
 
             table.Select.ShouldBe("SELECT\r\n"
-                    + "    [Id] AS 'Id',\r\n"
-                    + "    [Text] AS 'Text',\r\n"
-                    + "    [Int] AS 'Int',\r\n"
-                    + "    [Decimal] AS 'Decimal',\r\n"
-                    + "    [Double] AS 'Double',\r\n"
-                    + "    [Float] AS 'Float',\r\n"
-                    + "    [Flag] AS 'Flag',\r\n"
-                    + "    [Binary] AS 'Binary',\r\n"
-                    + "    [Key] AS 'Guid',\r\n"
-                    + "    [DateTime] AS 'DateTime',\r\n"
-                    + "    [DateTimeOffset] AS 'DateTimeOffset'\r\n"
+                    + "    [SampleModel].[Id] AS 'Id',\r\n"
+                    + "    [SampleModel].[Text] AS 'Text',\r\n"
+                    + "    [SampleModel].[Int] AS 'Int',\r\n"
+                    + "    [SampleModel].[Decimal] AS 'Decimal',\r\n"
+                    + "    [SampleModel].[Double] AS 'Double',\r\n"
+                    + "    [SampleModel].[Float] AS 'Float',\r\n"
+                    + "    [SampleModel].[Flag] AS 'Flag',\r\n"
+                    + "    [SampleModel].[Binary] AS 'Binary',\r\n"
+                    + "    [SampleModel].[Key] AS 'Guid',\r\n"
+                    + "    [SampleModel].[DateTime] AS 'DateTime',\r\n"
+                    + "    [SampleModel].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
                     + "FROM SampleModel\r\nWHERE\r\n    1 = 1;");
 
             table.InsertIdentity.ShouldBe("INSERT INTO SampleModel\r\n"

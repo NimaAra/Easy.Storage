@@ -9,6 +9,7 @@
     using Easy.Storage.Sqlite.Connections;
     using Easy.Storage.Sqlite.Extensions;
     using Easy.Storage.Sqlite.FTS;
+    using Easy.Storage.Sqlite.Models;
     using NUnit.Framework;
     using Shouldly;
     using static FtsContext;
@@ -396,7 +397,7 @@
         {
             var tableSql = SqliteSqlGenerator.Table<Log>();
             await connection.ExecuteAsync(tableSql);
-            var ftsTableSql = SqliteSqlGenerator.FtsTable<Log>();
+            var ftsTableSql = SqliteSqlGenerator.FTSTable<Log>(FTSTableType.ExternalContent);
             await connection.ExecuteAsync(ftsTableSql);
         }
     }
