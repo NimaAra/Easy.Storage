@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite.Connections
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Connections
 {
     using System.Collections.Generic;
     using System.Data.SQLite;
@@ -10,16 +11,16 @@
     /// <summary>
     /// A wrapper around the <see cref="SQLiteConnection"/> for a simpler usage of <c>Attached</c> databases.
     /// </summary>
-    public sealed class SqliteAttachedConnection : SqliteConnectionBase
+    public sealed class SQLiteAttachedConnection : SQLiteConnectionBase
     {
         private readonly string _attachCommands;
 
         /// <summary>
-        /// Creates an instance of the <see cref="SqliteAttachedConnection"/>.
+        /// Creates an instance of the <see cref="SQLiteAttachedConnection"/>.
         /// </summary>
         /// <param name="dbFiles">Database files to attached where the key is the alias to be used for the database.</param>
-        public SqliteAttachedConnection(Dictionary<string, FileInfo> dbFiles) 
-            : base(SqliteConnectionStringBuilder.GetInMemoryConnectionString())
+        public SQLiteAttachedConnection(Dictionary<string, FileInfo> dbFiles) 
+            : base(SQLiteConnectionStringProvider.GetInMemoryConnectionString())
         {
             FilesToAttach = Ensure.NotNull(dbFiles, nameof(dbFiles));
             Ensure.That(dbFiles.Count != 0, "The dbFiles cannot be empty.");

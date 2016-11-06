@@ -65,6 +65,7 @@
     <Compile Include="Sqlite\SqliteConnections\SqliteFileConnectionTests.cs" />
     <Compile Include="Sqlite\SqliteConnections\SqliteInMemoryConnectionTests.cs" />
     <Compile Include="Sqlite\SqliteExtensionsTests.cs" />
+    <Compile Include="Sqlite\SqliteFunction\SqliteFunctionTests.cs" />
     <Compile Include="Sqlite\SqliteRepositoryTests.cs" />
     <Compile Include="Sqlite\SqliteHelperTests.cs" />
     <Compile Include="Sqlite\SqliteRepositoryTranscationTests.cs" />

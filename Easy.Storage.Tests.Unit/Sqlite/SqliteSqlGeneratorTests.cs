@@ -13,7 +13,7 @@
         [Test]
         public void When_generating_table_sql()
         {
-            var tableSql = SqliteSqlGenerator.Table<SampleModel>();
+            var tableSql = SQLiteSQLGenerator.Table<SampleModel>();
 
             tableSql.ShouldNotBeNullOrWhiteSpace();
             tableSql.ShouldBe("CREATE TABLE IF NOT EXISTS SampleModel (\r\n"
@@ -34,10 +34,10 @@
         [Test]
         public void When_generating_full_text_search_with_content_table_sql()
         {
-            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Composite))
+            Should.Throw<KeyNotFoundException>(() => SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Composite))
                 .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
 
-            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Flag, m => m.Text, m => m.Guid);
+            var ftsTableSql = SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Flag, m => m.Text, m => m.Guid);
             ftsTableSql.ShouldNotBeNullOrWhiteSpace();
             ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 ([Flag], [Text], [Key]);");
         }
@@ -45,10 +45,10 @@
         [Test]
         public void When_generating_full_text_search_content_less_table_sql()
         {
-            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Composite))
+            Should.Throw<KeyNotFoundException>(() => SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Composite))
                 .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
 
-            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Flag, m => m.Text, m => m.Guid);
+            var ftsTableSql = SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.ContentLess, m => m.Flag, m => m.Text, m => m.Guid);
             ftsTableSql.ShouldNotBeNullOrWhiteSpace();
             ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content=\"\", [Flag], [Text], [Key]);");
         }
@@ -56,10 +56,10 @@
         [Test]
         public void When_generating_full_text_search_external_content_table_sql()
         {
-            Should.Throw<KeyNotFoundException>(() => SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Composite))
+            Should.Throw<KeyNotFoundException>(() => SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Composite))
                 .Message.ShouldBe("Could not find a mapping for property: Composite. Ensure it is not marked with an IgnoreAttribute.");
 
-            var ftsTableSql = SqliteSqlGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Flag, m => m.Text, m => m.Guid);
+            var ftsTableSql = SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.ExternalContent, m => m.Flag, m => m.Text, m => m.Guid);
             ftsTableSql.ShouldNotBeNullOrWhiteSpace();
             ftsTableSql.ShouldBe("CREATE VIRTUAL TABLE IF NOT EXISTS SampleModel_fts USING FTS4 (content=\"SampleModel\", [Flag], [Text], [Key]);\r\n\r\n"
                         + "CREATE TRIGGER IF NOT EXISTS SampleModel_bu BEFORE UPDATE ON SampleModel BEGIN\r\n"
@@ -79,7 +79,7 @@
         [Test]
         public void When_generating_table_for_model_with_inheritance()
         {
-            var parentTableSql = SqliteSqlGenerator.Table<Parent>();
+            var parentTableSql = SQLiteSQLGenerator.Table<Parent>();
 
             parentTableSql.ShouldNotBeNullOrWhiteSpace();
             parentTableSql.ShouldBe("CREATE TABLE IF NOT EXISTS Parent (\r\n"
@@ -88,7 +88,7 @@
                        + "    [Name] TEXT NOT NULL,\r\n"
                        + "    [Age] INTEGER NOT NULL\r\n);");
 
-            var childTableSql = SqliteSqlGenerator.Table<Child>();
+            var childTableSql = SQLiteSQLGenerator.Table<Child>();
 
             childTableSql.ShouldNotBeNullOrWhiteSpace();
             childTableSql.ShouldBe("CREATE TABLE IF NOT EXISTS Child (\r\n"

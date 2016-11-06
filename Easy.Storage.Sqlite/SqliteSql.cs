@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.Sqlite
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite
 {
     /// <summary>
     /// Provides <c>SQLite</c> specific <c>SQL</c> queries.
     /// </summary>
-    public static class SqliteSql
+    public static class SQLiteSQL
     {
         /// <summary>
         /// Query all the objects from the <c>SQLite</c> master database.
@@ -14,6 +15,11 @@
         /// Query all the attached databases.
         /// </summary>
         public const string AttachedDatabases = "PRAGMA database_list";
+
+        /// <summary>
+        /// Rebuilds the database file, repacking it into a minimal amount of disk space.
+        /// </summary>
+        public const string Vacuum = "VACUUM";
 
         /// <summary>
         /// Query to find if a given table exists.

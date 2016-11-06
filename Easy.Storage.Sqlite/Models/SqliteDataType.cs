@@ -7,7 +7,7 @@ namespace Easy.Storage.Sqlite.Models
     /// Each value stored in an SQLite database (or manipulated by the database engine) has one of the following storage classes.
     /// </remarks>
     /// </summary>
-    public enum SqliteDataType
+    public enum SQLiteDataType
     {
         /// <summary>
         /// The value is a <c>NULL</c> value.

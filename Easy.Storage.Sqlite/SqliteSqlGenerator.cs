@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +14,7 @@
     /// <summary>
     /// A handy class to generate <c>SQLite</c> table scripts from a model.
     /// </summary>
-    public static class SqliteSqlGenerator
+    public static class SQLiteSQLGenerator
     {
         private const string PrimaryKey = " PRIMARY KEY";
         private const string NotNull = " NOT NULL";
@@ -111,28 +112,28 @@
             }
         }
 
-        private static SqliteDataType GetSqliteType(Type type)
+        private static SQLiteDataType GetSqliteType(Type type)
         {
-            if (type.IsEnum) { return SqliteDataType.TEXT; }
+            if (type.IsEnum) { return SQLiteDataType.TEXT; }
 
-            if (type == ClrTypes.Bool || type == ClrTypes.BoolNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.Byte || type == ClrTypes.ByteNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.Short || type == ClrTypes.ShortNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.UShort || type == ClrTypes.UShortNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.Int || type == ClrTypes.IntNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.UInt || type == ClrTypes.UIntNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.Long || type == ClrTypes.LongNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.ULong || type == ClrTypes.ULongNull) { return SqliteDataType.INTEGER; }
-            if (type == ClrTypes.Float || type == ClrTypes.FloatNull) { return SqliteDataType.REAL; }
-            if (type == ClrTypes.Double || type == ClrTypes.DoubleNull) { return SqliteDataType.REAL; }
-            if (type == ClrTypes.Decimal || type == ClrTypes.DecimalNull) { return SqliteDataType.REAL; }
-            if (type == ClrTypes.String) { return SqliteDataType.TEXT; }
-            if (type == ClrTypes.Guid || type == ClrTypes.GuidNull) { return SqliteDataType.TEXT; }
-            if (type == ClrTypes.DateTime || type == ClrTypes.DateTimeNull) { return SqliteDataType.TEXT; }
-            if (type == ClrTypes.DateTimeOffset || type == ClrTypes.DateTimeOffsetNull) { return SqliteDataType.TEXT; }
-            if (type == ClrTypes.ByteArray) { return SqliteDataType.BLOB; }
+            if (type == ClrTypes.Bool || type == ClrTypes.BoolNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.Byte || type == ClrTypes.ByteNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.Short || type == ClrTypes.ShortNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.UShort || type == ClrTypes.UShortNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.Int || type == ClrTypes.IntNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.UInt || type == ClrTypes.UIntNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.Long || type == ClrTypes.LongNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.ULong || type == ClrTypes.ULongNull) { return SQLiteDataType.INTEGER; }
+            if (type == ClrTypes.Float || type == ClrTypes.FloatNull) { return SQLiteDataType.REAL; }
+            if (type == ClrTypes.Double || type == ClrTypes.DoubleNull) { return SQLiteDataType.REAL; }
+            if (type == ClrTypes.Decimal || type == ClrTypes.DecimalNull) { return SQLiteDataType.REAL; }
+            if (type == ClrTypes.String) { return SQLiteDataType.TEXT; }
+            if (type == ClrTypes.Guid || type == ClrTypes.GuidNull) { return SQLiteDataType.TEXT; }
+            if (type == ClrTypes.DateTime || type == ClrTypes.DateTimeNull) { return SQLiteDataType.TEXT; }
+            if (type == ClrTypes.DateTimeOffset || type == ClrTypes.DateTimeOffsetNull) { return SQLiteDataType.TEXT; }
+            if (type == ClrTypes.ByteArray) { return SQLiteDataType.BLOB; }
 
-            throw new ArgumentOutOfRangeException(nameof(type), $"There is no mapping between a {nameof(SqliteDataType)} and the given type of: {type}.");
+            throw new ArgumentOutOfRangeException(nameof(type), $"There is no mapping between a {nameof(SQLiteDataType)} and the given type of: {type}.");
         }
 
         private static class ClrTypes

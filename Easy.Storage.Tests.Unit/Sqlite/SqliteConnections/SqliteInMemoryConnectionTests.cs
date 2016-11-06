@@ -15,7 +15,7 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SQLiteConnections
         [Test]
         public void When_creating_connection()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 conn.ConnectionString.ShouldBe("Data Source=:memory:");
                 conn.ConnectionTimeout.ShouldBe(15);
@@ -29,7 +29,7 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SQLiteConnections
         [Test]
         public void When_creating_connection_with_valid_connection_string()
         {
-            using (var conn = new SqliteInMemoryConnection(SqliteConnectionStringBuilder.GetInMemoryConnectionString()))
+            using (var conn = new SQLiteInMemoryConnection(SQLiteConnectionStringProvider.GetInMemoryConnectionString()))
             {
                 conn.ConnectionString.ShouldBe("Data Source=:memory:");
                 conn.ConnectionTimeout.ShouldBe(15);
@@ -43,35 +43,35 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SQLiteConnections
         [Test]
         public void When_creating_connection_with_invalid_connection_string()
         {
-            Should.Throw<ArgumentException>(() => new SqliteInMemoryConnection("foo"))
+            Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection("foo"))
                 .Message.ShouldBe("Not a valid SQLite memory connection-string.");
         }
 
         [Test]
         public void When_creating_connection_with_null_empty_and_whitespace_connection_string()
         {
-            Should.Throw<ArgumentException>(() => new SqliteInMemoryConnection(null))
+            Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(null))
                 .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
 
-            Should.Throw<ArgumentException>(() => new SqliteInMemoryConnection(string.Empty))
+            Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(string.Empty))
                 .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
 
-            Should.Throw<ArgumentException>(() => new SqliteInMemoryConnection(" "))
+            Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(" "))
                 .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
         }
 
         [Test]
         public void When_creating_connection_with_non_memory_connection_string()
         {
-            var fileConnectionString = SqliteConnectionStringBuilder.GetFileConnectionString(new FileInfo("SomeFile.db"));
-            Should.Throw<ArgumentException>(() => new SqliteInMemoryConnection(fileConnectionString))
+            var fileConnectionString = SQLiteConnectionStringProvider.GetFileConnectionString(new FileInfo("SomeFile.db"));
+            Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(fileConnectionString))
                 .Message.ShouldBe("Not a valid SQLite memory connection-string.");
         }
 
         [Test]
         public void When_changing_connection_state()
         {
-            var conn = new SqliteInMemoryConnection();
+            var conn = new SQLiteInMemoryConnection();
             conn.State.ShouldBe(ConnectionState.Closed);
 
             conn.Open();

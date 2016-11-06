@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite
 {
     using System;
     using System.Data.SQLite;
@@ -8,7 +9,7 @@
     /// <summary>
     /// Provides helper methods for creating <c>SQLite</c> connection strings.
     /// </summary>
-    public static class SqliteConnectionStringBuilder
+    public static class SQLiteConnectionStringProvider
     {
         /// <summary>
         /// Returns an in-memory <c>SQLite</c> connection-string.

@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite.Connections
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Connections
 {
     using System.Data.SQLite;
     using Easy.Common;
@@ -6,20 +7,20 @@
     /// <summary>
     /// A wrapper around the <see cref="SQLiteConnection"/> to allow reuse of in-memory connections.
     /// </summary>
-    public sealed class SqliteInMemoryConnection : SqliteConnectionBase
+    public sealed class SQLiteInMemoryConnection : SQLiteConnectionBase
     {
         /// <summary>
-        /// Creates an instance of the <see cref="SqliteInMemoryConnection"/>.
+        /// Creates an instance of the <see cref="SQLiteInMemoryConnection"/>.
         /// </summary>
-        public SqliteInMemoryConnection() : base(SqliteConnectionStringBuilder.GetInMemoryConnectionString()) {}
+        public SQLiteInMemoryConnection() : base(SQLiteConnectionStringProvider.GetInMemoryConnectionString()) {}
 
         /// <summary>
-        /// Creates an instance of the <see cref="SqliteInMemoryConnection"/>.
+        /// Creates an instance of the <see cref="SQLiteInMemoryConnection"/>.
         /// </summary>
         /// <param name="connectionString">A valid <c>SQLite</c> connection-string.</param>
-        public SqliteInMemoryConnection(string connectionString) : base(connectionString)
+        public SQLiteInMemoryConnection(string connectionString) : base(connectionString)
         {
-            Ensure.That(SqliteHelper.IsInMemoryConnection(connectionString), 
+            Ensure.That(SQLiteHelper.IsInMemoryConnection(connectionString), 
                 "Not a valid SQLite memory connection-string.");
         }
 

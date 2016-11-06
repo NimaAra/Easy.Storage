@@ -20,7 +20,7 @@
         [Test]
         public async Task When_checking_if_table_exists_non_aliased_models()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 (await conn.ExistsAsync<Person>()).ShouldBeFalse();
                 await conn.ExecuteAsync(TableQuery);
@@ -31,7 +31,7 @@
         [Test]
         public async Task When_checking_if_table_exists_aliased_models()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 (await conn.ExistsAsync<MyPerson>()).ShouldBeFalse();
                 await conn.ExecuteAsync(TableQuery);
@@ -42,7 +42,7 @@
         [Test]
         public async Task When_getting_objects_of_a_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var snapshot1 = (await conn.GetDatabaseObjectsAsync()).ToArray();
                 snapshot1.ShouldNotBeNull();
@@ -54,7 +54,7 @@
                 snapshot2.ShouldNotBeNull();
                 snapshot2.Length.ShouldBe(1);
 
-                snapshot2[0].Type.ShouldBe(SqliteObjectType.Table);
+                snapshot2[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot2[0].Name.ShouldBe("Person");
                 snapshot2[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
@@ -64,11 +64,11 @@
                 snapshot3.ShouldNotBeNull();
                 snapshot3.Length.ShouldBe(2);
 
-                snapshot3[0].Type.ShouldBe(SqliteObjectType.Table);
+                snapshot3[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot3[0].Name.ShouldBe("Person");
                 snapshot3[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                snapshot3[1].Type.ShouldBe(SqliteObjectType.View);
+                snapshot3[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot3[1].Name.ShouldBe("Person_view");
                 snapshot3[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
@@ -78,15 +78,15 @@
                 snapshot4.ShouldNotBeNull();
                 snapshot4.Length.ShouldBe(3);
 
-                snapshot4[0].Type.ShouldBe(SqliteObjectType.Table);
+                snapshot4[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot4[0].Name.ShouldBe("Person");
                 snapshot4[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                snapshot4[1].Type.ShouldBe(SqliteObjectType.View);
+                snapshot4[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot4[1].Name.ShouldBe("Person_view");
                 snapshot4[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                snapshot4[2].Type.ShouldBe(SqliteObjectType.Trigger);
+                snapshot4[2].Type.ShouldBe(SQLiteObjectType.Trigger);
                 snapshot4[2].Name.ShouldBe("Person_bu");
                 snapshot4[2].Sql.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
 
@@ -96,19 +96,19 @@
                 snapshot5.ShouldNotBeNull();
                 snapshot5.Length.ShouldBe(4);
 
-                snapshot5[0].Type.ShouldBe(SqliteObjectType.Table);
+                snapshot5[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot5[0].Name.ShouldBe("Person");
                 snapshot5[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                snapshot5[1].Type.ShouldBe(SqliteObjectType.View);
+                snapshot5[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot5[1].Name.ShouldBe("Person_view");
                 snapshot5[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
-                snapshot5[2].Type.ShouldBe(SqliteObjectType.Trigger);
+                snapshot5[2].Type.ShouldBe(SQLiteObjectType.Trigger);
                 snapshot5[2].Name.ShouldBe("Person_bu");
                 snapshot5[2].Sql.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
 
-                snapshot5[3].Type.ShouldBe(SqliteObjectType.Index);
+                snapshot5[3].Type.ShouldBe(SQLiteObjectType.Index);
                 snapshot5[3].Name.ShouldBe("Person_idx");
                 snapshot5[3].Sql.ShouldBe(IndexQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
             }
@@ -117,7 +117,7 @@
         [Test]
         public async Task When_getting_table_info_of_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await conn.ExecuteAsync(TableQuery);
                 var tableInfo = await conn.GetTableInfoAsync<Person>();
@@ -131,21 +131,21 @@
 
                 tableInfo.Columns[0].Id.ShouldBe(0);
                 tableInfo.Columns[0].Name.ShouldBe("Id");
-                tableInfo.Columns[0].Type.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[0].Type.ShouldBe(SQLiteDataType.INTEGER);
                 tableInfo.Columns[0].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[0].IsPrimaryKey.ShouldBeTrue();
                 tableInfo.Columns[0].NotNull.ShouldBeTrue();
 
                 tableInfo.Columns[1].Id.ShouldBe(1);
                 tableInfo.Columns[1].Name.ShouldBe("Name");
-                tableInfo.Columns[1].Type.ShouldBe(SqliteDataType.TEXT);
+                tableInfo.Columns[1].Type.ShouldBe(SQLiteDataType.TEXT);
                 tableInfo.Columns[1].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[1].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[1].NotNull.ShouldBeTrue();
 
                 tableInfo.Columns[2].Id.ShouldBe(2);
                 tableInfo.Columns[2].Name.ShouldBe("Age");
-                tableInfo.Columns[2].Type.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[2].Type.ShouldBe(SQLiteDataType.INTEGER);
                 tableInfo.Columns[2].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[2].NotNull.ShouldBeTrue();
@@ -155,7 +155,7 @@
         [Test]
         public async Task When_getting_table_info_of_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await conn.ExecuteAsync(TableQuery);
                 var tableInfo = await conn.GetTableInfoAsync<MyPerson>();
@@ -169,21 +169,21 @@
 
                 tableInfo.Columns[0].Id.ShouldBe(0);
                 tableInfo.Columns[0].Name.ShouldBe("Id");
-                tableInfo.Columns[0].Type.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[0].Type.ShouldBe(SQLiteDataType.INTEGER);
                 tableInfo.Columns[0].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[0].IsPrimaryKey.ShouldBeTrue();
                 tableInfo.Columns[0].NotNull.ShouldBeTrue();
 
                 tableInfo.Columns[1].Id.ShouldBe(1);
                 tableInfo.Columns[1].Name.ShouldBe("Name");
-                tableInfo.Columns[1].Type.ShouldBe(SqliteDataType.TEXT);
+                tableInfo.Columns[1].Type.ShouldBe(SQLiteDataType.TEXT);
                 tableInfo.Columns[1].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[1].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[1].NotNull.ShouldBeTrue();
 
                 tableInfo.Columns[2].Id.ShouldBe(2);
                 tableInfo.Columns[2].Name.ShouldBe("Age");
-                tableInfo.Columns[2].Type.ShouldBe(SqliteDataType.INTEGER);
+                tableInfo.Columns[2].Type.ShouldBe(SQLiteDataType.INTEGER);
                 tableInfo.Columns[2].DefaultValue.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
                 tableInfo.Columns[2].NotNull.ShouldBeTrue();
@@ -193,7 +193,7 @@
         [Test]
         public void When_getting_table_info_of_a_non_existing_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfoAsync<Person>());
                 ex1.Message.ShouldBe("Table: Person does not exist.");
@@ -210,7 +210,7 @@
         [Test]
         public async Task When_checking_table_exists()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 (await conn.ExistsAsync<Person>()).ShouldBeFalse();
                 conn.State.ShouldBe(ConnectionState.Open);
@@ -222,7 +222,7 @@
         [Test]
         public async Task When_executing_some_sql()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await conn.ExecuteAsync(TableQuery);
                 (await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM Person")).ShouldBe(0);
@@ -239,7 +239,7 @@
         [Test]
         public async Task When_querying_multiple_single_rows()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             using(var reader = await conn.QueryMultipleAsync("SELECT 'Foo'; SELECT 666; SELECT 3.43;"))
             {
                 reader.IsConsumed.ShouldBeFalse();
@@ -261,10 +261,10 @@
         [Test]
         public async Task When_querying_multiple_multiple_rows()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
-                await conn.ExecuteAsync(SqliteSqlGenerator.Table<ModelOne>());
-                await conn.ExecuteAsync(SqliteSqlGenerator.Table<ModelTwo>());
+                await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelOne>());
+                await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelTwo>());
 
                 var repoOne = conn.GetRepository<ModelOne>();
                 var repoTwo = conn.GetRepository<ModelTwo>();

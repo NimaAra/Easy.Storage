@@ -21,7 +21,7 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
         {
             var sampleDbs = GetSampleDBs();
 
-            using (var conn = new SqliteAttachedConnection(sampleDbs))
+            using (var conn = new SQLiteAttachedConnection(sampleDbs))
             {
                 conn.FilesToAttach.ShouldBe(sampleDbs);
 
@@ -52,14 +52,14 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
         [Test]
         public void When_creating_connection_with_null_files()
         {
-            Should.Throw<ArgumentException>(() => new SqliteAttachedConnection(null))
+            Should.Throw<ArgumentException>(() => new SQLiteAttachedConnection(null))
                 .Message.ShouldBe("Value cannot be null.\r\nParameter name: dbFiles");
         }
 
         [Test]
         public void When_creating_connection_with_empty_files()
         {
-            Should.Throw<ArgumentException>(() => new SqliteAttachedConnection(new Dictionary<string, FileInfo>()))
+            Should.Throw<ArgumentException>(() => new SQLiteAttachedConnection(new Dictionary<string, FileInfo>()))
                 .Message.ShouldBe("The dbFiles cannot be empty.");
         }
 
@@ -68,7 +68,7 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
         {
             var sampleDbs = GetSampleDBs();
 
-            var conn = new SqliteAttachedConnection(sampleDbs);
+            var conn = new SQLiteAttachedConnection(sampleDbs);
             conn.State.ShouldBe(ConnectionState.Closed);
 
             conn.Open();
@@ -89,7 +89,7 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
         {
             var sampleDbs = GetSampleDBs();
 
-            using (var conn = new SqliteAttachedConnection(sampleDbs))
+            using (var conn = new SQLiteAttachedConnection(sampleDbs))
             {
                 conn.FilesToAttach.ShouldBe(sampleDbs);
                 conn.State.ShouldBe(ConnectionState.Closed);

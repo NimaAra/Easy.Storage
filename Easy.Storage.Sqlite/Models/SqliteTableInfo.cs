@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.Sqlite.Models
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Models
 {
     /// <summary>
     /// Represents the information relating to a <c>SQLite</c> table.
     /// </summary>
-    public sealed class SqliteTableInfo
+    public sealed class SQLiteTableInfo
     {
         /// <summary>
         /// Gets the name of the table.
@@ -18,6 +19,6 @@
         /// <summary>
         /// Gets the columns relating to the <see cref="TableName"/>.
         /// </summary>
-        public SqliteColumnInfo[] Columns { get; internal set; }
+        public SQLiteColumnInfo[] Columns { get; internal set; }
     }
 }

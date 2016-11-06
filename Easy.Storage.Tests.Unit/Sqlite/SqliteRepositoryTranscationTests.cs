@@ -21,7 +21,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
 
@@ -52,7 +52,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
 
@@ -86,7 +86,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -119,7 +119,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -150,7 +150,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -184,7 +184,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -220,7 +220,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -269,7 +269,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -318,7 +318,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);
@@ -368,7 +368,7 @@
 
             try
             {
-                using (var conn = new SqliteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo))
                 {
                     conn.Open();
                     await conn.ExecuteAsync(TableQuery);

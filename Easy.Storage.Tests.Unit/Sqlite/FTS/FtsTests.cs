@@ -20,7 +20,7 @@
         [Test]
         public void When_searching_for_non_existing_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var selectAllTerm = Term<Log>.All;
                 Should.Throw<SQLiteException>(async () => await conn.SearchAsync(selectAllTerm))
@@ -31,7 +31,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_empty_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -44,7 +44,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -78,7 +78,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_and_matching_any_of_the_given_log_level()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -111,7 +111,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_and_matching_all_of_the_given_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -138,7 +138,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_and_matching_any_of_the_given_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -172,7 +172,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_not_matching_all_of_the_given_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -206,7 +206,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_not_matching_any_of_the_given_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -235,7 +235,7 @@
         [Test]
         public async Task When_searching_for_all_records_in_a_table_matching_multiple_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -305,7 +305,7 @@
         [Test]
         public async Task When_searching_for_records_in_a_table_for_all_of_the_supplied_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -352,7 +352,7 @@
         [Test]
         public async Task When_searching_for_records_in_a_table_for_any_of_the_supplied_keywords()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
@@ -395,9 +395,9 @@
 
         private static async Task Given_a_logTtable_and_an_ftsTable(IDbConnection connection)
         {
-            var tableSql = SqliteSqlGenerator.Table<Log>();
+            var tableSql = SQLiteSQLGenerator.Table<Log>();
             await connection.ExecuteAsync(tableSql);
-            var ftsTableSql = SqliteSqlGenerator.FTSTable<Log>(FTSTableType.ExternalContent);
+            var ftsTableSql = SQLiteSQLGenerator.FTSTable<Log>(FTSTableType.ExternalContent);
             await connection.ExecuteAsync(ftsTableSql);
         }
     }

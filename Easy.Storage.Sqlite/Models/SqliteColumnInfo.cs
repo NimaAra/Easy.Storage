@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.Sqlite.Models
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Models
 {
     /// <summary>
     /// Represents the information relating to the columns of a <c>SQLite</c> table.
     /// </summary>
-    public sealed class SqliteColumnInfo
+    public sealed class SQLiteColumnInfo
     {
         /// <summary>
         /// Gets the name of the table.
@@ -23,7 +24,7 @@
         /// <summary>
         /// Gets the type of the column.
         /// </summary>
-        public SqliteDataType Type { get; internal set; }
+        public SQLiteDataType Type { get; internal set; }
 
         /// <summary>
         /// Gets the flag indicating whether the column can be <c>NULL</c> or not.

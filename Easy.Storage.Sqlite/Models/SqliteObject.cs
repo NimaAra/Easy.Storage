@@ -1,15 +1,16 @@
 ﻿// ReSharper disable UnassignedGetOnlyAutoProperty
+// ReSharper disable InconsistentNaming
 namespace Easy.Storage.Sqlite.Models
 {
     /// <summary>
     /// Represents objects defined in a <c>SQLite</c> database.
     /// </summary>
-    public sealed class SqliteObject
+    public sealed class SQLiteObject
     {
         /// <summary>
         /// Gets the type of the object.
         /// </summary>
-        public SqliteObjectType Type { get; }
+        public SQLiteObjectType Type { get; }
 
         /// <summary>
         /// Gets the name of the object.

@@ -19,7 +19,7 @@
         [Test]
         public void When_checking_table()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 var table = repo.Table;
@@ -60,7 +60,7 @@
         [Test]
         public async Task When_getting_non_aliased_models_lazily()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -119,7 +119,7 @@
         [Test]
         public async Task When_getting_aliased_models_lazily()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -178,7 +178,7 @@
         [Test]
         public async Task When_getting_non_aliased_models()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -237,7 +237,7 @@
         [Test]
         public async Task When_getting_aliased_models()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -296,7 +296,7 @@
         [Test]
         public async Task When_getting_non_aliased_models_by_selector()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -368,7 +368,7 @@
         [Test]
         public async Task When_getting_aliased_models_by_selector()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -440,7 +440,7 @@
         [Test] // [ToDo] - Add more filters then do the same for aliased
         public async Task When_getting_non_aliased_models_by_filter()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -497,7 +497,7 @@
         [Test]
         public async Task When_inserting_single_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -552,7 +552,7 @@
         [Test]
         public async Task When_inserting_single_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -607,7 +607,7 @@
         [Test]
         public async Task When_inserting_multiple_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -652,7 +652,7 @@
         [Test]
         public async Task When_inserting_multiple_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -697,7 +697,7 @@
         [Test]
         public async Task When_inserting_model_with_no_identity_column()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQueryWithNoIdentity);
@@ -742,7 +742,7 @@
         [Test]
         public async Task When_updating_single_by_id_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -792,7 +792,7 @@
         [Test]
         public async Task When_updating_single_by_id_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -842,7 +842,7 @@
         [Test]
         public async Task When_updating_custom_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -935,7 +935,7 @@
         [Test]
         public async Task When_updating_custom_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1028,7 +1028,7 @@
         [Test]
         public async Task When_updating_multiple_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1096,7 +1096,7 @@
         [Test]
         public async Task When_updating_multiple_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1164,7 +1164,7 @@
         [Test]
         public async Task When_deleting_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1238,7 +1238,7 @@
         [Test]
         public async Task When_deleting_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1312,7 +1312,7 @@
         [Test]
         public async Task When_deleting_all_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1341,7 +1341,7 @@
         [Test]
         public async Task When_deleting_all_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1370,7 +1370,7 @@
         [Test]
         public async Task When_counting_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1416,7 +1416,7 @@
         [Test]
         public async Task When_counting_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1462,7 +1462,7 @@
         [Test]
         public async Task When_min_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1490,7 +1490,7 @@
         [Test]
         public async Task When_min_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1518,7 +1518,7 @@
         [Test]
         public async Task When_max_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1546,7 +1546,7 @@
         [Test]
         public async Task When_max_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1574,7 +1574,7 @@
         [Test]
         public async Task When_sum_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1609,7 +1609,7 @@
         [Test]
         public async Task When_sum_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1643,7 +1643,7 @@
         [Test]
         public async Task When_avg_non_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1682,7 +1682,7 @@
         [Test]
         public async Task When_avg_aliased_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
@@ -1721,9 +1721,9 @@
         [Test]
         public async Task When_doing_multiple_operations_with_sample_model()
         {
-            var tableQuery = SqliteSqlGenerator.Table<SampleModel>();
+            var tableQuery = SQLiteSQLGenerator.Table<SampleModel>();
 
-            using (var conn = new SqliteInMemoryConnection("Data Source=:memory:;BinaryGUID=False;"))
+            using (var conn = new SQLiteInMemoryConnection("Data Source=:memory:;BinaryGUID=False;"))
             {
                 (await conn.ExistsAsync<SampleModel>()).ShouldBeFalse();
                 await conn.ExecuteAsync(tableQuery);
@@ -1801,10 +1801,10 @@
         [Test]
         public async Task When_working_with_inheritted_model()
         {
-            using (var conn = new SqliteInMemoryConnection())
+            using (var conn = new SQLiteInMemoryConnection())
             {
                 (await conn.ExistsAsync<Child>()).ShouldBeFalse();
-                await conn.ExecuteAsync(SqliteSqlGenerator.Table<Child>());
+                await conn.ExecuteAsync(SQLiteSQLGenerator.Table<Child>());
                 (await conn.ExistsAsync<Child>()).ShouldBeTrue();
 
                 var repo = conn.GetRepository<Child>();

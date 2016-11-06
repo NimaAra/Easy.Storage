@@ -1,4 +1,5 @@
-﻿namespace Easy.Storage.Sqlite
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite
 {
     using System;
     using System.IO;
@@ -8,7 +9,7 @@
     /// <summary>
     /// A helper class to extract data-source of a file-based <c>SQLite</c> database.
     /// </summary>
-    internal static class SqliteHelper
+    internal static class SQLiteHelper
     {
         private const string DataSourceToken = "Data Source=";
         private const string InMemoryToken = ":memory:";

@@ -1,16 +1,18 @@
-﻿namespace Easy.Storage.Sqlite.Connections
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Connections
 {
     using System;
     using System.Data;
     using System.Data.Common;
     using System.Data.SQLite;
     using Easy.Common;
+    using Easy.Storage.Sqlite.Functions;
 
     /// <summary>
     /// An abstraction over <see cref="SQLiteConnection"/>.
     /// </summary>
     [System.ComponentModel.DesignerCategory("")]
-    public abstract class SqliteConnectionBase : DbConnection, IDisposable
+    public abstract class SQLiteConnectionBase : DbConnection, IDisposable
     {
         /// <summary>
         /// The underlying <c>SQLite</c> connection.
@@ -18,10 +20,10 @@
         protected readonly SQLiteConnection Connection;
 
         /// <summary>
-        /// Creates an instance of the <see cref="SqliteConnectionBase"/>.
+        /// Creates an instance of the <see cref="SQLiteConnectionBase"/>.
         /// </summary>
         /// <param name="connectionString">A valid <c>SQLite</c> connection-string.</param>
-        protected SqliteConnectionBase(string connectionString)
+        protected SQLiteConnectionBase(string connectionString)
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(connectionString, "Connection string cannot be null, empty or whitespace.");
             Connection = new SQLiteConnection(connectionString);
@@ -48,7 +50,7 @@
         public override string ServerVersion => Connection.ServerVersion;
 
         /// <summary>
-        /// Gets the state of the <see cref="SqliteConnectionBase"/>.
+        /// Gets the state of the <see cref="SQLiteConnectionBase"/>.
         /// </summary>
         public override ConnectionState State => Connection.State;
 
@@ -113,6 +115,23 @@
         public override void Open()
         {
             Connection.Open();
+        }
+
+        /// <summary>
+        /// Binds the given <paramref name="function"/> to the <paramref see="connection"/>.
+        /// </summary>
+        public void BindFunction(SQLiteFunctionBase function)
+        {
+            Ensure.NotNull(function, nameof(function));
+            Ensure.That<InvalidOperationException>(Connection.State == ConnectionState.Open, "Cannot bind a function to a closed.");
+
+            var funcAttr = new SQLiteFunctionAttribute
+            {
+                Name = function.Name,
+                FuncType = function.Type,
+                Arguments = function.ArgumentCount
+            };
+            Connection.BindFunction(funcAttr, function);
         }
 
         /// <summary>

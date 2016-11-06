@@ -47,10 +47,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connections\SqliteConnectionBase.cs" />
-    <Compile Include="Connections\SqliteFileConnection.cs" />
-    <Compile Include="Connections\SqliteInMemoryConnection.cs" />
-    <Compile Include="Extensions\SqliteExtensions.cs" />
+    <Compile Include="Connections\SQLiteConnectionBase.cs" />
+    <Compile Include="Connections\SQLiteFileConnection.cs" />
+    <Compile Include="Connections\SQLiteInMemoryConnection.cs" />
+    <Compile Include="Extensions\SQLiteExtensions.cs" />
+    <Compile Include="Functions\SQLiteAggregateFunction.cs" />
+    <Compile Include="Functions\SQLiteCollationFunction.cs" />
+    <Compile Include="Functions\SQLiteFunctionBase.cs" />
+    <Compile Include="Functions\SQLiteScalarFunction.cs" />
     <Compile Include="Models\FTSTableType.cs" />
     <Compile Include="FTS\ITerm.cs" />
     <Compile Include="FTS\JoinClauses.cs" />
@@ -58,17 +62,16 @@
     <Compile Include="FTS\Term.cs" />
     <Compile Include="FTS\TermExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RollingPolicy.cs" />
-    <Compile Include="Models\SqliteColumnInfo.cs" />
-    <Compile Include="Connections\SqliteAttachedConnection.cs" />
-    <Compile Include="SqliteConnectionStringBuilder.cs" />
-    <Compile Include="Models\SqliteDataType.cs" />
-    <Compile Include="Models\SqliteObject.cs" />
-    <Compile Include="Models\SqliteObjectType.cs" />
-    <Compile Include="SqliteHelper.cs" />
-    <Compile Include="Models\SqliteTableInfo.cs" />
-    <Compile Include="SqliteSql.cs" />
-    <Compile Include="SqliteSqlGenerator.cs" />
+    <Compile Include="Models\SQLiteColumnInfo.cs" />
+    <Compile Include="Connections\SQLiteAttachedConnection.cs" />
+    <Compile Include="SQLiteConnectionStringProvider.cs" />
+    <Compile Include="Models\SQLiteDataType.cs" />
+    <Compile Include="Models\SQLiteObject.cs" />
+    <Compile Include="Models\SQLiteObjectType.cs" />
+    <Compile Include="SQLiteHelper.cs" />
+    <Compile Include="Models\SQLiteTableInfo.cs" />
+    <Compile Include="SQLiteSQL.cs" />
+    <Compile Include="SQLiteSQLGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

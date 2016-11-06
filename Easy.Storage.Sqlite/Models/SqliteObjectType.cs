@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.Sqlite.Models
+﻿// ReSharper disable InconsistentNaming
+namespace Easy.Storage.Sqlite.Models
 {
     /// <summary>
     /// Represents the object types available in a <c>SQLite</c> database.
     /// </summary>
-    public enum SqliteObjectType
+    public enum SQLiteObjectType
     {
         /// <summary>
         /// A <c>SQLite</c> table.
