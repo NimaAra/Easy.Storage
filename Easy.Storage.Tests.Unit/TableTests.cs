@@ -20,9 +20,9 @@
                     + "    [Person].[Id] AS 'Id',\r\n"
                     + "    [Person].[Name] AS 'Name',\r\n"
                     + "    [Person].[Age] AS 'Age'\r\n"
-                    + "FROM Person\r\nWHERE\r\n    1 = 1;");
+                    + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
 
-            table.InsertIdentity.ShouldBe("INSERT INTO Person\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO [Person]\r\n"
                     + "(\r\n"
                     + "    [Name],\r\n"
                     + "    [Age]\r\n"
@@ -33,17 +33,17 @@
                     + "    @Age\r\n"
                     + ");");
 
-            table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+            table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
                     + "    [Name] = @Name,\r\n"
                     + "    [Age] = @Age\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+            table.UpdateCustom.ShouldBe("UPDATE [Person] SET\r\n"
                     + "    [Name] = @Name,\r\n"
                     + "    [Age] = @Age\r\n"
                     + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
         }
 
         [Test]
@@ -80,9 +80,9 @@
                     + "    [SampleModel].[Key] AS 'Guid',\r\n"
                     + "    [SampleModel].[DateTime] AS 'DateTime',\r\n"
                     + "    [SampleModel].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
-                    + "FROM SampleModel\r\nWHERE\r\n    1 = 1;");
+                    + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
 
-            table.InsertIdentity.ShouldBe("INSERT INTO SampleModel\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO [SampleModel]\r\n"
                     + "(\r\n"
                     + "    [Text],\r\n"
                     + "    [Int],\r\n"
@@ -109,7 +109,7 @@
                     + "    @DateTimeOffset\r\n"
                     + ");");
 
-            table.UpdateDefault.ShouldBe("UPDATE SampleModel SET\r\n"
+            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -122,7 +122,7 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateCustom.ShouldBe("UPDATE SampleModel SET\r\n"
+            table.UpdateCustom.ShouldBe("UPDATE [SampleModel] SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -135,7 +135,7 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM SampleModel\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
         }
     }
 }

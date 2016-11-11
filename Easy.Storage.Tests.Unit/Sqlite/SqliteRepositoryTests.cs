@@ -29,9 +29,9 @@
                         + "    [Person].[Id] AS 'Id',\r\n"
                         + "    [Person].[Name] AS 'Name',\r\n"
                         + "    [Person].[Age] AS 'Age'\r\n"
-                        + "FROM Person\r\nWHERE\r\n    1 = 1;");
+                        + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
 
-                table.InsertIdentity.ShouldBe("INSERT INTO Person\r\n"
+                table.InsertIdentity.ShouldBe("INSERT INTO [Person]\r\n"
                         + "(\r\n"
                         + "    [Name],\r\n"
                         + "    [Age]\r\n"
@@ -43,17 +43,17 @@
                         + ");\r\n" 
                         + "SELECT last_insert_rowid();");
 
-                table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+                table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    [Id] = @Id;");
 
-                table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+                table.UpdateCustom.ShouldBe("UPDATE [Person] SET\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    1 = 1;");
 
-                table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
+                table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
             }
         }
 

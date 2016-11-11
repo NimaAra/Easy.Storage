@@ -11,7 +11,7 @@
     /// Represents an object used to specify a filter for querying the data.
     /// </summary>
     /// <typeparam name="T">The type of the model to be queried.</typeparam>
-    public sealed class QueryFilter<T> // [ToDo] - add IN, NOT IN, OrderBy
+    public sealed class QueryFilter<T> // [ToDo] - add IN, NOT IN, OrderBy, Dont' keep hold of _builder
     {
         private readonly Table _table;
         private readonly StringBuilder _builder;

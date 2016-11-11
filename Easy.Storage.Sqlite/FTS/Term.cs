@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Text;
+    using Easy.Common;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
 
@@ -48,7 +48,7 @@
         {
             // Can also do the following format: 
             // SELECT [Log].* FROM Log, Log_fts WHERE [Log_fts].[Foo] MATCH '"bar" OR "baz"' AND Log.Id = [Log_fts].[docId]
-            var builder = new StringBuilder();
+            var builder = StringBuilderCache.Acquire();
 
             if (!_terms.Any())
             {
@@ -85,17 +85,17 @@
                 
                 if (term.IsNegation)
                 {
-                    builder.AppendFormat("{0} [{1}].[docId] NOT IN{2}({2}{3}{0} [{1}].{4} MATCH '{5}'{6})",
+                    builder.AppendFormat("{0} {1}.[docId] NOT IN{2}({2}{3}{0} {1}.{4} MATCH '{5}'{6})",
                         _config.PrefixQuery, _config.TableName, Formatter.NewLine, Formatter.Spacer, term.ColumnName, keywordsQuery, Formatter.NewLine);
                 } else
                 {
 
-                    builder.AppendFormat("{0} [{1}].{2} MATCH '{3}'", 
+                    builder.AppendFormat("{0} {1}.{2} MATCH '{3}'", 
                         _config.PrefixQuery, _config.TableName, term.ColumnName, keywordsQuery);
                 }
             }
 
-            return builder.ToString();
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 
         internal void Add<TProperty>(JoinClauses clause, bool isNegation, Match type, Expression<Func<T, TProperty>> selector, params TProperty[] values)
@@ -141,8 +141,8 @@
             private TermConfig()
             {
                 _table = Table.Get<T>();
-                TableName = _table.Name + "_fts";
-                PrefixQuery = $"SELECT [{TableName}].[docId] FROM {TableName} WHERE";
+                TableName = "[" + _table.Name + "_fts]";
+                PrefixQuery = $"SELECT {TableName}.[docId] FROM {TableName} WHERE";
             }
 
             internal string PrefixQuery { get; }

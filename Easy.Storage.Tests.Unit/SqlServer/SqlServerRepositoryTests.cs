@@ -8,7 +8,6 @@
     using Easy.Storage.Common;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.SqlServer;
     using Easy.Storage.SqlServer.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
@@ -77,10 +76,10 @@
                         + "    [Person].[Id] AS 'Id',\r\n"
                         + "    [Person].[Name] AS 'Name',\r\n"
                         + "    [Person].[Age] AS 'Age'\r\n"
-                        + "FROM Person\r\nWHERE\r\n    1 = 1;");
+                        + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
 
                 table.InsertIdentity.ShouldBe("DECLARE @InsertedRows AS TABLE (Id BIGINT);\r\n"
-                    + "INSERT INTO Person\r\n"
+                    + "INSERT INTO [Person]\r\n"
                         + "(\r\n"
                         + "    [Name],\r\n"
                         + "    [Age]\r\n"
@@ -92,17 +91,17 @@
                         + ");\r\n"
                         + "SELECT Id FROM @InsertedRows;");
 
-                table.UpdateDefault.ShouldBe("UPDATE Person SET\r\n"
+                table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    [Id] = @Id;");
 
-                table.UpdateCustom.ShouldBe("UPDATE Person SET\r\n"
+                table.UpdateCustom.ShouldBe("UPDATE [Person] SET\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    1 = 1;");
 
-                table.Delete.ShouldBe("DELETE FROM Person\r\nWHERE\r\n    1 = 1;");
+                table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
             }
         }
 

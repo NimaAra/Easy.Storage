@@ -4,7 +4,6 @@ namespace Easy.Storage.Sqlite.Connections
     using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
-    using System.Text;
     using Easy.Common;
     using Easy.Storage.Common.Extensions;
 
@@ -25,13 +24,13 @@ namespace Easy.Storage.Sqlite.Connections
             FilesToAttach = Ensure.NotNull(dbFiles, nameof(dbFiles));
             Ensure.That(dbFiles.Count != 0, "The dbFiles cannot be empty.");
 
-            var cmdBuilder = new StringBuilder();
+            var cmdBuilder = StringBuilderCache.Acquire();
             foreach (var pair in dbFiles)
             {
                 cmdBuilder.AppendFormat("ATTACH DATABASE '{0}' AS '{1}';\r\n", pair.Value.FullName, pair.Key);
             }
 
-            _attachCommands = cmdBuilder.ToString();
+            _attachCommands = StringBuilderCache.GetStringAndRelease(cmdBuilder);
         }
 
         /// <summary>

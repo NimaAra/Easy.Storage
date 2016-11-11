@@ -5,7 +5,7 @@ namespace Easy.Storage.Sqlite
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Text;
+    using Easy.Common;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
@@ -26,7 +26,7 @@ namespace Easy.Storage.Sqlite
         {
             var table = Common.Table.Get<T>();
 
-            var builder = new StringBuilder();
+            var builder = StringBuilderCache.Acquire();
             builder.AppendLine($"CREATE TABLE IF NOT EXISTS {table.Name} (");
             builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
 
@@ -41,7 +41,7 @@ namespace Easy.Storage.Sqlite
             builder.Remove(builder.Length - 3, 1);
             builder.Append(");");
 
-            return builder.ToString();
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Easy.Storage.Sqlite
                 case FTSTableType.ContentLess:
                     return $"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"\", {ftsColumns});";
                 case FTSTableType.ExternalContent:
-                    var builder = new StringBuilder();
+                    var builder = StringBuilderCache.Acquire();
                     builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"{table.Name}\", {ftsColumns});");
                     builder.AppendLine();
 
@@ -106,7 +106,7 @@ namespace Easy.Storage.Sqlite
                     builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_ai AFTER INSERT ON {table.Name} BEGIN");
                     builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
                     builder.Append("END;");
-                    return builder.ToString();
+                    return StringBuilderCache.GetStringAndRelease(builder);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

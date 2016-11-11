@@ -49,7 +49,7 @@
             var columns = string.Join(Formatter.ColumnSeparator, allColNames);
             var properties = string.Join(Formatter.ColumnSeparator, allPropNames.Select(x => "@" + x));
 
-            var insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columns}{Formatter.NewLine})";
+            var insertSeg = $"INSERT INTO [{Name}]{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columns}{Formatter.NewLine})";
             var valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{properties}{Formatter.NewLine});";
             var insertAll = GetInsertQueries(Dialect, insertSeg, valuesSeg);
 
@@ -60,17 +60,17 @@
             var columnsMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity);
             var propertiesMinusIdentity = string.Join(Formatter.ColumnSeparator, propNamesMinusIdentity.Select(x => "@" + x));
 
-            insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIdentity}{Formatter.NewLine})";
+            insertSeg = $"INSERT INTO [{Name}]{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIdentity}{Formatter.NewLine})";
             valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIdentity}{Formatter.NewLine});";
             var insertIdentity = GetInsertQueries(Dialect, insertSeg, valuesSeg);
 
             var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"[{Name}].{col} AS '{prop}'"));
             var colEqualPropMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity.Zip(propNamesMinusIdentity, (col, propName) => $"{col} = @{propName}"));
 
-            Select =                $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            UpdateDefault =         $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[IdentityColumn]} = @{IdentityColumn.Name};";
-            UpdateCustom =          $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            Delete =                $"DELETE FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            Select =                $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM [{Name}]{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            UpdateDefault =         $"UPDATE [{Name}] SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[IdentityColumn]} = @{IdentityColumn.Name};";
+            UpdateCustom =          $"UPDATE [{Name}] SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            Delete =                $"DELETE FROM [{Name}]{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
             InsertIdentity =        insertIdentity;
             InsertAll =             insertAll;
         }
