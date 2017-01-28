@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.Sqlite
+namespace Easy.Storage.SQLite
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace Easy.Storage.Sqlite
     using Easy.Storage.Common;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Models;
+    using Easy.Storage.SQLite.Models;
 
     /// <summary>
     /// A handy class to generate <c>SQLite</c> table scripts from a model.
@@ -32,7 +32,7 @@ namespace Easy.Storage.Sqlite
 
             foreach (var pair in table.PropertyToColumns)
             {
-                var sqliteType = GetSqliteType(pair.Key.PropertyType).ToString();
+                var sqliteType = GetSQLiteType(pair.Key.PropertyType).ToString();
                 var isIdColumn = table.IdentityColumn == pair.Key;
 
                 builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
@@ -112,7 +112,7 @@ namespace Easy.Storage.Sqlite
             }
         }
 
-        private static SQLiteDataType GetSqliteType(Type type)
+        private static SQLiteDataType GetSQLiteType(Type type)
         {
             if (type.IsEnum) { return SQLiteDataType.TEXT; }
 

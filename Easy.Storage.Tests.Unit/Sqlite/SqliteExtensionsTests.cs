@@ -1,21 +1,22 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System;
     using System.Data;
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Sqlite.Models;
+    using Easy.Storage.Common.Extensions;
+    using Easy.Storage.SQLite;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Extensions;
+    using Easy.Storage.SQLite.Models;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
-    using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Extensions;
 
     [TestFixture]
-    internal sealed class SqliteExtensionsTests : Context
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteExtensionsTests : Context
     {
         [Test]
         public async Task When_checking_if_table_exists_non_aliased_models()
@@ -56,7 +57,7 @@
 
                 snapshot2[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot2[0].Name.ShouldBe("Person");
-                snapshot2[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot2[0].SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 await conn.ExecuteAsync(ViewQuery);
 
@@ -66,11 +67,11 @@
 
                 snapshot3[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot3[0].Name.ShouldBe("Person");
-                snapshot3[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot3[0].SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 snapshot3[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot3[1].Name.ShouldBe("Person_view");
-                snapshot3[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot3[1].SQL.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 await conn.ExecuteAsync(TriggerQuery);
 
@@ -80,15 +81,15 @@
 
                 snapshot4[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot4[0].Name.ShouldBe("Person");
-                snapshot4[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot4[0].SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 snapshot4[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot4[1].Name.ShouldBe("Person_view");
-                snapshot4[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot4[1].SQL.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 snapshot4[2].Type.ShouldBe(SQLiteObjectType.Trigger);
                 snapshot4[2].Name.ShouldBe("Person_bu");
-                snapshot4[2].Sql.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
+                snapshot4[2].SQL.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
 
                 await conn.ExecuteAsync(IndexQuery);
 
@@ -98,19 +99,19 @@
 
                 snapshot5[0].Type.ShouldBe(SQLiteObjectType.Table);
                 snapshot5[0].Name.ShouldBe("Person");
-                snapshot5[0].Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot5[0].SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 snapshot5[1].Type.ShouldBe(SQLiteObjectType.View);
                 snapshot5[1].Name.ShouldBe("Person_view");
-                snapshot5[1].Sql.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot5[1].SQL.ShouldBe(ViewQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
 
                 snapshot5[2].Type.ShouldBe(SQLiteObjectType.Trigger);
                 snapshot5[2].Name.ShouldBe("Person_bu");
-                snapshot5[2].Sql.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
+                snapshot5[2].SQL.ShouldBe(TriggerQuery.Replace("IF NOT EXISTS ", string.Empty));
 
                 snapshot5[3].Type.ShouldBe(SQLiteObjectType.Index);
                 snapshot5[3].Name.ShouldBe("Person_idx");
-                snapshot5[3].Sql.ShouldBe(IndexQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                snapshot5[3].SQL.ShouldBe(IndexQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
             }
         }
 
@@ -124,7 +125,7 @@
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
-                tableInfo.Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                tableInfo.SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
                 tableInfo.Columns.Length.ShouldBe(3);
 
                 Array.TrueForAll(tableInfo.Columns, i => i.TableName == "Person").ShouldBeTrue();
@@ -162,7 +163,7 @@
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
-                tableInfo.Sql.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
+                tableInfo.SQL.ShouldBe(TableQuery.Replace("IF NOT EXISTS ", string.Empty).Replace(";", string.Empty));
                 tableInfo.Columns.Length.ShouldBe(3);
 
                 Array.TrueForAll(tableInfo.Columns, i => i.TableName == "Person").ShouldBeTrue();

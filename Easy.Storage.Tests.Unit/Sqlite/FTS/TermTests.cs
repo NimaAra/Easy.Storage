@@ -1,11 +1,11 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite.FTS
+﻿namespace Easy.Storage.Tests.Unit.SQLite.FTS
 {
-    using Easy.Storage.Sqlite.FTS;
+    using Easy.Storage.SQLite.FTS;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class TermTests : FtsContext
+    internal sealed class TermTests : FTSContext
     {
         [Test]
         public void When_creating_default_term()

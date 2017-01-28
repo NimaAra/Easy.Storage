@@ -1,13 +1,13 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("EasyStorage.Common")]
+[assembly: AssemblyTitle("Easy.Storage.Common")]
 
-[assembly: AssemblyVersion("0.6.0.0")]
-[assembly: AssemblyFileVersion("0.6.0.0")]
+[assembly: AssemblyVersion("0.6.1.0")]
+[assembly: AssemblyFileVersion("0.6.1.0")]
 
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCopyright("Copyright © 2017")]
 
 [assembly: InternalsVisibleTo("Easy.Storage.Tests.Unit")]
-[assembly: InternalsVisibleTo("Easy.Storage.Sqlite")]
-[assembly: InternalsVisibleTo("Easy.Storage.SqlServer")]
+[assembly: InternalsVisibleTo("Easy.Storage.SQLite")]
+[assembly: InternalsVisibleTo("Easy.Storage.SQLServer")]

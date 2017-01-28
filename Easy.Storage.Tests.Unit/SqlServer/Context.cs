@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Tests.Unit.SqlServer
+﻿namespace Easy.Storage.Tests.Unit.SQLServer
 {
     using System.IO;
 

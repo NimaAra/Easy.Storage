@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.Sqlite.Connections
+namespace Easy.Storage.SQLite.Connections
 {
     using System.Data.SQLite;
     using System.IO;

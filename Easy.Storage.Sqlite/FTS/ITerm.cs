@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Sqlite.FTS
+﻿namespace Easy.Storage.SQLite.FTS
 {
     /// <summary>
     /// Specifies the contract for an <see cref="ITerm{T}"/>.

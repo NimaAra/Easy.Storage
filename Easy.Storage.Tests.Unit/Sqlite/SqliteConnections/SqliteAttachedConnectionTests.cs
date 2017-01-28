@@ -1,5 +1,5 @@
 ﻿// ReSharper disable ObjectCreationAsStatement
-namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
+namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
 {
     using System;
     using System.Collections.Generic;
@@ -8,13 +8,14 @@ namespace Easy.Storage.Tests.Unit.Sqlite.SqliteConnections
     using System.Reflection;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Extensions;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Extensions;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqliteAttachedConnectionTests
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteAttachedConnectionTests
     {
         [Test]
         public async Task When_creating_connection()

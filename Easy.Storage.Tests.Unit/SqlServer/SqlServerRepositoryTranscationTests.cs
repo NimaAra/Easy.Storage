@@ -1,17 +1,18 @@
-﻿namespace Easy.Storage.Tests.Unit.SqlServer
+﻿namespace Easy.Storage.Tests.Unit.SQLServer
 {
     using System.Data;
     using System.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.SqlServer.Extensions;
+    using Easy.Storage.SQLServer.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqlServerRepositoryTranscationTests : Context
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLServerRepositoryTranscationTests : Context
     {
         internal static async Task Run()
         {

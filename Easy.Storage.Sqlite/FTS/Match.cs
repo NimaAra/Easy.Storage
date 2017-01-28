@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Sqlite.FTS
+﻿namespace Easy.Storage.SQLite.FTS
 {
     /// <summary>
     /// Represents the type based on which a match should be applied.

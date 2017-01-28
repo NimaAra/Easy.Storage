@@ -1,20 +1,21 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Easy.Storage.Common;
-    using Easy.Storage.Sqlite;
+    using Easy.Storage.Common.Extensions;
+    using Easy.Storage.SQLite;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
-    using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Extensions;
 
     [TestFixture]
-    internal sealed class SqliteRepositoryTests : Context
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteRepositoryTests : Context
     {
         [Test]
         public void When_checking_table()
@@ -23,7 +24,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 var table = repo.Table;
-                table.Dialect.ShouldBe(Dialect.Sqlite);
+                table.Dialect.ShouldBe(Dialect.SQLite);
                 table.Name.ShouldBe("Person");
                 table.Select.ShouldBe("SELECT\r\n"
                         + "    [Person].[Id] AS 'Id',\r\n"

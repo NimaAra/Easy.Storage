@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Sqlite.Models
+﻿namespace Easy.Storage.SQLite.Models
 {
     /// <summary>
     /// Represents the different types of <c>SQLite</c> Full Text Search table.

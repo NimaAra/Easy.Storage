@@ -27,8 +27,10 @@
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
-        private const string SqlServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
-        private const string SqlServerSelectInsertedRowClause = "SELECT Id FROM @InsertedRows;";
+        // ReSharper disable once InconsistentNaming
+        private const string SQLServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
+        // ReSharper disable once InconsistentNaming
+        private const string SQLServerSelectInsertedRowClause = "SELECT Id FROM @InsertedRows;";
 
         private Table(TableKey key)
         {
@@ -150,13 +152,13 @@
         {
             switch (dialect)
             {
-                case Dialect.Sqlite:
+                case Dialect.SQLite:
                     return $"{insertSegment}{valuesSegment}{Formatter.NewLine}SELECT last_insert_rowid();";
 
-                case Dialect.SqlServer:
+                case Dialect.SQLServer:
                     var idColumnName = PropertyToColumns[IdentityColumn];
                     var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
-                    return $"{SqlServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{Formatter.NewLine}{SqlServerSelectInsertedRowClause}";
+                    return $"{SQLServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{Formatter.NewLine}{SQLServerSelectInsertedRowClause}";
 
                 case Dialect.Generic:
                     return $"{insertSegment}{valuesSegment}";

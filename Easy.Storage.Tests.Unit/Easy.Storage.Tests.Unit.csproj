@@ -57,35 +57,35 @@
     <Compile Include="Models\Person.cs" />
     <Compile Include="Models\SampleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sqlite\Context.cs" />
-    <Compile Include="Sqlite\FTS\FtsContext.cs" />
-    <Compile Include="Sqlite\FTS\FtsTests.cs" />
-    <Compile Include="Sqlite\FTS\TermTests.cs" />
-    <Compile Include="Sqlite\SqliteConnections\SqliteAttachedConnectionTests.cs" />
-    <Compile Include="Sqlite\SqliteConnections\SqliteFileConnectionTests.cs" />
-    <Compile Include="Sqlite\SqliteConnections\SqliteInMemoryConnectionTests.cs" />
-    <Compile Include="Sqlite\SqliteExtensionsTests.cs" />
-    <Compile Include="Sqlite\SqliteFunction\SqliteFunctionTests.cs" />
-    <Compile Include="Sqlite\SqliteRepositoryTests.cs" />
-    <Compile Include="Sqlite\SqliteHelperTests.cs" />
-    <Compile Include="Sqlite\SqliteRepositoryTranscationTests.cs" />
-    <Compile Include="Sqlite\SqliteSqlGeneratorTests.cs" />
-    <Compile Include="SqlServer\Context.cs" />
-    <Compile Include="SqlServer\SqlServerColumnTypeParsingTests.cs" />
-    <Compile Include="SqlServer\SqlServerRepositoryTests.cs" />
-    <Compile Include="SqlServer\SqlServerRepositoryTranscationTests.cs" />
-    <Compile Include="SqlServer\SqlServerExtensionsTests.cs" />
+    <Compile Include="SQLite\Context.cs" />
+    <Compile Include="SQLite\FTS\FTSContext.cs" />
+    <Compile Include="SQLite\FTS\FTSTests.cs" />
+    <Compile Include="SQLite\FTS\TermTests.cs" />
+    <Compile Include="SQLite\SQLiteConnections\SQLiteAttachedConnectionTests.cs" />
+    <Compile Include="SQLite\SQLiteConnections\SQLiteFileConnectionTests.cs" />
+    <Compile Include="SQLite\SQLiteConnections\SQLiteInMemoryConnectionTests.cs" />
+    <Compile Include="SQLite\SQLiteExtensionsTests.cs" />
+    <Compile Include="SQLite\SQLiteFunction\SQLiteFunctionTests.cs" />
+    <Compile Include="SQLite\SQLiteRepositoryTests.cs" />
+    <Compile Include="SQLite\SQLiteHelperTests.cs" />
+    <Compile Include="SQLite\SQLiteRepositoryTranscationTests.cs" />
+    <Compile Include="SQLite\SQLiteSQLGeneratorTests.cs" />
+    <Compile Include="SQLServer\Context.cs" />
+    <Compile Include="SQLServer\SQLServerColumnTypeParsingTests.cs" />
+    <Compile Include="SQLServer\SQLServerRepositoryTests.cs" />
+    <Compile Include="SQLServer\SQLServerRepositoryTranscationTests.cs" />
+    <Compile Include="SQLServer\SQLServerExtensionsTests.cs" />
     <Compile Include="TableTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Sqlite\SampleDBs\1.db">
+    <None Include="SQLite\SampleDBs\1.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Sqlite\SampleDBs\2.db">
+    <None Include="SQLite\SampleDBs\2.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Sqlite\SampleDBs\3.db">
+    <None Include="SQLite\SampleDBs\3.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -94,13 +94,13 @@
       <Project>{45DA2F67-F774-4C43-A27B-349FFC4752F7}</Project>
       <Name>Easy.Storage.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj">
+    <ProjectReference Include="..\Easy.Storage.Sqlite\Easy.Storage.SQLite.csproj">
       <Project>{800D2B81-5854-4184-8A08-6F13143DA1A3}</Project>
-      <Name>Easy.Storage.Sqlite</Name>
+      <Name>Easy.Storage.SQLite</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Easy.Storage.SqlServer\Easy.Storage.SqlServer.csproj">
+    <ProjectReference Include="..\Easy.Storage.SqlServer\Easy.Storage.SQLServer.csproj">
       <Project>{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}</Project>
-      <Name>Easy.Storage.SqlServer</Name>
+      <Name>Easy.Storage.SQLServer</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

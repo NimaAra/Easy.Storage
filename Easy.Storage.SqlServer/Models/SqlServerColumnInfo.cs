@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.SqlServer.Models
+﻿namespace Easy.Storage.SQLServer.Models
 {
     /// <summary>
     /// Represents the information relating to the columns of a <c>SQL Server</c> table.
     /// </summary>
-    public class SqlServerColumnInfo
+    // ReSharper disable once InconsistentNaming
+    public class SQLServerColumnInfo
     {
         /// <summary>
         /// Gets the name of the column.
@@ -13,7 +14,7 @@
         /// <summary>
         /// Gets the type of the column.
         /// </summary>
-        public SqlServerDataType Type { get; internal set; }
+        public SQLServerDataType Type { get; internal set; }
 
         /// <summary>
         /// Gets the level of precision for the column.

@@ -1,12 +1,13 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System;
-    using Easy.Storage.Sqlite;
+    using Easy.Storage.SQLite;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqliteHelperTests
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteHelperTests
     {
         [Test]
         public void When_getting_data_source_from_an_invalid_sqlite_connection_string()

@@ -1,16 +1,17 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite.SqliteFunction
+﻿namespace Easy.Storage.Tests.Unit.SQLite.SQLiteFunction
 {
     using System;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Functions;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Functions;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqliteFunctionTests
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteFunctionTests
     {
         [Test]
         public void When_binding_function_to_a_closed_connection()

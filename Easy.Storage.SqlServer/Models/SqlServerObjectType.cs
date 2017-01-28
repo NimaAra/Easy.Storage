@@ -1,11 +1,11 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Global
-namespace Easy.Storage.SqlServer.Models
+namespace Easy.Storage.SQLServer.Models
 {
     /// <summary>
     /// Represents every <c>SQL Server</c> object type.
     /// </summary>
-    public enum SqlServerObjectType
+    public enum SQLServerObjectType
     {
         /// <summary>
         /// Aggregate function (CLR).

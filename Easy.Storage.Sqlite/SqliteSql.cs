@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.Sqlite
+namespace Easy.Storage.SQLite
 {
     /// <summary>
     /// Provides <c>SQLite</c> specific <c>SQL</c> queries.

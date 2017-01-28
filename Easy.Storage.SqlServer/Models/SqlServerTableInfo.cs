@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.SqlServer.Models
+﻿namespace Easy.Storage.SQLServer.Models
 {
     /// <summary>
     /// Represents the information relating to a <c>SQL Server</c> table.
     /// </summary>
-    public sealed class SqlServerTableInfo
+    // ReSharper disable once InconsistentNaming
+    public sealed class SQLServerTableInfo
     {
         /// <summary>
         /// Gets the name of the database.
@@ -23,6 +24,6 @@
         /// <summary>
         /// Gets the columns relating to the <see cref="Name"/>.
         /// </summary>
-        public SqlServerColumnInfo[] Columns { get; internal set; }
+        public SQLServerColumnInfo[] Columns { get; internal set; }
     }
 }

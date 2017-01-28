@@ -1,14 +1,15 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System.Collections.Generic;
-    using Easy.Storage.Sqlite;
-    using Easy.Storage.Sqlite.Models;
+    using Easy.Storage.SQLite;
+    using Easy.Storage.SQLite.Models;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqliteSqlGeneratorTests
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteSQLGeneratorTests
     {
         [Test]
         public void When_generating_table_sql()

@@ -1,5 +1,5 @@
 ﻿// ReSharper disable UnassignedGetOnlyAutoProperty
-namespace Easy.Storage.SqlServer.Models
+namespace Easy.Storage.SQLServer.Models
 {
     using System;
 
@@ -7,7 +7,8 @@ namespace Easy.Storage.SqlServer.Models
     /// Represents objects defined in a <c>SQL Server</c> database.
     /// </summary>
     // ReSharper disable once ClassNeverInstantiated.Global
-    public sealed class SqlServerObject
+    // ReSharper disable once InconsistentNaming
+    public sealed class SQLServerObject
     {
         /// <summary>
         /// Gets the object Id.
@@ -40,6 +41,6 @@ namespace Easy.Storage.SqlServer.Models
         /// <summary>
         /// Gets the type of the object.
         /// </summary>
-        public SqlServerObjectType Type { get; }
+        public SQLServerObjectType Type { get; }
     }
 }

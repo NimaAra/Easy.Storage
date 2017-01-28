@@ -1,10 +1,11 @@
 ﻿#pragma warning disable 1591
-namespace Easy.Storage.SqlServer.Models
+namespace Easy.Storage.SQLServer.Models
 {
     /// <summary>
     /// Represents <c>SQL Server</c> data types.
     /// </summary>
-    public enum SqlServerDataType
+    // ReSharper disable once InconsistentNaming
+    public enum SQLServerDataType
     {
         Image,
         Text,

@@ -1,12 +1,12 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.Sqlite.Connections
+namespace Easy.Storage.SQLite.Connections
 {
     using System;
     using System.Data;
     using System.Data.Common;
     using System.Data.SQLite;
     using Easy.Common;
-    using Easy.Storage.Sqlite.Functions;
+    using Easy.Storage.SQLite.Functions;
 
     /// <summary>
     /// An abstraction over <see cref="SQLiteConnection"/>.

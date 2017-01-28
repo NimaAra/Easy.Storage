@@ -1,9 +1,10 @@
-﻿namespace Easy.Storage.SqlServer
+﻿namespace Easy.Storage.SQLServer
 {
     /// <summary>
     /// Provides <c>SQL Server</c> specific <c>SQL</c> queries.
     /// </summary>
-    public static class SqlServerSql
+    // ReSharper disable once InconsistentNaming
+    public static class SQLServerSQL
     {
         /// <summary>
         /// Query to find if a given table exists.

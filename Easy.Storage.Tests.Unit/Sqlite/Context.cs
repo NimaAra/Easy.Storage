@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     internal class Context
     {

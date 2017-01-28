@@ -1,28 +1,27 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite.FTS
+﻿namespace Easy.Storage.Tests.Unit.SQLite.FTS
 {
     using System.Data;
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Extensions;
-    using Easy.Storage.Sqlite.FTS;
-    using Easy.Storage.Sqlite.Models;
+    using Easy.Storage.SQLite;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Extensions;
+    using Easy.Storage.SQLite.FTS;
+    using Easy.Storage.SQLite.Models;
     using NUnit.Framework;
     using Shouldly;
-    using static FtsContext;
 
     [TestFixture]
-    internal sealed class FtsTests
+    internal sealed class FTSTests
     {
         [Test]
         public void When_searching_for_non_existing_table()
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var selectAllTerm = Term<Log>.All;
+                var selectAllTerm = Term<FTSContext.Log>.All;
                 Should.Throw<SQLiteException>(async () => await conn.SearchAsync(selectAllTerm))
                     .Message.ShouldBe("SQL logic error or missing database\r\nno such table: Log");
             }
@@ -35,7 +34,7 @@
             {
                 await Given_a_logTtable_and_an_ftsTable(conn);
 
-                var selectAllTerm = Term<Log>.All;
+                var selectAllTerm = Term<FTSContext.Log>.All;
                 var result = await conn.SearchAsync(selectAllTerm);
                 result.ShouldBeEmpty();
             }
@@ -50,15 +49,15 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Debug, Message = "There is a Dog"},
-                    new Log {Level = Level.Debug, Message = "There is a Cat and a Dog"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var selectAllTerm = Term<Log>.All;
+                var selectAllTerm = Term<FTSContext.Log>.All;
                 var result = (await conn.SearchAsync(selectAllTerm)).ToArray();
                 result.Length.ShouldBe(3);
                 result[0].Level.ShouldBe(logs[0].Level);
@@ -84,16 +83,16 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Info, Message = "There is a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Cat and a Dog"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "There is a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All
-                    .And(Match.Any, l => l.Level, Level.Debug, Level.Info);
+                var term = Term<FTSContext.Log>.All
+                    .And(Match.Any, l => l.Level, FTSContext.Level.Debug, FTSContext.Level.Info);
 
                 var result = (await conn.SearchAsync(term)).ToArray();
                 result.Length.ShouldBe(2);
@@ -117,15 +116,15 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Info, Message = "There is a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Cat and a Dog"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "There is a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All
+                var term = Term<FTSContext.Log>.All
                     .And(Match.All, l => l.Message, "Cat", "Dog");
 
                 var result = (await conn.SearchAsync(term)).ToArray();
@@ -144,16 +143,16 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Debug, Message = "There is a dog"},
-                    new Log {Level = Level.Info, Message = "There is a big cat"},
-                    new Log {Level = Level.Warn, Message = "There is a very big cat"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "There is a big cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a very big cat"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All
+                var term = Term<FTSContext.Log>.All
                     .And(Match.Any, l => l.Message, "big", "Dog");
 
                 var result = (await conn.SearchAsync(term)).ToArray();
@@ -178,16 +177,16 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Info, Message = "There is a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Cat and a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Parrot"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "There is a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Parrot"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All
+                var term = Term<FTSContext.Log>.All
                     .AndNot(Match.All, l => l.Message, "Cat", "Dog");
 
                 var result = (await conn.SearchAsync(term)).ToArray();
@@ -212,16 +211,16 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "There is a Cat"},
-                    new Log {Level = Level.Info, Message = "There is a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Cat and a Dog"},
-                    new Log {Level = Level.Warn, Message = "There is a Parrot"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "There is a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Parrot"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All
+                var term = Term<FTSContext.Log>.All
                     .AndNot(Match.Any, l => l.Message, "Cat", "Dog");
 
                 var result = (await conn.SearchAsync(term)).ToArray();
@@ -241,16 +240,16 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "Linux can be fun"},
-                    new Log {Level = Level.Info, Message = "Windows and linux are two operating systems"},
-                    new Log {Level = Level.Warn, Message = "linux is a Unix like operating system"},
-                    new Log {Level = Level.Fatal, Message = "software development in Mac OS operating system may be fun!"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "Linux can be fun"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "Windows and linux are two operating systems"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "linux is a Unix like operating system"},
+                    new FTSContext.Log {Level = FTSContext.Level.Fatal, Message = "software development in Mac OS operating system may be fun!"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All;
+                var term = Term<FTSContext.Log>.All;
 
                 var result = (await conn.SearchAsync(term)).ToArray();
                 result.Length.ShouldBe(4);
@@ -311,17 +310,17 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "John is playing football"},
-                    new Log {Level = Level.Info, Message = "Mary is playing football"},
-                    new Log {Level = Level.Warn, Message = "Someone is playing football"},
-                    new Log {Level = Level.Warn, Message = "John with Mary are playing football"},
-                    new Log {Level = Level.Warn, Message = "football is awesome"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "John is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "Mary is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "Someone is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "John with Mary are playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "football is awesome"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All.And(Match.All, l => l.Message, "John", "Mary", "football");
+                var term = Term<FTSContext.Log>.All.And(Match.All, l => l.Message, "John", "Mary", "football");
 
                 var result1 = (await conn.SearchAsync(term)).ToArray();
                 result1.Length.ShouldBe(1);
@@ -358,17 +357,17 @@
 
                 var logs = new[]
                 {
-                    new Log {Level = Level.Debug, Message = "John is playing football"},
-                    new Log {Level = Level.Info, Message = "Mary is playing football"},
-                    new Log {Level = Level.Warn, Message = "Someone is playing football"},
-                    new Log {Level = Level.Warn, Message = "John with Mary are playing football"},
-                    new Log {Level = Level.Warn, Message = "football is awesome"}
+                    new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "John is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Info, Message = "Mary is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "Someone is playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "John with Mary are playing football"},
+                    new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "football is awesome"}
                 };
 
-                var repo = conn.GetRepository<Log>();
+                var repo = conn.GetRepository<FTSContext.Log>();
                 await repo.InsertAsync(logs);
 
-                var term = Term<Log>.All.And(Match.Any, l => l.Message, "John", "Mary", "football");
+                var term = Term<FTSContext.Log>.All.And(Match.Any, l => l.Message, "John", "Mary", "football");
 
                 var result1 = (await conn.SearchAsync(term)).ToArray();
                 result1.Length.ShouldBe(5);
@@ -395,9 +394,9 @@
 
         private static async Task Given_a_logTtable_and_an_ftsTable(IDbConnection connection)
         {
-            var tableSql = SQLiteSQLGenerator.Table<Log>();
+            var tableSql = SQLiteSQLGenerator.Table<FTSContext.Log>();
             await connection.ExecuteAsync(tableSql);
-            var ftsTableSql = SQLiteSQLGenerator.FTSTable<Log>(FTSTableType.ExternalContent);
+            var ftsTableSql = SQLiteSQLGenerator.FTSTable<FTSContext.Log>(FTSTableType.ExternalContent);
             await connection.ExecuteAsync(ftsTableSql);
         }
     }

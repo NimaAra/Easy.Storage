@@ -1,82 +1,83 @@
-﻿namespace Easy.Storage.Tests.Unit.SqlServer
+﻿namespace Easy.Storage.Tests.Unit.SQLServer
 {
     using System;
-    using Easy.Storage.SqlServer.Models;
+    using Easy.Storage.SQLServer.Extensions;
+    using Easy.Storage.SQLServer.Models;
     using NUnit.Framework;
     using Shouldly;
-    using Storage.SqlServer.Extensions;
 
     [TestFixture]
-    internal sealed class SqlServerColumnTypeParsingTests
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLServerColumnTypeParsingTests
     {
         [Test]
         public void When_parsing_null()
         {
-            Should.Throw<ArgumentException>(() => ((string)null).ParseAsSqlServerDataType())
+            Should.Throw<ArgumentException>(() => ((string)null).ParseAsSQLServerDataType())
                 .Message.ShouldBe("String must not be null, empty or whitespace.");
         }
 
         [Test]
         public void When_parsing_empty_string()
         {
-            var e = Should.Throw<ArgumentException>(() => string.Empty.ParseAsSqlServerDataType());
+            var e = Should.Throw<ArgumentException>(() => string.Empty.ParseAsSQLServerDataType());
             e.Message.ShouldBe("String must not be null, empty or whitespace.");
         }
 
         [Test]
         public void When_parsing_whitespace_string()
         {
-            var e = Should.Throw<ArgumentException>(() => " ".ParseAsSqlServerDataType());
+            var e = Should.Throw<ArgumentException>(() => " ".ParseAsSQLServerDataType());
             e.Message.ShouldBe("String must not be null, empty or whitespace.");
         }
 
         [Test]
         public void When_parsing_invalid_string()
         {
-            var e = Should.Throw<ArgumentOutOfRangeException>(() => "foo".ParseAsSqlServerDataType());
+            var e = Should.Throw<ArgumentOutOfRangeException>(() => "foo".ParseAsSQLServerDataType());
             e.ParamName.ShouldBe("columnType");
         }
 
         [Test]
         public void When_parsing_valid_strings()
         {
-            "image".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Image);
-            "IMAGE".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Image);
-            "iMaGe".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Image);
+            "image".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Image);
+            "IMAGE".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Image);
+            "iMaGe".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Image);
 
-            "text".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Text);
-            "uniqueidentifier".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.UniqueIdentifier);
-            "date".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Date);
-            "time".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Time);
-            "smalldatetime".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.SmallDateTime);
-            "datetime".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.DateTime);
-            "datetime2".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.DateTime2);
-            "datetimeoffset".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.DateTimeOffset);
-            "timestamp".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Timestamp);
-            "tinyint".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.TinyInt);
-            "smallint".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.SmallInt);
-            "int".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Int);
-            "real".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Real);
-            "money".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Money);
-            "float".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Float);
-            "decimal".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Decimal);
-            "sql_variant".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Variant);
-            "ntext".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.NText);
-            "bit".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Bit);
-            "numeric".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Numeric);
-            "smallmoney".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.SmallMoney);
-            "bigint".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.BigInt);
-            "hierarchyid".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.HierarchyId);
-            "geometry".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Geometry);
-            "geography".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Geography);
-            "varbinary".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.VarBinary);
-            "varchar".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.VarChar);
-            "binary".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Binary);
-            "char".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Char);
-            "nvarchar".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.NVarChar);
-            "nchar".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.NChar);
-            "xml".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.Xml);
-            "sysname".ParseAsSqlServerDataType().ShouldBe(SqlServerDataType.SysName);
+            "text".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Text);
+            "uniqueidentifier".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.UniqueIdentifier);
+            "date".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Date);
+            "time".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Time);
+            "smalldatetime".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.SmallDateTime);
+            "datetime".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.DateTime);
+            "datetime2".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.DateTime2);
+            "datetimeoffset".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.DateTimeOffset);
+            "timestamp".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Timestamp);
+            "tinyint".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.TinyInt);
+            "smallint".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.SmallInt);
+            "int".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Int);
+            "real".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Real);
+            "money".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Money);
+            "float".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Float);
+            "decimal".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Decimal);
+            "sql_variant".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Variant);
+            "ntext".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.NText);
+            "bit".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Bit);
+            "numeric".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Numeric);
+            "smallmoney".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.SmallMoney);
+            "bigint".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.BigInt);
+            "hierarchyid".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.HierarchyId);
+            "geometry".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Geometry);
+            "geography".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Geography);
+            "varbinary".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.VarBinary);
+            "varchar".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.VarChar);
+            "binary".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Binary);
+            "char".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Char);
+            "nvarchar".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.NVarChar);
+            "nchar".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.NChar);
+            "xml".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.Xml);
+            "sysname".ParseAsSQLServerDataType().ShouldBe(SQLServerDataType.SysName);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.Sqlite.Extensions
+namespace Easy.Storage.SQLite.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -9,9 +9,9 @@ namespace Easy.Storage.Sqlite.Extensions
     using Easy.Common;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.FTS;
-    using Easy.Storage.Sqlite.Models;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.FTS;
+    using Easy.Storage.SQLite.Models;
 
     /// <summary>
     /// Provides a set of methods to help working with <see cref="SQLiteConnectionBase"/>.
@@ -23,7 +23,7 @@ namespace Easy.Storage.Sqlite.Extensions
         /// </summary>
         public static IRepository<T> GetRepository<T>(this SQLiteConnectionBase connection)
         {
-            return new Repository<T>(connection, Dialect.Sqlite);
+            return new Repository<T>(connection, Dialect.SQLite);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace Easy.Storage.Sqlite.Extensions
             return new SQLiteTableInfo
             {
                 TableName = tableName,
-                Sql = databaseObjects.Single(x => x.Type == SQLiteObjectType.Table && x.Name == tableName).Sql,
+                SQL = databaseObjects.Single(x => x.Type == SQLiteObjectType.Table && x.Name == tableName).SQL,
                 Columns = columnsInfo
             };
         }

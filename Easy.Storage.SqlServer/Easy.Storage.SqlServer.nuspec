@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Easy.Storage.SqlServer</id>
+    <id>Easy.Storage.SQLServer</id>
     <version>$version$</version>
     <title>Easy Storage SQL Server</title>
     <authors>Nima Ara</authors>
@@ -10,7 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A fast and easy to use library for managing data with a SQL Server database based on Dapper.</description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright 2017</copyright>
     <tags>Easy Storage Database Micro ORM Dapper SQL Server MSSQL</tags>
   </metadata>
 </package>

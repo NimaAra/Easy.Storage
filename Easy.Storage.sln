@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.Sqlite", "Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj", "{800D2B81-5854-4184-8A08-6F13143DA1A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.SQLite", "Easy.Storage.Sqlite\Easy.Storage.SQLite.csproj", "{800D2B81-5854-4184-8A08-6F13143DA1A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6985A4A8-2091-4CBC-AEC8-8B0914C93D47}"
 EndProject
@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.Tests.Unit", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.Common", "Easy.Storage.Common\Easy.Storage.Common.csproj", "{45DA2F67-F774-4C43-A27B-349FFC4752F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.SqlServer", "Easy.Storage.SqlServer\Easy.Storage.SqlServer.csproj", "{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.SQLServer", "Easy.Storage.SqlServer\Easy.Storage.SQLServer.csproj", "{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Tests.Unit.SqlServer
+﻿namespace Easy.Storage.Tests.Unit.SQLServer
 {
     using System;
     using System.Data.SqlClient;
@@ -8,13 +8,14 @@
     using Easy.Storage.Common;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.SqlServer.Extensions;
+    using Easy.Storage.SQLServer.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqlServerRepositoryTests : Context
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLServerRepositoryTests : Context
     {
         [OneTimeSetUp]
         public void SetUp()
@@ -61,7 +62,7 @@
             await When_doing_multiple_operations_with_sample_model();
             await When_working_with_inheritted_model();
 
-            await SqlServerRepositoryTranscationTests.Run();
+            await SQLServerRepositoryTranscationTests.Run();
         }
 
         private static void When_checking_table()
@@ -70,7 +71,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 var table = repo.Table;
-                table.Dialect.ShouldBe(Dialect.SqlServer);
+                table.Dialect.ShouldBe(Dialect.SQLServer);
                 table.Name.ShouldBe("Person");
                 table.Select.ShouldBe("SELECT\r\n"
                         + "    [Person].[Id] AS 'Id',\r\n"

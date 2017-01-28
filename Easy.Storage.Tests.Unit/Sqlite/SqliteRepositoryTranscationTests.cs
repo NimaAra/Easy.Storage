@@ -1,18 +1,19 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite
+﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System.Data;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.Sqlite.Connections;
-    using Easy.Storage.Sqlite.Extensions;
+    using Easy.Storage.SQLite.Connections;
+    using Easy.Storage.SQLite.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SqliteRepositoryTranscationTests : Context
+    // ReSharper disable once InconsistentNaming
+    internal sealed class SQLiteRepositoryTranscationTests : Context
     {
         [Test]
         public async Task When_querying_with_transaction()

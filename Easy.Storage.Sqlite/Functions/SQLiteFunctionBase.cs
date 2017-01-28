@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Sqlite.Functions
+﻿namespace Easy.Storage.SQLite.Functions
 {
     using System.Data.SQLite;
     using Easy.Common;

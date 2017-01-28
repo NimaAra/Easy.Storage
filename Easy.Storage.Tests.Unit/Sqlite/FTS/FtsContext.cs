@@ -1,8 +1,9 @@
-﻿namespace Easy.Storage.Tests.Unit.Sqlite.FTS
+﻿namespace Easy.Storage.Tests.Unit.SQLite.FTS
 {
     using System;
 
-    internal class FtsContext
+    // ReSharper disable once InconsistentNaming
+    internal class FTSContext
     {
         internal sealed class Log
         {

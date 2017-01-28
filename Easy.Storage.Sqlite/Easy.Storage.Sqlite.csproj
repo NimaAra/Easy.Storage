@@ -7,8 +7,8 @@
     <ProjectGuid>{800D2B81-5854-4184-8A08-6F13143DA1A3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Easy.Storage.Sqlite</RootNamespace>
-    <AssemblyName>Easy.Storage.Sqlite</AssemblyName>
+    <RootNamespace>Easy.Storage.SQLite</RootNamespace>
+    <AssemblyName>Easy.Storage.SQLite</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -30,7 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Easy.Storage.Sqlite.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Easy.Storage.SQLite.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Easy.Common, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">

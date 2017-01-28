@@ -1,4 +1,4 @@
-﻿namespace Easy.Storage.Sqlite.FTS
+﻿namespace Easy.Storage.SQLite.FTS
 {
     using System;
     using System.Linq.Expressions;
