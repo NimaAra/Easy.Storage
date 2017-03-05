@@ -1,0 +1,8 @@
+version: 1.0.{build}
+services: mssql2008r2sp2
+init:
+- git config --global core.autocrlf false
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
