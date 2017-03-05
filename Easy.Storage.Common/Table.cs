@@ -18,7 +18,7 @@
     {
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
         
-        internal static Table Get<TItem>(Dialect dialect = Dialect.Generic)
+        internal static Table Make<TItem>(Dialect dialect = Dialect.Generic)
         {
             var key = new TableKey(typeof(TItem), dialect);
             return Cache.GetOrAdd(key, theKey => new Table(theKey));

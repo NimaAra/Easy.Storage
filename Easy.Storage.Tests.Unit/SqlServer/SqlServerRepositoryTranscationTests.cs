@@ -35,20 +35,20 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
                 
-                await repo.InsertAsync(person);
+                await repo.Insert(person);
 
                 conn.Open();
                 var tran = conn.BeginTransaction();
                 {
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                 }
 
-                (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
             }
         }
 
@@ -59,7 +59,7 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
@@ -67,14 +67,14 @@
                 conn.Open();
                 using (var tran = conn.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, transaction: tran);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    await repo.Insert(person, transaction: tran);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                     tran.Commit();
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong)1);
                 }
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)1);
             }
         }
 
@@ -86,22 +86,22 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
 
                 using (var tran = conn.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, transaction: tran);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    await repo.Insert(person, transaction: tran);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
 
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                     tran.Rollback();
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
                 }
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
             }
         }
 
@@ -113,19 +113,19 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
 
                 using (var tran = conn.BeginTransaction())
                 {
-                    await repo.InsertAsync(person, transaction: tran);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    await repo.Insert(person, transaction: tran);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)1);
                 }
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
             }
         }
 
@@ -137,21 +137,21 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person1 = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person1);
+                await repo.Insert(person1);
 
                 using (var tran = conn.BeginTransaction())
                 {
                     var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2, transaction: tran);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    await repo.Insert(person2, transaction: tran);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
                 }
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)1);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)1);
             }
         }
 
@@ -163,24 +163,24 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person1 = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person1);
+                await repo.Insert(person1);
 
                 using (var tran = conn.BeginTransaction())
                 {
                     var person2 = new Person { Name = "P2", Age = 20 };
-                    await repo.InsertAsync(person2, transaction: tran);
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    await repo.Insert(person2, transaction: tran);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
 
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
                     tran.Commit();
-                    (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
+                    (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong)2);
                 }
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)2);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)2);
             }
         }
 
@@ -192,34 +192,34 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person);
+                await repo.Insert(person);
 
-                var insertedPerson = (await repo.GetAsync()).Single();
+                var insertedPerson = (await repo.Get()).Single();
 
                 var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
 
                 using (var tran = conn.BeginTransaction())
                 {
-                    await repo.UpdateAsync(updatedPerson, transaction: tran);
+                    await repo.Update(updatedPerson, transaction: tran);
 
-                    var snapshot1 = (await repo.GetAsync(tran)).Single();
+                    var snapshot1 = (await repo.Get(tran)).Single();
                     snapshot1.Id.ShouldBe(insertedPerson.Id);
                     snapshot1.Name.ShouldBe(updatedPerson.Name);
                     snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                     tran.Commit();
 
-                    var snapshot2 = (await repo.GetAsync(tran)).Single();
+                    var snapshot2 = (await repo.Get(tran)).Single();
                     snapshot2.Id.ShouldBe(insertedPerson.Id);
                     snapshot2.Name.ShouldBe(updatedPerson.Name);
                     snapshot2.Age.ShouldBe(updatedPerson.Age);
                 }
 
-                var snapshot3 = (await repo.GetAsync()).Single();
+                var snapshot3 = (await repo.Get()).Single();
                 snapshot3.Id.ShouldBe(insertedPerson.Id);
                 snapshot3.Name.ShouldBe(updatedPerson.Name);
                 snapshot3.Age.ShouldBe(updatedPerson.Age);
@@ -234,34 +234,34 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person);
+                await repo.Insert(person);
 
-                var insertedPerson = (await repo.GetAsync()).Single();
+                var insertedPerson = (await repo.Get()).Single();
 
                 var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
 
                 using (var tran = conn.BeginTransaction())
                 {
-                    await repo.UpdateAsync(updatedPerson, transaction: tran);
+                    await repo.Update(updatedPerson, transaction: tran);
 
-                    var snapshot1 = (await repo.GetAsync(tran)).Single();
+                    var snapshot1 = (await repo.Get(tran)).Single();
                     snapshot1.Id.ShouldBe(insertedPerson.Id);
                     snapshot1.Name.ShouldBe(updatedPerson.Name);
                     snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                     tran.Rollback();
 
-                    var snapshot2 = (await repo.GetAsync(tran)).Single();
+                    var snapshot2 = (await repo.Get(tran)).Single();
                     snapshot2.Id.ShouldBe(insertedPerson.Id);
                     snapshot2.Name.ShouldBe(insertedPerson.Name);
                     snapshot2.Age.ShouldBe(insertedPerson.Age);
                 }
 
-                var snapshot3 = (await repo.GetAsync()).Single();
+                var snapshot3 = (await repo.Get()).Single();
                 snapshot3.Id.ShouldBe(insertedPerson.Id);
                 snapshot3.Name.ShouldBe(insertedPerson.Name);
                 snapshot3.Age.ShouldBe(insertedPerson.Age);
@@ -276,34 +276,34 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person);
+                await repo.Insert(person);
 
-                var insertedPerson = (await repo.GetAsync()).Single();
+                var insertedPerson = (await repo.Get()).Single();
 
                 var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
 
                 using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
-                    await repo.UpdateAsync(updatedPerson, transaction: tran);
+                    await repo.Update(updatedPerson, transaction: tran);
 
-                    var snapshot1 = (await repo.GetAsync(tran)).Single();
+                    var snapshot1 = (await repo.Get(tran)).Single();
                     snapshot1.Id.ShouldBe(insertedPerson.Id);
                     snapshot1.Name.ShouldBe(updatedPerson.Name);
                     snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                     tran.Commit();
 
-                    var snapshot2 = (await repo.GetAsync(tran)).Single();
+                    var snapshot2 = (await repo.Get(tran)).Single();
                     snapshot2.Id.ShouldBe(insertedPerson.Id);
                     snapshot2.Name.ShouldBe(updatedPerson.Name);
                     snapshot2.Age.ShouldBe(updatedPerson.Age);
                 }
 
-                var snapshot3 = (await repo.GetAsync()).Single();
+                var snapshot3 = (await repo.Get()).Single();
                 snapshot3.Id.ShouldBe(insertedPerson.Id);
                 snapshot3.Name.ShouldBe(updatedPerson.Name);
                 snapshot3.Age.ShouldBe(updatedPerson.Age);
@@ -318,34 +318,34 @@
                 await conn.ExecuteAsync(TableQuery);
 
                 var repo = conn.GetRepository<Person>();
-                await repo.DeleteAllAsync();
+                await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
                 var person = new Person { Name = "P1", Age = 10 };
-                await repo.InsertAsync(person);
+                await repo.Insert(person);
 
-                var insertedPerson = (await repo.GetAsync()).Single();
+                var insertedPerson = (await repo.Get()).Single();
 
                 var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
 
                 using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
-                    await repo.UpdateAsync(updatedPerson, transaction: tran);
+                    await repo.Update(updatedPerson, transaction: tran);
 
-                    var snapshot1 = (await repo.GetAsync(tran)).Single();
+                    var snapshot1 = (await repo.Get(tran)).Single();
                     snapshot1.Id.ShouldBe(insertedPerson.Id);
                     snapshot1.Name.ShouldBe(updatedPerson.Name);
                     snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                     tran.Rollback();
 
-                    var snapshot2 = (await repo.GetAsync(tran)).Single();
+                    var snapshot2 = (await repo.Get(tran)).Single();
                     snapshot2.Id.ShouldBe(insertedPerson.Id);
                     snapshot2.Name.ShouldBe(insertedPerson.Name);
                     snapshot2.Age.ShouldBe(insertedPerson.Age);
                 }
 
-                var snapshot3 = (await repo.GetAsync()).Single();
+                var snapshot3 = (await repo.Get()).Single();
                 snapshot3.Id.ShouldBe(insertedPerson.Id);
                 snapshot3.Name.ShouldBe(insertedPerson.Name);
                 snapshot3.Age.ShouldBe(insertedPerson.Age);

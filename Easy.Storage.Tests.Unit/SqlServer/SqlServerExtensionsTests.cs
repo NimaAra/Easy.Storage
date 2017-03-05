@@ -55,7 +55,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                (await conn.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new {name = "Users"}))
+                (await conn.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new { name = "Person" }))
                     .ShouldBe(1);
                 (await conn.ExecuteScalarAsync<int>("SELECT 1 FROM sysobjects WHERE name = @name", new { name = "Bambolini" }))
                     .ShouldBe(0);
@@ -84,8 +84,8 @@
 
                 var personTable = dbObjects.Single(o => o.Type == SQLServerObjectType.U && o.Name == "Person");
 
-                dbObjects.ShouldContain(o => o.Type == SQLServerObjectType.PK 
-                    && o.ParentId == personTable.Id 
+                dbObjects.ShouldContain(o => o.Type == SQLServerObjectType.PK
+                    && o.ParentId == personTable.Id
                     && o.SchemaId == personTable.SchemaId
                     && o.CreationDate.Date == personTable.CreationDate.Date
                     && o.CreationDate.Hour == personTable.CreationDate.Hour

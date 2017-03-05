@@ -2,28 +2,29 @@
 {
     using System;
     using System.Collections.Generic;
+    using Easy.Storage.Common.Filter;
 
     /// <summary>
     /// Provides a set of helper methods for working with <see cref="Enum"/>.
     /// </summary>
     public static class EnumExtensions
     {
-        private static readonly Dictionary<Operand, string> Operands = new Dictionary<Operand, string>
+        private static readonly Dictionary<Operator, string> Operands = new Dictionary<Operator, string>
         {
-            {Operand.Equal, "="},
-            {Operand.NotEqual, "<>"},
-            {Operand.GreaterThan, ">"},
-            {Operand.GreaterThanOrEqual, ">="},
-            {Operand.LessThan, "<"},
-            {Operand.LessThanOrEqual, "<="},
+            {Operator.Equal, "="},
+            {Operator.NotEqual, "<>"},
+            {Operator.GreaterThan, ">"},
+            {Operator.GreaterThanOrEqual, ">="},
+            {Operator.LessThan, "<"},
+            {Operator.LessThanOrEqual, "<="},
         };
 
         /// <summary>
-        /// Returns the string representation of the given <paramref name="operand"/>.
+        /// Returns the string representation of the given <paramref name="operator"/>.
         /// </summary>
-        internal static string OperandAsStr(this Operand operand)
+        internal static string AsString(this Operator @operator)
         {
-            return Operands[operand];
+            return Operands[@operator];
         }
     }
 }

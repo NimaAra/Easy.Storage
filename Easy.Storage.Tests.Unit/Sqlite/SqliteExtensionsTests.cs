@@ -270,14 +270,14 @@
                 var repoOne = conn.GetRepository<ModelOne>();
                 var repoTwo = conn.GetRepository<ModelTwo>();
 
-                await repoOne.InsertAsync(new[]
+                await repoOne.Insert(new[]
                 {
                     new ModelOne {Name = "M1-A"},
                     new ModelOne {Name = "M1-B"},
                     new ModelOne {Name = "M1-C"}
                 });
 
-                await repoTwo.InsertAsync(new[]
+                await repoTwo.Insert(new[]
                 {
                     new ModelTwo {Category = "M2-C-A", Number = 1},
                     new ModelTwo {Category = "M2-C-B", Number = 2},

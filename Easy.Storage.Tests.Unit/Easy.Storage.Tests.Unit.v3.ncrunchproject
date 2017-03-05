@@ -1,0 +1,22 @@
+﻿<ProjectConfiguration>
+  <Settings>
+    <AdditionalFilesToIncludeForProject>
+      <Value>Sqlite\SampleDBs\**.*</Value>
+    </AdditionalFilesToIncludeForProject>
+    <IgnoredTests>
+      <FixtureTestSelector>
+        <FixtureName>Easy.Storage.Tests.Unit.SQLServer.SQLServerRepositoryTests</FixtureName>
+      </FixtureTestSelector>
+      <FixtureTestSelector>
+        <FixtureName>Easy.Storage.Tests.Unit.SQLServer.SQLServerExtensionsTests</FixtureName>
+      </FixtureTestSelector>
+      <FixtureTestSelector>
+        <FixtureName>Easy.Storage.Tests.Unit.SQLServer.SQLServerColumnTypeParsingTests</FixtureName>
+      </FixtureTestSelector>
+      <NamedTestSelector>
+        <TestName>Easy.Storage.Tests.Unit.SQLite.SQLiteConnections.SQLiteAttachedConnectionTests.When_querying_attached_files</TestName>
+      </NamedTestSelector>
+    </IgnoredTests>
+    <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
+  </Settings>
+</ProjectConfiguration>

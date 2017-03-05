@@ -6,8 +6,8 @@
     using System.Linq;
     using System.Linq.Expressions;
     using Easy.Common;
+    using Easy.Common.Extensions;
     using Easy.Storage.Common;
-    using Easy.Storage.Common.Extensions;
 
     /// <summary>
     /// Represents an object for creating <c>Full Text Search</c> queries.
@@ -140,7 +140,7 @@
 
             private TermConfig()
             {
-                _table = Table.Get<T>();
+                _table = Table.Make<T>();
                 TableName = "[" + _table.Name + "_fts]";
                 PrefixQuery = $"SELECT {TableName}.[docId] FROM {TableName} WHERE";
             }

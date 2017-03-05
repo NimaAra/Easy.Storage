@@ -55,7 +55,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var selectAllTerm = Term<FTSContext.Log>.All;
                 var result = (await conn.SearchAsync(selectAllTerm)).ToArray();
@@ -89,7 +89,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
                     .And(Match.Any, l => l.Level, FTSContext.Level.Debug, FTSContext.Level.Info);
@@ -122,7 +122,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
                     .And(Match.All, l => l.Message, "Cat", "Dog");
@@ -150,7 +150,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
                     .And(Match.Any, l => l.Message, "big", "Dog");
@@ -184,7 +184,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
                     .AndNot(Match.All, l => l.Message, "Cat", "Dog");
@@ -218,7 +218,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
                     .AndNot(Match.Any, l => l.Message, "Cat", "Dog");
@@ -247,7 +247,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All;
 
@@ -318,7 +318,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All.And(Match.All, l => l.Message, "John", "Mary", "football");
 
@@ -365,7 +365,7 @@
                 };
 
                 var repo = conn.GetRepository<FTSContext.Log>();
-                await repo.InsertAsync(logs);
+                await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All.And(Match.Any, l => l.Message, "John", "Mary", "football");
 

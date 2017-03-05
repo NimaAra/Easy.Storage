@@ -5,6 +5,7 @@
     using System.Data;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using Easy.Storage.Common.Filter;
 
     /// <summary>
     /// Specifies the contract that a repository would need to implement.
@@ -19,12 +20,12 @@
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// </summary>
-        Task<IEnumerable<T>> GetAsync(IDbTransaction transaction = null);
+        Task<IEnumerable<T>> Get(IDbTransaction transaction = null);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// </summary>
-        Task<IEnumerable<T>> GetLazyAsync(IDbTransaction transaction = null);
+        Task<IEnumerable<T>> GetLazy(IDbTransaction transaction = null);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
@@ -32,7 +33,7 @@
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="value">The value associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
-        Task<IEnumerable<T>> GetAsync<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
+        Task<IEnumerable<T>> GetWhere<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
@@ -40,14 +41,14 @@
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
         /// <param name="values">The values associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
-        Task<IEnumerable<T>> GetAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
+        Task<IEnumerable<T>> GetWhere<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
 
         /// <summary>
-        /// Gets the records represented by the <typeparamref name="T"/> based on the given <paramref name="queryFilter"/>.
+        /// Gets the records represented by the <typeparamref name="T"/> based on the given <paramref name="filter"/>.
         /// </summary>
         /// <param name="transaction">The transaction</param>
-        /// <param name="queryFilter">The filter to limit the records returned</param>
-        Task<IEnumerable<T>> GetAsync(QueryFilter<T> queryFilter, IDbTransaction transaction = null);
+        /// <param name="filter">The filter to limit the records returned</param>
+        Task<IEnumerable<T>> GetWhere(Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
         /// Inserts the given <paramref name="item"/> to the storage.
@@ -56,7 +57,7 @@
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        Task<long> InsertAsync(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
+        Task<long> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.
@@ -65,31 +66,37 @@
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
-        Task<int> InsertAsync(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
+        Task<int> Insert(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        Task<int> UpdateAsync(T item, IDbTransaction transaction = null);
+        Task<int> Update(T item, IDbTransaction transaction = null);
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the value of the <paramref name="selector"/>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
+        Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
 
         /// <summary>
         /// Updates the given <paramref name="item"/> based on the values of the <paramref name="selector"/>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        Task<int> UpdateAsync<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
+        Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
+
+        /// <summary>
+        /// Updates the given <paramref name="item"/> based on the given <paramref name="filter"/>.
+        /// </summary>
+        /// <returns>Number of rows affected</returns>
+        Task<int> UpdateWhere(T item, Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
         /// Updates the given <paramref name="items"/> based on the value of their ids in the storage.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        Task<int> UpdateAsync(IEnumerable<T> items, IDbTransaction transaction = null);
+        Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null);
 
         /// <summary>
         /// Deletes a record based on the value of the given <paramref name="selector"/>.
@@ -98,7 +105,7 @@
         /// <param name="value">The value associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>Number of rows affected</returns>
-        Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
+        Task<int> DeleteWhere<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
 
         /// <summary>
         /// Deletes a record based on the value of the given <paramref name="selector"/>.
@@ -107,12 +114,20 @@
         /// <param name="transaction">The transaction</param>
         /// <param name="values">The values associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <returns>Number of rows affected</returns>
-        Task<int> DeleteAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
+        Task<int> DeleteWhere<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
+
+        /// <summary>
+        /// Deletes a record based on the given <paramref name="filter"/>.
+        /// </summary>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="transaction">The transaction</param>
+        /// <returns>Number of rows affected</returns>
+        Task<int> DeleteWhere(Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
         /// Deletes all the records.
         /// </summary>
-        Task<int> DeleteAllAsync(IDbTransaction transaction = null);
+        Task<int> DeleteAll(IDbTransaction transaction = null);
 
         /// <summary>
         /// Returns the count of records based on the given <paramref name="selector"/>.
@@ -120,7 +135,16 @@
         /// <param name="selector">The selector used to identify the column by which the <c>COUNT</c> should be calculated.</param>
         /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
         /// <param name="transaction">The transaction</param>
-        Task<ulong> CountAsync<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+        Task<ulong> Count<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Returns the count of records based on the given <paramref name="selector"/>.
+        /// </summary>
+        /// <param name="selector">The selector used to identify the column by which the <c>COUNT</c> should be calculated.</param>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
+        /// <param name="transaction">The transaction</param>
+        Task<ulong> Count<TProperty>(Expression<Func<T, TProperty>> selector, Filter<T> filter, bool distinct = false, IDbTransaction transaction = null);
 
         /// <summary>
         /// Returns the sum of records based on the given <paramref name="selector"/>.
@@ -128,7 +152,16 @@
         /// <param name="selector">The selector used to identify the column by which the <c>SUM</c> should be calculated.</param>
         /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
         /// <param name="transaction">The transaction</param>
-        Task<long> SumAsync<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+        Task<long> Sum<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Returns the sum of records based on the given <paramref name="selector"/>.
+        /// </summary>
+        /// <param name="selector">The selector used to identify the column by which the <c>SUM</c> should be calculated.</param>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
+        /// <param name="transaction">The transaction</param>
+        Task<long> Sum<TProperty>(Expression<Func<T, TProperty>> selector, Filter<T> filter, bool distinct = false, IDbTransaction transaction = null);
 
         /// <summary>
         /// Returns the average of records based on the given <paramref name="selector"/>.
@@ -136,16 +169,45 @@
         /// <param name="selector">The selector used to identify the column by which the <c>AVG</c> should be calculated.</param>
         /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
         /// <param name="transaction">The transaction</param>
-        Task<decimal> AvgAsync<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+        Task<decimal> Avg<TProperty>(Expression<Func<T, TProperty>> selector, bool distinct = false, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Returns the average of records based on the given <paramref name="selector"/>.
+        /// </summary>
+        /// <param name="selector">The selector used to identify the column by which the <c>AVG</c> should be calculated.</param>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="distinct">The flag indicating whether unique values should be considered only or not.</param>
+        /// <param name="transaction">The transaction</param>
+        Task<decimal> Avg<TProperty>(Expression<Func<T, TProperty>> selector, Filter<T> filter, bool distinct = false, IDbTransaction transaction = null);
 
         /// <summary>
         /// Returns the minimum value defined by the given <paramref name="selector"/>.
+        /// <param name="selector">The selector used to identify the column by which the <c>MIN</c> should be calculated.</param>
+        /// <param name="transaction">The transaction</param>
         /// </summary>
-        Task<TProperty> MinAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null);
+        Task<TProperty> Min<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Returns the minimum value defined by the given <paramref name="selector"/>.
+        /// <param name="selector">The selector used to identify the column by which the <c>MIN</c> should be calculated.</param>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="transaction">The transaction</param>
+        /// </summary>
+        Task<TProperty> Min<TProperty>(Expression<Func<T, TProperty>> selector, Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
         /// Returns the maximum value defined by the given <paramref name="selector"/>.
+        /// <param name="selector">The selector used to identify the column by which the <c>MAX</c> should be calculated.</param>
+        /// <param name="transaction">The transaction</param>
         /// </summary>
-        Task<TProperty> MaxAsync<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null);
+        Task<TProperty> Max<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Returns the maximum value defined by the given <paramref name="selector"/>.
+        /// <param name="selector">The selector used to identify the column by which the <c>MAX</c> should be calculated.</param>
+        /// <param name="filter">The filter to limit the records returned</param>
+        /// <param name="transaction">The transaction</param>
+        /// </summary>
+        Task<TProperty> Max<TProperty>(Expression<Func<T, TProperty>> selector, Filter<T> filter, IDbTransaction transaction = null);
     }
 }

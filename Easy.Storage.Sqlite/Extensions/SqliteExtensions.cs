@@ -39,7 +39,7 @@ namespace Easy.Storage.SQLite.Extensions
         /// </summary>
         public static async Task<bool> ExistsAsync<T>(this SQLiteConnectionBase connection)
         {
-            var tableName = Table.Get<T>().Name;
+            var tableName = Table.Make<T>().Name;
             return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
 
@@ -48,7 +48,7 @@ namespace Easy.Storage.SQLite.Extensions
         /// </summary>
         public static Task<SQLiteTableInfo> GetTableInfoAsync<T>(this SQLiteConnectionBase connection)
         {
-            return connection.GetTableInfoAsync(Table.Get<T>().Name);
+            return connection.GetTableInfoAsync(Table.Make<T>().Name);
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Easy.Storage.SQLite.Extensions
         /// </summary>
         public static Task<IEnumerable<T>> SearchAsync<T>(this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
         {
-            var query = Table.Get<T>().Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
+            var query = Table.Make<T>().Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
             return connection.QueryAsync<T>(query, buffered: buffered);
         }
 

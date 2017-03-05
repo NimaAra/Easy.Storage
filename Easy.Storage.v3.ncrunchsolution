@@ -1,0 +1,13 @@
+﻿<SolutionConfiguration>
+  <Settings>
+    <AllowParallelTestExecution>True</AllowParallelTestExecution>
+    <MetricsExclusionList>
+      <Value>..\Version.cs:Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj</Value>
+      <Value>Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj\..</Value>
+      <Value>Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj\..\</Value>
+      <Value>Easy.Storage.Tests.Unit\Easy.Storage.Tests.Unit.csproj</Value>
+      <Value>SqliteRollingConnection.cs:Easy.Storage.Sqlite\Easy.Storage.Sqlite.csproj</Value>
+    </MetricsExclusionList>
+    <SolutionConfigured>True</SolutionConfigured>
+  </Settings>
+</SolutionConfiguration>

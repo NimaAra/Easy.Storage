@@ -57,7 +57,7 @@
                 await conn.ExecuteAsync("CREATE TABLE Numbers(No INTEGER NOT NULL);");
                 await conn.ExecuteAsync("INSERT INTO Numbers VALUES (1), (2), (3), (4);");
 
-                var initState = 0;
+                const int InitState = 0;
                 Func<object[], int, object, object> step = (objects, i, state) =>
                 {
                     var newNo = Convert.ToInt32(objects[0]);
@@ -65,7 +65,7 @@
                 };
                 Func<object, object> final = finalState => finalState;
 
-                conn.BindFunction(new SQLiteAggregateFunction("FunkySum", 1, initState, step, final));
+                conn.BindFunction(new SQLiteAggregateFunction("FunkySum", 1, InitState, step, final));
 
                 var funkySum = await conn.ExecuteScalarAsync<long>("SELECT FunkySum(No) FROM Numbers;");
                 funkySum.ShouldBe(10);

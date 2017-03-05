@@ -31,14 +31,14 @@
                     var person = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person);
+                    await repo.Insert(person);
 
                     using (var tran = conn.BeginTransaction())
                     {
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                 }
             } finally
             {
@@ -65,14 +65,14 @@
 
                     using (var tran = conn.BeginTransaction())
                     {
-                        await repo.InsertAsync(person);
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                        await repo.Insert(person);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
                         tran.Commit();
 
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                 }
             } finally
             {
@@ -97,15 +97,15 @@
                     var repo = conn.GetRepository<Person>();
                     using (var tran = conn.BeginTransaction())
                     {
-                        await repo.InsertAsync(person);
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                        await repo.Insert(person);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
 
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                         tran.Rollback();
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 0);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 0);
                 }
             } finally
             {
@@ -130,13 +130,13 @@
                     var repo = conn.GetRepository<Person>();
                     using (var tran = conn.BeginTransaction())
                     {
-                        await repo.InsertAsync(person);
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
+                        await repo.Insert(person);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 1);
 
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 0);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 0);
                 }
             } finally
             {
@@ -159,18 +159,18 @@
                     var person1 = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person1);
+                    await repo.Insert(person1);
 
                     using (var tran = conn.BeginTransaction())
                     {
                         var person2 = new Person {Name = "P2", Age = 20};
-                        await repo.InsertAsync(person2);
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
+                        await repo.Insert(person2);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
 
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 2);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 1);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 1);
                 }
             } finally
             {
@@ -193,20 +193,20 @@
                     var person1 = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person1);
+                    await repo.Insert(person1);
 
                     using (var tran = conn.BeginTransaction())
                     {
                         var person2 = new Person {Name = "P2", Age = 20};
-                        await repo.InsertAsync(person2);
-                        (await repo.CountAsync(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
+                        await repo.Insert(person2);
+                        (await repo.Count(p => p.Id, transaction: tran)).ShouldBe((ulong) 2);
 
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 2);
                         tran.Commit();
-                        (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                        (await repo.Count(p => p.Id)).ShouldBe((ulong) 2);
                     }
 
-                    (await repo.CountAsync(p => p.Id)).ShouldBe((ulong) 2);
+                    (await repo.Count(p => p.Id)).ShouldBe((ulong) 2);
                 }
             } finally
             {
@@ -229,30 +229,30 @@
                     var person = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person);
+                    await repo.Insert(person);
 
-                    var insertedPerson = (await repo.GetAsync()).Single();
+                    var insertedPerson = (await repo.Get()).Single();
 
                     var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
 
                     using (var tran = conn.BeginTransaction())
                     {
-                        await repo.UpdateAsync(updatedPerson);
+                        await repo.Update(updatedPerson);
 
-                        var snapshot1 = (await repo.GetAsync()).Single();
+                        var snapshot1 = (await repo.Get()).Single();
                         snapshot1.Id.ShouldBe(insertedPerson.Id);
                         snapshot1.Name.ShouldBe(updatedPerson.Name);
                         snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                         tran.Commit();
 
-                        var snapshot2 = (await repo.GetAsync()).Single();
+                        var snapshot2 = (await repo.Get()).Single();
                         snapshot2.Id.ShouldBe(insertedPerson.Id);
                         snapshot2.Name.ShouldBe(updatedPerson.Name);
                         snapshot2.Age.ShouldBe(updatedPerson.Age);
                     }
 
-                    var snapshot3 = (await repo.GetAsync()).Single();
+                    var snapshot3 = (await repo.Get()).Single();
                     snapshot3.Id.ShouldBe(insertedPerson.Id);
                     snapshot3.Name.ShouldBe(updatedPerson.Name);
                     snapshot3.Age.ShouldBe(updatedPerson.Age);
@@ -278,30 +278,30 @@
                     var person = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person);
+                    await repo.Insert(person);
 
-                    var insertedPerson = (await repo.GetAsync()).Single();
+                    var insertedPerson = (await repo.Get()).Single();
 
                     var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
 
                     using (var tran = conn.BeginTransaction())
                     {
-                        await repo.UpdateAsync(updatedPerson);
+                        await repo.Update(updatedPerson);
 
-                        var snapshot1 = (await repo.GetAsync()).Single();
+                        var snapshot1 = (await repo.Get()).Single();
                         snapshot1.Id.ShouldBe(insertedPerson.Id);
                         snapshot1.Name.ShouldBe(updatedPerson.Name);
                         snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                         tran.Rollback();
 
-                        var snapshot2 = (await repo.GetAsync()).Single();
+                        var snapshot2 = (await repo.Get()).Single();
                         snapshot2.Id.ShouldBe(insertedPerson.Id);
                         snapshot2.Name.ShouldBe(insertedPerson.Name);
                         snapshot2.Age.ShouldBe(insertedPerson.Age);
                     }
 
-                    var snapshot3 = (await repo.GetAsync()).Single();
+                    var snapshot3 = (await repo.Get()).Single();
                     snapshot3.Id.ShouldBe(insertedPerson.Id);
                     snapshot3.Name.ShouldBe(insertedPerson.Name);
                     snapshot3.Age.ShouldBe(insertedPerson.Age);
@@ -327,30 +327,30 @@
                     var person = new Person {Name = "P1", Age = 10};
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person);
+                    await repo.Insert(person);
 
-                    var insertedPerson = (await repo.GetAsync()).Single();
+                    var insertedPerson = (await repo.Get()).Single();
 
                     var updatedPerson = new Person {Id = insertedPerson.Id, Name = "P1-updated", Age = 15};
 
                     using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                     {
-                        await repo.UpdateAsync(updatedPerson);
+                        await repo.Update(updatedPerson);
 
-                        var snapshot1 = (await repo.GetAsync()).Single();
+                        var snapshot1 = (await repo.Get()).Single();
                         snapshot1.Id.ShouldBe(insertedPerson.Id);
                         snapshot1.Name.ShouldBe(updatedPerson.Name);
                         snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                         tran.Commit();
 
-                        var snapshot2 = (await repo.GetAsync()).Single();
+                        var snapshot2 = (await repo.Get()).Single();
                         snapshot2.Id.ShouldBe(insertedPerson.Id);
                         snapshot2.Name.ShouldBe(updatedPerson.Name);
                         snapshot2.Age.ShouldBe(updatedPerson.Age);
                     }
 
-                    var snapshot3 = (await repo.GetAsync()).Single();
+                    var snapshot3 = (await repo.Get()).Single();
                     snapshot3.Id.ShouldBe(insertedPerson.Id);
                     snapshot3.Name.ShouldBe(updatedPerson.Name);
                     snapshot3.Age.ShouldBe(updatedPerson.Age);
@@ -377,30 +377,30 @@
                     var person = new Person { Name = "P1", Age = 10 };
 
                     var repo = conn.GetRepository<Person>();
-                    await repo.InsertAsync(person);
+                    await repo.Insert(person);
 
-                    var insertedPerson = (await repo.GetAsync()).Single();
+                    var insertedPerson = (await repo.Get()).Single();
 
                     var updatedPerson = new Person { Id = insertedPerson.Id, Name = "P1-updated", Age = 15 };
 
                     using (var tran = conn.BeginTransaction(IsolationLevel.ReadCommitted))
                     {
-                        await repo.UpdateAsync(updatedPerson);
+                        await repo.Update(updatedPerson);
 
-                        var snapshot1 = (await repo.GetAsync()).Single();
+                        var snapshot1 = (await repo.Get()).Single();
                         snapshot1.Id.ShouldBe(insertedPerson.Id);
                         snapshot1.Name.ShouldBe(updatedPerson.Name);
                         snapshot1.Age.ShouldBe(updatedPerson.Age);
 
                         tran.Rollback();
 
-                        var snapshot2 = (await repo.GetAsync()).Single();
+                        var snapshot2 = (await repo.Get()).Single();
                         snapshot2.Id.ShouldBe(insertedPerson.Id);
                         snapshot2.Name.ShouldBe(insertedPerson.Name);
                         snapshot2.Age.ShouldBe(insertedPerson.Age);
                     }
 
-                    var snapshot3 = (await repo.GetAsync()).Single();
+                    var snapshot3 = (await repo.Get()).Single();
                     snapshot3.Id.ShouldBe(insertedPerson.Id);
                     snapshot3.Name.ShouldBe(insertedPerson.Name);
                     snapshot3.Age.ShouldBe(insertedPerson.Age);

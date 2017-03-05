@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
+    using Easy.Storage.Common.Filter;
     using Easy.Storage.SQLite;
     using Easy.Storage.SQLite.Connections;
     using Easy.Storage.SQLite.Extensions;
@@ -41,7 +42,7 @@
                         + "(\r\n"
                         + "    @Name,\r\n"
                         + "    @Age\r\n"
-                        + ");\r\n" 
+                        + ");\r\n"
                         + "SELECT last_insert_rowid();");
 
                 table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
@@ -65,7 +66,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetLazyAsync()).ShouldBeEmpty();
+                (await repo.GetLazy()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -75,10 +76,10 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetLazyAsync()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetLazyAsync()).ToArray();
+                var insertedPeopleBuffered = (await repo.GetLazy()).ToArray();
+                var insertedPeopleUnBuffered = (await repo.GetLazy()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -124,7 +125,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetLazyAsync()).ShouldBeEmpty();
+                (await repo.GetLazy()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -134,10 +135,10 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetLazyAsync()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetLazyAsync()).ToArray();
+                var insertedPeopleBuffered = (await repo.GetLazy()).ToArray();
+                var insertedPeopleUnBuffered = (await repo.GetLazy()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -183,7 +184,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -193,10 +194,10 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetAsync()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetAsync()).ToArray();
+                var insertedPeopleBuffered = (await repo.Get()).ToArray();
+                var insertedPeopleUnBuffered = (await repo.Get()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -242,7 +243,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -252,10 +253,10 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetAsync()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetAsync()).ToArray();
+                var insertedPeopleBuffered = (await repo.Get()).ToArray();
+                var insertedPeopleUnBuffered = (await repo.Get()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -301,7 +302,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -313,16 +314,16 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(6);
+                (await repo.Insert(people)).ShouldBe(6);
 
-                var onePerson = (await repo.GetAsync(p => p.Id, 1)).ToArray();
+                var onePerson = (await repo.GetWhere(p => p.Id, 1)).ToArray();
 
                 onePerson.Length.ShouldBe(1);
                 onePerson[0].Id.ShouldBe(1);
                 onePerson[0].Name.ShouldBe("P1");
                 onePerson[0].Age.ShouldBe(10);
 
-                var peopleWithSameName = (await repo.GetAsync(p => p.Name, "P5")).ToArray();
+                var peopleWithSameName = (await repo.GetWhere(p => p.Name, "P5")).ToArray();
 
                 peopleWithSameName.Length.ShouldBe(2);
                 peopleWithSameName[0].Id.ShouldBe(5);
@@ -333,7 +334,7 @@
                 peopleWithSameName[1].Name.ShouldBe("P5");
                 peopleWithSameName[1].Age.ShouldBe(10);
 
-                var peopleWithSameAge = (await repo.GetAsync(p => p.Age, 10)).ToArray();
+                var peopleWithSameAge = (await repo.GetWhere(p => p.Age, 10)).ToArray();
 
                 peopleWithSameAge.Length.ShouldBe(3);
                 peopleWithSameAge[0].Id.ShouldBe(1);
@@ -348,7 +349,7 @@
                 peopleWithSameAge[2].Name.ShouldBe("P5");
                 peopleWithSameAge[2].Age.ShouldBe(10);
 
-                var peopleWithDifferentNames = (await repo.GetAsync(p => p.Name, null, "P1", "P2")).ToArray();
+                var peopleWithDifferentNames = (await repo.GetWhere(p => p.Name, null, "P1", "P2")).ToArray();
 
                 peopleWithDifferentNames.Length.ShouldBe(2);
 
@@ -360,7 +361,7 @@
                 peopleWithDifferentNames[1].Name.ShouldBe("P2");
                 peopleWithDifferentNames[1].Age.ShouldBe(20);
 
-                var nonExistingPeople = (await repo.GetAsync(p => p.Age, 60)).ToArray();
+                var nonExistingPeople = (await repo.GetWhere(p => p.Age, 60)).ToArray();
 
                 nonExistingPeople.ShouldBeEmpty();
             }
@@ -373,7 +374,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -385,16 +386,16 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(6);
+                (await repo.Insert(people)).ShouldBe(6);
 
-                var onePerson = (await repo.GetAsync(p => p.SomeId, 1)).ToArray();
+                var onePerson = (await repo.GetWhere(p => p.SomeId, 1)).ToArray();
 
                 onePerson.Length.ShouldBe(1);
                 onePerson[0].SomeId.ShouldBe(1);
                 onePerson[0].SomeName.ShouldBe("P1");
                 onePerson[0].Age.ShouldBe(10);
 
-                var peopleWithSameName = (await repo.GetAsync(p => p.SomeName, "P5")).ToArray();
+                var peopleWithSameName = (await repo.GetWhere(p => p.SomeName, "P5")).ToArray();
 
                 peopleWithSameName.Length.ShouldBe(2);
                 peopleWithSameName[0].SomeId.ShouldBe(5);
@@ -405,7 +406,7 @@
                 peopleWithSameName[1].SomeName.ShouldBe("P5");
                 peopleWithSameName[1].Age.ShouldBe(10);
 
-                var peopleWithSameAge = (await repo.GetAsync(p => p.Age, 10)).ToArray();
+                var peopleWithSameAge = (await repo.GetWhere(p => p.Age, 10)).ToArray();
 
                 peopleWithSameAge.Length.ShouldBe(3);
                 peopleWithSameAge[0].SomeId.ShouldBe(1);
@@ -420,7 +421,7 @@
                 peopleWithSameAge[2].SomeName.ShouldBe("P5");
                 peopleWithSameAge[2].Age.ShouldBe(10);
 
-                var peopleWithDifferentNames = (await repo.GetAsync(p => p.SomeName, null, "P1", "P2")).ToArray();
+                var peopleWithDifferentNames = (await repo.GetWhere(p => p.SomeName, null, "P1", "P2")).ToArray();
 
                 peopleWithDifferentNames.Length.ShouldBe(2);
 
@@ -432,7 +433,7 @@
                 peopleWithDifferentNames[1].SomeName.ShouldBe("P2");
                 peopleWithDifferentNames[1].Age.ShouldBe(20);
 
-                var nonExistingPeople = (await repo.GetAsync(p => p.Age, 60)).ToArray();
+                var nonExistingPeople = (await repo.GetWhere(p => p.Age, 60)).ToArray();
 
                 nonExistingPeople.ShouldBeEmpty();
             }
@@ -445,7 +446,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -457,13 +458,13 @@
                     new Person { Name = "P5", Age = 50 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(6);
+                (await repo.Insert(people)).ShouldBe(6);
 
-                var filter1 = new QueryFilter<Person>();
-                filter1.And(p => p.Age, Operand.GreaterThan, 30);
-                filter1.Or(p => p.Name, Operand.Equal, "P1");
+                var filter1 = Filter<Person>.Make
+                    .And(p => p.Age, Operator.GreaterThan, 30)
+                    .Or(p => p.Name, Operator.Equal, "P1");
 
-                var filter1Result = (await repo.GetAsync(filter1)).ToArray();
+                var filter1Result = (await repo.GetWhere(filter1)).ToArray();
                 filter1Result.Length.ShouldBe(3);
 
                 filter1Result[0].Id.ShouldBe(1);
@@ -478,11 +479,11 @@
                 filter1Result[2].Name.ShouldBe("P5");
                 filter1Result[2].Age.ShouldBe(50);
 
-                var filter2 = new QueryFilter<Person>();
-                filter2.And(p => p.Age, Operand.GreaterThanOrEqual, 50);
-                filter2.Or(p => p.Age, Operand.Equal, 20);
+                var filter2 = Filter<Person>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
+                    .Or(p => p.Age, Operator.Equal, 20);
 
-                var filter2Result = (await repo.GetAsync(filter2)).ToArray();
+                var filter2Result = (await repo.GetWhere(filter2)).ToArray();
                 filter2Result.Length.ShouldBe(2);
 
                 filter2Result[0].Id.ShouldBe(2);
@@ -492,6 +493,31 @@
                 filter2Result[1].Id.ShouldBe(6);
                 filter2Result[1].Name.ShouldBe("P5");
                 filter2Result[1].Age.ShouldBe(50);
+
+                var filter3 = Filter<Person>.Make
+                    .And(p => p.Age, Operator.Equal, 50)
+                    .OrIn(p => p.Name, "P2", "P3", "P4");
+
+                var filter3Result = (await repo.GetWhere(filter3))
+                    .OrderBy(x => x.Name)
+                    .ToArray();
+                filter3Result.Length.ShouldBe(4);
+
+                filter3Result[0].Id.ShouldBe(2);
+                filter3Result[0].Name.ShouldBe("P2");
+                filter3Result[0].Age.ShouldBe(20);
+                      
+                filter3Result[1].Id.ShouldBe(3);
+                filter3Result[1].Name.ShouldBe("P3");
+                filter3Result[1].Age.ShouldBe(30);
+                      
+                filter3Result[2].Id.ShouldBe(4);
+                filter3Result[2].Name.ShouldBe("P4");
+                filter3Result[2].Age.ShouldBe(10);
+
+                filter3Result[3].Id.ShouldBe(6);
+                filter3Result[3].Name.ShouldBe("P5");
+                filter3Result[3].Age.ShouldBe(50);
             }
         }
 
@@ -502,47 +528,47 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                (await repo.InsertAsync(p1)).ShouldBe(1);
+                (await repo.Insert(p1)).ShouldBe(1);
 
-                (await repo.GetAsync()).Count().ShouldBe(1);
+                (await repo.Get()).Count().ShouldBe(1);
 
-                var insertedP1 = (await repo.GetAsync()).Single();
+                var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.Id.ShouldBe(1);
                 insertedP1.Name.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(2);
+                (await repo.Insert(p2)).ShouldBe(2);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
-                var insertedP2 = (await repo.GetAsync(p => p.Id, 2)).Single();
+                var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.Id.ShouldBe(2);
                 insertedP2.Name.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new Person { Id = 1, Name = "P3", Age = 30 };
-                (await repo.InsertAsync(p3)).ShouldBe(3);
+                (await repo.Insert(p3)).ShouldBe(3);
 
-                (await repo.GetAsync()).Count().ShouldBe(3);
+                (await repo.Get()).Count().ShouldBe(3);
 
-                var insertedP3 = (await repo.GetAsync(p => p.Id, 3)).Single();
+                var insertedP3 = (await repo.GetWhere(p => p.Id, 3)).Single();
                 insertedP3.ShouldNotBeNull();
                 insertedP3.Id.ShouldBe(3);
                 insertedP3.Name.ShouldBe("P3");
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new Person { Id = 4, Name = "P4", Age = 40 };
-                (await repo.InsertAsync(p4)).ShouldBe(4);
+                (await repo.Insert(p4)).ShouldBe(4);
 
-                (await repo.GetAsync()).Count().ShouldBe(4);
+                (await repo.Get()).Count().ShouldBe(4);
 
-                var insertedP4 = (await repo.GetAsync(p => p.Id, 4)).Single();
+                var insertedP4 = (await repo.GetWhere(p => p.Id, 4)).Single();
                 insertedP4.ShouldNotBeNull();
                 insertedP4.Id.ShouldBe(4);
                 insertedP4.Name.ShouldBe("P4");
@@ -557,47 +583,47 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                (await repo.InsertAsync(p1)).ShouldBe(1);
+                (await repo.Insert(p1)).ShouldBe(1);
 
-                (await repo.GetAsync()).Count().ShouldBe(1);
+                (await repo.Get()).Count().ShouldBe(1);
 
-                var insertedP1 = (await repo.GetAsync()).Single();
+                var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.SomeId.ShouldBe(1);
                 insertedP1.SomeName.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(2);
+                (await repo.Insert(p2)).ShouldBe(2);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
-                var insertedP2 = (await repo.GetAsync(p => p.SomeId, 2)).Single();
+                var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.SomeId.ShouldBe(2);
                 insertedP2.SomeName.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new MyPerson { SomeId = 1, SomeName = "P3", Age = 30 };
-                (await repo.InsertAsync(p3)).ShouldBe(3);
+                (await repo.Insert(p3)).ShouldBe(3);
 
-                (await repo.GetAsync()).Count().ShouldBe(3);
+                (await repo.Get()).Count().ShouldBe(3);
 
-                var insertedP3 = (await repo.GetAsync(p => p.SomeId, 3)).Single();
+                var insertedP3 = (await repo.GetWhere(p => p.SomeId, 3)).Single();
                 insertedP3.ShouldNotBeNull();
                 insertedP3.SomeId.ShouldBe(3);
                 insertedP3.SomeName.ShouldBe("P3");
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new MyPerson { SomeId = 4, SomeName = "P4", Age = 40 };
-                (await repo.InsertAsync(p4)).ShouldBe(4);
+                (await repo.Insert(p4)).ShouldBe(4);
 
-                (await repo.GetAsync()).Count().ShouldBe(4);
+                (await repo.Get()).Count().ShouldBe(4);
 
-                var insertedP4 = (await repo.GetAsync(p => p.SomeId, 4)).Single();
+                var insertedP4 = (await repo.GetWhere(p => p.SomeId, 4)).Single();
                 insertedP4.ShouldNotBeNull();
                 insertedP4.SomeId.ShouldBe(4);
                 insertedP4.SomeName.ShouldBe("P4");
@@ -612,7 +638,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -622,9 +648,9 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -657,7 +683,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -667,9 +693,9 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -702,7 +728,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQueryWithNoIdentity);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -712,9 +738,9 @@
                     new Person { Id = 7, Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people, false)).ShouldBe(4);
+                (await repo.Insert(people, false)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -747,46 +773,46 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                (await repo.InsertAsync(p1)).ShouldBe(1);
+                (await repo.Insert(p1)).ShouldBe(1);
 
-                var insertedP1 = (await repo.GetAsync()).Single();
+                var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.Id.ShouldBe(1);
                 insertedP1.Name.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(2);
+                (await repo.Insert(p2)).ShouldBe(2);
 
-                var insertedP2 = (await repo.GetAsync(p => p.Id, 2)).Single();
+                var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.Id.ShouldBe(2);
                 insertedP2.Name.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.Name = "P1-updated";
                 updateToP1.Age = 60;
 
-                (await repo.UpdateAsync(updateToP1)).ShouldBe(1);
+                (await repo.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
-                var updatedP1 = (await repo.GetAsync(p => p.Id, updateToP1.Id)).Single();
+                var updatedP1 = (await repo.GetWhere(p => p.Id, updateToP1.Id)).Single();
                 updatedP1.ShouldNotBeNull();
                 updatedP1.Id.ShouldBe(updateToP1.Id);
                 updatedP1.Name.ShouldBe("P1-updated");
                 updatedP1.Age.ShouldBe(60);
 
                 var nonExistingPerson = new Person { Id = 1234, Name = "Santa", Age = 96 };
-                (await repo.UpdateAsync(nonExistingPerson)).ShouldBe(0);
+                (await repo.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
             }
         }
 
@@ -797,46 +823,46 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                (await repo.InsertAsync(p1)).ShouldBe(1);
+                (await repo.Insert(p1)).ShouldBe(1);
 
-                var insertedP1 = (await repo.GetAsync()).Single();
+                var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.SomeId.ShouldBe(1);
                 insertedP1.SomeName.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.InsertAsync(p2)).ShouldBe(2);
+                (await repo.Insert(p2)).ShouldBe(2);
 
-                var insertedP2 = (await repo.GetAsync(p => p.SomeId, 2)).Single();
+                var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.SomeId.ShouldBe(2);
                 insertedP2.SomeName.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.SomeName = "P1-updated";
                 updateToP1.Age = 60;
 
-                (await repo.UpdateAsync(updateToP1)).ShouldBe(1);
+                (await repo.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
 
-                var updatedP1 = (await repo.GetAsync(p => p.SomeId, updateToP1.SomeId)).Single();
+                var updatedP1 = (await repo.GetWhere(p => p.SomeId, updateToP1.SomeId)).Single();
                 updatedP1.ShouldNotBeNull();
                 updatedP1.SomeId.ShouldBe(updateToP1.SomeId);
                 updatedP1.SomeName.ShouldBe("P1-updated");
                 updatedP1.Age.ShouldBe(60);
 
                 var nonExistingPerson = new MyPerson { SomeId = 1234, SomeName = "Santa", Age = 96 };
-                (await repo.UpdateAsync(nonExistingPerson)).ShouldBe(0);
+                (await repo.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.GetAsync()).Count().ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
             }
         }
 
@@ -847,7 +873,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -860,14 +886,14 @@
                     new Person { Name = "P5", Age = 70 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(7);
+                (await repo.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 var template1 = new Person { Name = "P0", Age = 0 };
-                (await repo.UpdateAsync(template1, p => p.Age, 10)).ShouldBe(1);
+                (await repo.UpdateWhere(template1, p => p.Age, 10)).ShouldBe(1);
 
-                var snapshot1 = (await repo.GetAsync()).ToArray();
+                var snapshot1 = (await repo.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot1[0].Id.ShouldBe(1);
@@ -882,9 +908,9 @@
                 }
 
                 var template2 = new Person { Name = "P100", Age = 100 };
-                (await repo.UpdateAsync(template2, p => p.Name, "P5")).ShouldBe(3);
+                (await repo.UpdateWhere(template2, p => p.Name, "P5")).ShouldBe(3);
 
-                var snapshot2 = (await repo.GetAsync()).ToArray();
+                var snapshot2 = (await repo.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
 
                 for (var i = snapshot1.Length - 4; i >= 0; i--)
@@ -907,9 +933,9 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new Person { Name = "P200", Age = 200 };
-                (await repo.UpdateAsync(template3, p => p.Id, null,  1,  2,  3)).ShouldBe(3);
+                (await repo.UpdateWhere(template3, p => p.Id, null, 1, 2, 3)).ShouldBe(3);
 
-                var snapshot3 = (await repo.GetAsync()).ToArray();
+                var snapshot3 = (await repo.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot3[0].Id.ShouldBe(1);
@@ -940,7 +966,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -953,14 +979,14 @@
                     new MyPerson { SomeName = "P5", Age = 70 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(7);
+                (await repo.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 var template1 = new MyPerson { SomeName = "P0", Age = 0 };
-                (await repo.UpdateAsync(template1, p => p.Age, 10)).ShouldBe(1);
+                (await repo.UpdateWhere(template1, p => p.Age, 10)).ShouldBe(1);
 
-                var snapshot1 = (await repo.GetAsync()).ToArray();
+                var snapshot1 = (await repo.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot1[0].SomeId.ShouldBe(1);
@@ -975,9 +1001,9 @@
                 }
 
                 var template2 = new MyPerson { SomeName = "P100", Age = 100 };
-                (await repo.UpdateAsync(template2, p => p.SomeName, "P5")).ShouldBe(3);
+                (await repo.UpdateWhere(template2, p => p.SomeName, "P5")).ShouldBe(3);
 
-                var snapshot2 = (await repo.GetAsync()).ToArray();
+                var snapshot2 = (await repo.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
 
                 for (var i = snapshot1.Length - 4; i >= 0; i--)
@@ -1000,9 +1026,9 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new MyPerson { SomeName = "P200", Age = 200 };
-                (await repo.UpdateAsync(template3, p => p.SomeId, null, 1, 2, 3)).ShouldBe(3);
+                (await repo.UpdateWhere(template3, p => p.SomeId, null, 1, 2, 3)).ShouldBe(3);
 
-                var snapshot3 = (await repo.GetAsync()).ToArray();
+                var snapshot3 = (await repo.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot3[0].SomeId.ShouldBe(1);
@@ -1033,7 +1059,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1043,14 +1069,14 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 var someOtherPerson = new Person { Name = "Santa", Age = 96 };
-                (await repo.InsertAsync(someOtherPerson)).ShouldBe(5);
+                (await repo.Insert(someOtherPerson)).ShouldBe(5);
 
-                (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
+                (await repo.Get()).Count().ShouldBe(people.Length + 1);
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -1061,11 +1087,11 @@
                     p.Age = p.Age * 2;
                 });
 
-                (await repo.UpdateAsync(insertedPeople)).ShouldBe(insertedPeople.Length);
+                (await repo.Update(insertedPeople)).ShouldBe(insertedPeople.Length);
 
-                (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
+                (await repo.Get()).Count().ShouldBe(people.Length + 1);
 
-                var allPeople = (await repo.GetAsync()).OrderBy(p => p.Id).ToArray();
+                var allPeople = (await repo.Get()).OrderBy(p => p.Id).ToArray();
 
                 var p1 = allPeople[0];
                 p1.Id.ShouldBe(1);
@@ -1101,7 +1127,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1111,14 +1137,14 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 var someOtherPerson = new MyPerson { SomeName = "Santa", Age = 96 };
-                (await repo.InsertAsync(someOtherPerson)).ShouldBe(5);
+                (await repo.Insert(someOtherPerson)).ShouldBe(5);
 
-                (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
+                (await repo.Get()).Count().ShouldBe(people.Length + 1);
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -1129,11 +1155,11 @@
                     p.Age = p.Age * 2;
                 });
 
-                (await repo.UpdateAsync(insertedPeople)).ShouldBe(insertedPeople.Length);
+                (await repo.Update(insertedPeople)).ShouldBe(insertedPeople.Length);
 
-                (await repo.GetAsync()).Count().ShouldBe(people.Length + 1);
+                (await repo.Get()).Count().ShouldBe(people.Length + 1);
 
-                var allPeople = (await repo.GetAsync()).OrderBy(p => p.SomeId).ToArray();
+                var allPeople = (await repo.Get()).OrderBy(p => p.SomeId).ToArray();
 
                 var p1 = allPeople[0];
                 p1.SomeId.ShouldBe(1);
@@ -1163,13 +1189,49 @@
         }
 
         [Test]
+        public async Task When_updating_custom_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 20 },
+                    new MyPerson { SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 30 },
+                    new MyPerson { SomeName = "P5", Age = 50 },
+                    new MyPerson { SomeName = "P5", Age = 60 },
+                    new MyPerson { SomeName = "P5", Age = 70 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(7);
+
+                var template1 = new MyPerson { SomeName = "P0", Age = 0 };
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50);
+
+                var updatedCount = await repo.UpdateWhere(template1, filter);
+                updatedCount.ShouldBe(3);
+
+                (await repo.GetWhere(p => p.SomeId, 5)).Single().SomeName.ShouldBe("P0");
+                (await repo.GetWhere(p => p.SomeId, 6)).Single().SomeName.ShouldBe("P0");
+                (await repo.GetWhere(p => p.SomeId, 7)).Single().SomeName.ShouldBe("P0");
+            }
+        }
+
+        [Test]
         public async Task When_deleting_non_aliased_model()
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1179,22 +1241,22 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.GetAsync(p => p.Id, 1)).ShouldNotBeEmpty();
-                (await repo.DeleteAsync(p => p.Id, 1)).ShouldBe(1);
-                (await repo.GetAsync()).Count().ShouldBe(3);
-                (await repo.GetAsync(p => p.Id, 1)).ShouldBeEmpty();
+                (await repo.GetWhere(p => p.Id, 1)).ShouldNotBeEmpty();
+                (await repo.DeleteWhere(p => p.Id, 1)).ShouldBe(1);
+                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.GetWhere(p => p.Id, 1)).ShouldBeEmpty();
 
-                (await repo.GetAsync(p => p.Age, 30)).Count().ShouldBe(2);
-                (await repo.DeleteAsync(p => p.Age, 30)).ShouldBe(2);
-                (await repo.GetAsync()).Count().ShouldBe(1);
-                (await repo.GetAsync(p => p.Age, 30)).ShouldBeEmpty();
+                (await repo.GetWhere(p => p.Age, 30)).Count().ShouldBe(2);
+                (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
-                var remainingPeople = (await repo.GetAsync()).Single();
+                var remainingPeople = (await repo.Get()).Single();
                 remainingPeople.Id.ShouldBe(2);
                 remainingPeople.Name.ShouldBe("P2");
                 remainingPeople.Age.ShouldBe(20);
@@ -1209,21 +1271,21 @@
                     new Person { Name = "MP5", Age = 100 }
                 };
 
-                (await repo.InsertAsync(morePeople)).ShouldBe(6);
+                (await repo.Insert(morePeople)).ShouldBe(6);
 
-                var allPeople = (await repo.GetAsync()).ToArray();
+                var allPeople = (await repo.Get()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
 
                 allPeople[0].Id.ShouldBe(remainingPeople.Id);
                 allPeople[0].Name.ShouldBe(remainingPeople.Name);
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
-                (await repo.DeleteAsync(p => p.Id, null, remainingPeople.Id, allPeople[1].Id)).ShouldBe(2);
+                (await repo.DeleteWhere(p => p.Id, null, remainingPeople.Id, allPeople[1].Id)).ShouldBe(2);
 
-                (await repo.GetAsync()).Count().ShouldBe(morePeople.Length + 1 - 2);
+                (await repo.Get()).Count().ShouldBe(morePeople.Length + 1 - 2);
 
-                (await repo.DeleteAsync(p => p.Name, null, "MP4", "MP5")).ShouldBe(3);
+                (await repo.DeleteWhere(p => p.Name, null, "MP4", "MP5")).ShouldBe(3);
 
-                var totalPeopleRemaining = (await repo.GetAsync()).ToArray();
+                var totalPeopleRemaining = (await repo.Get()).ToArray();
                 totalPeopleRemaining.Length.ShouldBe(2);
 
                 totalPeopleRemaining[0].Id.ShouldBe(allPeople[2].Id);
@@ -1243,7 +1305,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1253,22 +1315,22 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.GetAsync(p => p.SomeId, 1)).ShouldNotBeEmpty();
-                (await repo.DeleteAsync(p => p.SomeId, 1)).ShouldBe(1);
-                (await repo.GetAsync()).Count().ShouldBe(3);
-                (await repo.GetAsync(p => p.SomeId, 1)).ShouldBeEmpty();
+                (await repo.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
+                (await repo.DeleteWhere(p => p.SomeId, 1)).ShouldBe(1);
+                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.GetWhere(p => p.SomeId, 1)).ShouldBeEmpty();
 
-                (await repo.GetAsync(p => p.Age, 30)).Count().ShouldBe(2);
-                (await repo.DeleteAsync(p => p.Age, 30)).ShouldBe(2);
-                (await repo.GetAsync()).Count().ShouldBe(1);
-                (await repo.GetAsync(p => p.Age, 30)).ShouldBeEmpty();
+                (await repo.GetWhere(p => p.Age, 30)).Count().ShouldBe(2);
+                (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
-                var remainingPeople = (await repo.GetAsync()).Single();
+                var remainingPeople = (await repo.Get()).Single();
                 remainingPeople.SomeId.ShouldBe(2);
                 remainingPeople.SomeName.ShouldBe("P2");
                 remainingPeople.Age.ShouldBe(20);
@@ -1283,21 +1345,21 @@
                     new MyPerson { SomeName = "MP5", Age = 100 }
                 };
 
-                (await repo.InsertAsync(morePeople)).ShouldBe(6);
+                (await repo.Insert(morePeople)).ShouldBe(6);
 
-                var allPeople = (await repo.GetAsync()).ToArray();
+                var allPeople = (await repo.Get()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
 
                 allPeople[0].SomeId.ShouldBe(remainingPeople.SomeId);
                 allPeople[0].SomeName.ShouldBe(remainingPeople.SomeName);
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
-                (await repo.DeleteAsync(p => p.SomeId, null, remainingPeople.SomeId, allPeople[1].SomeId)).ShouldBe(2);
+                (await repo.DeleteWhere(p => p.SomeId, null, remainingPeople.SomeId, allPeople[1].SomeId)).ShouldBe(2);
 
-                (await repo.GetAsync()).Count().ShouldBe(morePeople.Length + 1 - 2);
+                (await repo.Get()).Count().ShouldBe(morePeople.Length + 1 - 2);
 
-                (await repo.DeleteAsync(p => p.SomeName, null, "MP4", "MP5")).ShouldBe(3);
+                (await repo.DeleteWhere(p => p.SomeName, null, "MP4", "MP5")).ShouldBe(3);
 
-                var totalPeopleRemaining = (await repo.GetAsync()).ToArray();
+                var totalPeopleRemaining = (await repo.Get()).ToArray();
                 totalPeopleRemaining.Length.ShouldBe(2);
 
                 totalPeopleRemaining[0].SomeId.ShouldBe(allPeople[2].SomeId);
@@ -1311,15 +1373,52 @@
         }
 
         [Test]
+        public async Task When_deleting_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 20 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 30 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(4);
+
+                var insertedPeople = (await repo.Get()).ToArray();
+                insertedPeople.Length.ShouldBe(people.Length);
+
+                (await repo.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.Equal, 30);
+
+                (await repo.DeleteWhere(filter)).ShouldBe(2);
+                (await repo.Get()).Count().ShouldBe(2);
+
+                (await repo.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
+                (await repo.GetWhere(p => p.SomeId, 2)).ShouldNotBeEmpty();
+                (await repo.GetWhere(p => p.SomeId, 3)).ShouldBeEmpty();
+                (await repo.GetWhere(p => p.SomeId, 4)).ShouldBeEmpty();
+            }
+        }
+
+        [Test]
         public async Task When_deleting_all_non_aliased_model()
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
-                
-                (await repo.DeleteAllAsync()).ShouldBe(0);
+                (await repo.Get()).ShouldBeEmpty();
+
+                (await repo.DeleteAll()).ShouldBe(0);
 
                 var people = new[]
                 {
@@ -1329,13 +1428,13 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.DeleteAllAsync()).ShouldBe(insertedPeople.Length);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.DeleteAll()).ShouldBe(insertedPeople.Length);
+                (await repo.Get()).ShouldBeEmpty();
             }
         }
 
@@ -1346,9 +1445,9 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
-                (await repo.DeleteAllAsync()).ShouldBe(0);
+                (await repo.DeleteAll()).ShouldBe(0);
 
                 var people = new[]
                 {
@@ -1358,13 +1457,13 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.DeleteAllAsync()).ShouldBe(insertedPeople.Length);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.DeleteAll()).ShouldBe(insertedPeople.Length);
+                (await repo.Get()).ShouldBeEmpty();
             }
         }
 
@@ -1376,13 +1475,13 @@
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)0);
-                
-                (await repo.CountAsync(p => p.Id, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Name)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)0);
 
                 var people = new[]
                 {
@@ -1392,25 +1491,25 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)people.Length);
-                
-                (await repo.CountAsync(p => p.Id, true)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)2);
-                (await repo.CountAsync(p => p.Name, true)).ShouldBe((ulong)3);
-                
-                await repo.DeleteAllAsync();
-                
-                (await repo.CountAsync(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name)).ShouldBe((ulong)0);
-                
-                (await repo.CountAsync(p => p.Id, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Name, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.Name)).ShouldBe((ulong)people.Length);
+
+                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)2);
+                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)3);
+
+                await repo.DeleteAll();
+
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Name)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)0);
             }
         }
 
@@ -1421,14 +1520,14 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                
-                (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)0);
-                
-                (await repo.CountAsync(p => p.SomeId, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.SomeName, true)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
 
                 var people = new[]
                 {
@@ -1438,67 +1537,43 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)people.Length);
-                
-                (await repo.CountAsync(p => p.SomeId, true)).ShouldBe((ulong)people.Length);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)2);
-                (await repo.CountAsync(p => p.SomeName, true)).ShouldBe((ulong)3);
-                
-                await repo.DeleteAllAsync();
-                
-                (await repo.CountAsync(p => p.SomeId)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.SomeName)).ShouldBe((ulong)0);
-                
-                (await repo.CountAsync(p => p.SomeId, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.CountAsync(p => p.SomeName, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)people.Length);
+
+                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)people.Length);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)2);
+                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)3);
+
+                await repo.DeleteAll();
+
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
             }
         }
 
         [Test]
-        public async Task When_min_non_aliased_model()
-        {
-            using (var conn = new SQLiteInMemoryConnection())
-            {
-                var repo = conn.GetRepository<Person>();
-                await conn.ExecuteAsync(TableQuery);
-
-                (await repo.MinAsync(p => p.Id)).ShouldBe(0);
-                (await repo.MinAsync(p => p.Age)).ShouldBe(0);
-                (await repo.MinAsync(p => p.Name)).ShouldBeNull();
-
-                var people = new[]
-                {
-                    new Person { Name = "P1", Age = 10 },
-                    new Person { Name = "P2", Age = 30 },
-                    new Person { Id = 123, Name = "P3", Age = 30 },
-                    new Person { Name = "P3", Age = 30 }
-                };
-
-                (await repo.InsertAsync(people)).ShouldBe(4);
-
-                (await repo.MinAsync(p => p.Id)).ShouldBe(1);
-                (await repo.MinAsync(p => p.Age)).ShouldBe(10);
-                (await repo.MinAsync(p => p.Name)).ShouldBe("P1");
-            }
-        }
-
-        [Test]
-        public async Task When_min_aliased_model()
+        public async Task When_counting_model_with_filter()
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.MinAsync(p => p.SomeId)).ShouldBe(0);
-                (await repo.MinAsync(p => p.Age)).ShouldBe(0);
-                (await repo.MinAsync(p => p.SomeName)).ShouldBeNull();
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)0);
+
+                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
 
                 var people = new[]
                 {
@@ -1508,67 +1583,14 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
-                (await repo.MinAsync(p => p.SomeId)).ShouldBe(1);
-                (await repo.MinAsync(p => p.Age)).ShouldBe(10);
-                (await repo.MinAsync(p => p.SomeName)).ShouldBe("P1");
-            }
-        }
 
-        [Test]
-        public async Task When_max_non_aliased_model()
-        {
-            using (var conn = new SQLiteInMemoryConnection())
-            {
-                var repo = conn.GetRepository<Person>();
-                await conn.ExecuteAsync(TableQuery);
-
-                (await repo.MaxAsync(p => p.Id)).ShouldBe(0);
-                (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
-                (await repo.MaxAsync(p => p.Name)).ShouldBeNull();
-
-                var people = new[]
-                {
-                    new Person { Name = "P1", Age = 10 },
-                    new Person { Name = "P2", Age = 30 },
-                    new Person { Id = 123, Name = "P3", Age = 30 },
-                    new Person { Name = "P3", Age = 30 }
-                };
-
-                (await repo.InsertAsync(people)).ShouldBe(4);
-
-                (await repo.MaxAsync(p => p.Id)).ShouldBe(4);
-                (await repo.MaxAsync(p => p.Age)).ShouldBe(30);
-                (await repo.MaxAsync(p => p.Name)).ShouldBe("P3");
-            }
-        }
-
-        [Test]
-        public async Task When_max_aliased_model()
-        {
-            using (var conn = new SQLiteInMemoryConnection())
-            {
-                var repo = conn.GetRepository<MyPerson>();
-                await conn.ExecuteAsync(TableQuery);
-
-                (await repo.MaxAsync(p => p.SomeId)).ShouldBe(0);
-                (await repo.MaxAsync(p => p.Age)).ShouldBe(0);
-                (await repo.MaxAsync(p => p.SomeName)).ShouldBeNull();
-
-                var people = new[]
-                {
-                    new MyPerson { SomeName = "P1", Age = 10 },
-                    new MyPerson { SomeName = "P2", Age = 30 },
-                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
-                    new MyPerson { SomeName = "P3", Age = 30 }
-                };
-
-                (await repo.InsertAsync(people)).ShouldBe(4);
-
-                (await repo.MaxAsync(p => p.SomeId)).ShouldBe(4);
-                (await repo.MaxAsync(p => p.Age)).ShouldBe(30);
-                (await repo.MaxAsync(p => p.SomeName)).ShouldBe("P3");
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+                
+                (await repo.Count(p => p.SomeId, filter)).ShouldBe((ulong)3);
+                (await repo.Count(p => p.Age, filter, true)).ShouldBe((ulong)1);
             }
         }
 
@@ -1580,7 +1602,7 @@
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1591,19 +1613,19 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(5);
+                (await repo.Insert(people)).ShouldBe(5);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(5);
 
-                (await repo.SumAsync(p => p.Id)).ShouldBe(15);
-                (await repo.SumAsync(p => p.Name)).ShouldBe(0);
-                (await repo.SumAsync(p => p.Age)).ShouldBe(110);
-                
-                (await repo.SumAsync(p => p.Id, true)).ShouldBe(15);
-                (await repo.SumAsync(p => p.Name, true)).ShouldBe(0);
-                (await repo.SumAsync(p => p.Age, true)).ShouldBe(100);
+                (await repo.Sum(p => p.Id)).ShouldBe(15);
+                (await repo.Sum(p => p.Name)).ShouldBe(0);
+                (await repo.Sum(p => p.Age)).ShouldBe(110);
+
+                (await repo.Sum(p => p.Id, true)).ShouldBe(15);
+                (await repo.Sum(p => p.Name, true)).ShouldBe(0);
+                (await repo.Sum(p => p.Age, true)).ShouldBe(100);
             }
         }
 
@@ -1614,7 +1636,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1625,19 +1647,52 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(5);
+                (await repo.Insert(people)).ShouldBe(5);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(5);
 
-                (await repo.SumAsync(p => p.SomeId)).ShouldBe(15);
-                (await repo.SumAsync(p => p.SomeName)).ShouldBe(0);
-                (await repo.SumAsync(p => p.Age)).ShouldBe(110);
-                
-                (await repo.SumAsync(p => p.SomeId, true)).ShouldBe(15);
-                (await repo.SumAsync(p => p.SomeName, true)).ShouldBe(0);
-                (await repo.SumAsync(p => p.Age, true)).ShouldBe(100);
+                (await repo.Sum(p => p.SomeId)).ShouldBe(15);
+                (await repo.Sum(p => p.SomeName)).ShouldBe(0);
+                (await repo.Sum(p => p.Age)).ShouldBe(110);
+
+                (await repo.Sum(p => p.SomeId, true)).ShouldBe(15);
+                (await repo.Sum(p => p.SomeName, true)).ShouldBe(0);
+                (await repo.Sum(p => p.Age, true)).ShouldBe(100);
+            }
+        }
+
+        [Test]
+        public async Task When_sum_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 20 },
+                    new MyPerson { SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 40 },
+                    new MyPerson { SomeName = "P5", Age = 10 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(5);
+
+                var insertedPeople = (await repo.Get()).ToArray();
+
+                insertedPeople.Length.ShouldBe(5);
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.LessThan, 30)
+                    .Or(p => p.Age, Operator.Equal, 40);
+
+                (await repo.Sum(p => p.Age, filter)).ShouldBe(80);
+                (await repo.Sum(p => p.Age, filter, true)).ShouldBe(70);
             }
         }
 
@@ -1648,7 +1703,7 @@
             {
                 var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1661,22 +1716,19 @@
                     new Person { Name = "P7", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(7);
+                (await repo.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(7);
 
-                (await repo.SumAsync(p=> p.Id)).ShouldBe(28);
-                (await repo.SumAsync(p=> p.Age)).ShouldBe(220);
-                
-                (await repo.AvgAsync(p => p.Id)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.Name)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age)).ShouldBe(31.42m, 0.01m);
-                
-                (await repo.AvgAsync(p => p.Id, true)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.Name, true)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age, true)).ShouldBe(35m);
+                (await repo.Avg(p => p.Id)).ShouldBe(4m);
+                (await repo.Avg(p => p.Name)).ShouldBe(0);
+                (await repo.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
+
+                (await repo.Avg(p => p.Id, true)).ShouldBe(4m);
+                (await repo.Avg(p => p.Name, true)).ShouldBe(0);
+                (await repo.Avg(p => p.Age, true)).ShouldBe(35m);
             }
         }
 
@@ -1687,7 +1739,7 @@
             {
                 var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetAsync()).ShouldBeEmpty();
+                (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1700,22 +1752,225 @@
                     new MyPerson { SomeName = "P7", Age = 10 }
                 };
 
-                (await repo.InsertAsync(people)).ShouldBe(7);
+                (await repo.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.GetAsync()).ToArray();
+                var insertedPeople = (await repo.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(7);
 
-                (await repo.SumAsync(p => p.SomeId)).ShouldBe(28);
-                (await repo.SumAsync(p => p.Age)).ShouldBe(220);
-                
-                (await repo.AvgAsync(p => p.SomeId)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.SomeName)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age)).ShouldBe(31.42m, 0.01m);
-                
-                (await repo.AvgAsync(p => p.SomeId, true)).ShouldBe(4m);
-                (await repo.AvgAsync(p => p.SomeName, true)).ShouldBe(0);
-                (await repo.AvgAsync(p => p.Age, true)).ShouldBe(35m);
+                (await repo.Avg(p => p.SomeId)).ShouldBe(4m);
+                (await repo.Avg(p => p.SomeName)).ShouldBe(0);
+                (await repo.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
+
+                (await repo.Avg(p => p.SomeId, true)).ShouldBe(4m);
+                (await repo.Avg(p => p.SomeName, true)).ShouldBe(0);
+                (await repo.Avg(p => p.Age, true)).ShouldBe(35m);
+            }
+        }
+
+        [Test]
+        public async Task When_avg_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 20 },
+                    new MyPerson { SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 40 },
+                    new MyPerson { SomeName = "P5", Age = 50 },
+                    new MyPerson { SomeName = "P6", Age = 60 },
+                    new MyPerson { SomeName = "P7", Age = 10 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(7);
+
+                var insertedPeople = (await repo.Get()).ToArray();
+
+                insertedPeople.Length.ShouldBe(7);
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 40);
+
+                (await repo.Avg(p => p.Age, filter)).ShouldBe(50);
+                (await repo.Avg(p => p.Age, filter, true)).ShouldBe(50);
+            }
+        }
+
+        [Test]
+        public async Task When_min_non_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Min(p => p.Id)).ShouldBe(0);
+                (await repo.Min(p => p.Age)).ShouldBe(0);
+                (await repo.Min(p => p.Name)).ShouldBeNull();
+
+                var people = new[]
+                {
+                    new Person { Name = "P1", Age = 10 },
+                    new Person { Name = "P2", Age = 30 },
+                    new Person { Id = 123, Name = "P3", Age = 30 },
+                    new Person { Name = "P3", Age = 30 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(4);
+
+                (await repo.Min(p => p.Id)).ShouldBe(1);
+                (await repo.Min(p => p.Age)).ShouldBe(10);
+                (await repo.Min(p => p.Name)).ShouldBe("P1");
+            }
+        }
+
+        [Test]
+        public async Task When_min_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Min(p => p.SomeId)).ShouldBe(0);
+                (await repo.Min(p => p.Age)).ShouldBe(0);
+                (await repo.Min(p => p.SomeName)).ShouldBeNull();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 30 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P3", Age = 30 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(4);
+
+                (await repo.Min(p => p.SomeId)).ShouldBe(1);
+                (await repo.Min(p => p.Age)).ShouldBe(10);
+                (await repo.Min(p => p.SomeName)).ShouldBe("P1");
+            }
+        }
+
+        [Test]
+        public async Task When_min_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Min(p => p.SomeId)).ShouldBe(0);
+                (await repo.Min(p => p.Age)).ShouldBe(0);
+                (await repo.Min(p => p.SomeName)).ShouldBeNull();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 30 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 40 },
+                    new MyPerson { SomeName = "P5", Age = 50 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(5);
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+
+                (await repo.Min(p => p.Age, filter)).ShouldBe(30);
+            }
+        }
+
+        [Test]
+        public async Task When_max_non_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Max(p => p.Id)).ShouldBe(0);
+                (await repo.Max(p => p.Age)).ShouldBe(0);
+                (await repo.Max(p => p.Name)).ShouldBeNull();
+
+                var people = new[]
+                {
+                    new Person { Name = "P1", Age = 10 },
+                    new Person { Name = "P2", Age = 30 },
+                    new Person { Id = 123, Name = "P3", Age = 30 },
+                    new Person { Name = "P3", Age = 30 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(4);
+
+                (await repo.Max(p => p.Id)).ShouldBe(4);
+                (await repo.Max(p => p.Age)).ShouldBe(30);
+                (await repo.Max(p => p.Name)).ShouldBe("P3");
+            }
+        }
+
+        [Test]
+        public async Task When_max_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Max(p => p.SomeId)).ShouldBe(0);
+                (await repo.Max(p => p.Age)).ShouldBe(0);
+                (await repo.Max(p => p.SomeName)).ShouldBeNull();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 30 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P3", Age = 30 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(4);
+
+                (await repo.Max(p => p.SomeId)).ShouldBe(4);
+                (await repo.Max(p => p.Age)).ShouldBe(30);
+                (await repo.Max(p => p.SomeName)).ShouldBe("P3");
+            }
+        }
+
+        [Test]
+        public async Task When_max_model_with_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>();
+                await conn.ExecuteAsync(TableQuery);
+
+                (await repo.Max(p => p.SomeId)).ShouldBe(0);
+                (await repo.Max(p => p.Age)).ShouldBe(0);
+                (await repo.Max(p => p.SomeName)).ShouldBeNull();
+
+                var people = new[]
+               {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 30 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 40 },
+                    new MyPerson { SomeName = "P5", Age = 50 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(5);
+
+                var filter = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+
+                (await repo.Max(p => p.Age, filter)).ShouldBe(50);
             }
         }
 
@@ -1747,9 +2002,9 @@
 
                 var repo = conn.GetRepository<SampleModel>();
 
-                (await repo.InsertAsync(sample1)).ShouldBe(1);
+                (await repo.Insert(sample1)).ShouldBe(1);
 
-                var insertedSample1 = (await repo.GetAsync()).Single();
+                var insertedSample1 = (await repo.Get()).Single();
                 insertedSample1.Id.ShouldBe(1);
                 insertedSample1.Int.ShouldBe(sample1.Int);
                 insertedSample1.Decimal.ShouldBe(sample1.Decimal);
@@ -1769,16 +2024,16 @@
                 // [ToDo] - Make sure the bug is fixed in dapper - you can 
                 // then use SetValue of the DateTimeOffsetHandler to store as file time or otherwise.
                 // insertedSample1.DateTimeOffset.TimeOfDay.Milliseconds.ShouldBe(sample1.DateTimeOffset.TimeOfDay.Milliseconds);
-                    
+
                 insertedSample1.Composite.ShouldBe(sample1.Composite);
 
                 insertedSample1.Flag = true;
                 insertedSample1.Double = 5.6;
                 insertedSample1.Text = "Updated";
 
-                (await repo.UpdateAsync(insertedSample1)).ShouldBe(1);
-                (await repo.CountAsync(p => p.Id)).ShouldBe((uint)1);
-                var updatedSample1 = (await repo.GetAsync()).Single();
+                (await repo.Update(insertedSample1)).ShouldBe(1);
+                (await repo.Count(p => p.Id)).ShouldBe((uint)1);
+                var updatedSample1 = (await repo.Get()).Single();
 
                 updatedSample1.Id.ShouldBe(insertedSample1.Id);
                 updatedSample1.Int.ShouldBe(insertedSample1.Int);
@@ -1809,7 +2064,7 @@
                 (await conn.ExistsAsync<Child>()).ShouldBeTrue();
 
                 var repo = conn.GetRepository<Child>();
-                
+
                 var child1 = new Child
                 {
                     Id = 1,
@@ -1819,10 +2074,10 @@
                     Toy = "Toy-1"
                 };
 
-                var insertedId1 = await repo.InsertAsync(child1);
+                var insertedId1 = await repo.Insert(child1);
                 insertedId1.ShouldBe(1);
 
-                var retrievedChild1 = (await repo.GetAsync(c => c.Id, insertedId1)).First();
+                var retrievedChild1 = (await repo.GetWhere(c => c.Id, insertedId1)).First();
                 retrievedChild1.Id.ShouldBe(1);
                 retrievedChild1.Name.ShouldBe("Child-1");
                 retrievedChild1.Age.ShouldBe(10);
@@ -1838,10 +2093,10 @@
                     Toy = "Toy-2"
                 };
 
-                var insertedId2 = await repo.InsertAsync(child2);
+                var insertedId2 = await repo.Insert(child2);
                 insertedId2.ShouldBe(2);
 
-                var retrievedChild2 = (await repo.GetAsync(c => c.Id, insertedId2)).First();
+                var retrievedChild2 = (await repo.GetWhere(c => c.Id, insertedId2)).First();
                 retrievedChild2.Id.ShouldBe(2);
                 retrievedChild2.Name.ShouldBe("Child-2");
                 retrievedChild2.Age.ShouldBe(20);

@@ -37,7 +37,7 @@
         /// </summary>
         public static Task<SQLServerTableInfo> GetTableInfoAsync<T>(this SqlConnection connection)
         {
-            return connection.GetTableInfoAsync(Table.Get<T>().Name);
+            return connection.GetTableInfoAsync(Table.Make<T>().Name);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@
         /// </summary>
         public static async Task<bool> ExistsAsync<T>(this SqlConnection connection)
         {
-            var tableName = Table.Get<T>().Name;
+            var tableName = Table.Make<T>().Name;
             return await connection.ExecuteScalarAsync<uint>(SQLServerSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
     }

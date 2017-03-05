@@ -13,7 +13,7 @@
         [Test]
         public void When_creating_table()
         {
-            var table = Table.Get<Person>();
+            var table = Table.Make<Person>();
             table.Dialect.ShouldBe(Dialect.Generic);
             table.Name.ShouldBe("Person");
             table.Select.ShouldBe("SELECT\r\n"
@@ -49,14 +49,14 @@
         [Test]
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
-            Should.Throw<InvalidOperationException>(() => Table.Get<ModelWithNoIdOrPrimaryKey>())
+            Should.Throw<InvalidOperationException>(() => Table.Make<ModelWithNoIdOrPrimaryKey>())
                 .Message.ShouldBe("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property()
         {
-            var table = Table.Get<SampleModel>();
+            var table = Table.Make<SampleModel>();
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("SampleModel");
@@ -64,9 +64,6 @@
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
                 .Message.ShouldBe("The given key was not present in the dictionary.");
-
-            var sqlQuery = table.GetSqlWithClause<SampleModel, string>(m => m.Text, "SELECT * FROM SampleModel;", true);
-            sqlQuery.ShouldBe("SELECT * FROM SampleModel\r\nAND\r\n    ([Text]  = @Value);");
 
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [SampleModel].[Id] AS 'Id',\r\n"
