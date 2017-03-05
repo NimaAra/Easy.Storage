@@ -1,8 +1,10 @@
 ﻿namespace Easy.Storage.Common
 {
+    using System;
+
     internal static class Formatter
     {
-        internal const string NewLine = "\r\n";
+        internal static readonly string NewLine = Environment.NewLine;
         internal static readonly string Spacer = new string(' ', 4);
         internal static readonly string ColumnSeparator = $",{NewLine}{Spacer}";
         internal static readonly string AndClauseSeparator = $"{NewLine}AND{NewLine}{Spacer}";
