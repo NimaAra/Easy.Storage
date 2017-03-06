@@ -1,5 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite.Extensions
+﻿namespace Easy.Storage.SQLite.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -16,20 +15,13 @@ namespace Easy.Storage.SQLite.Extensions
     /// <summary>
     /// Provides a set of methods to help working with <see cref="SQLiteConnectionBase"/>.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public static class SQLiteExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
-        /// </summary>
-        public static IRepository<T> GetRepository<T>(this SQLiteConnectionBase connection)
-        {
-            return new Repository<T>(connection, Dialect.SQLite);
-        }
-
-        /// <summary>
         /// Returns the <c>SQLite</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjectsAsync(this SQLiteConnectionBase connection)
+        public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(this SQLiteConnectionBase connection)
         {
             return connection.QueryAsync<SQLiteObject>(SQLiteSQL.Master);
         }
@@ -37,24 +29,24 @@ namespace Easy.Storage.SQLite.Extensions
         /// <summary>
         /// Returns <c>True</c> if a table representing <typeparamref name="T"/> exists on the storage.
         /// </summary>
-        public static async Task<bool> ExistsAsync<T>(this SQLiteConnectionBase connection)
+        public static async Task<bool> Exists<T>(this SQLiteConnectionBase connection)
         {
-            var tableName = Table.Make<T>().Name;
+            var tableName = Table.MakeOrGet<T>(Dialect.SQLite).Name;
             return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
 
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQLite</c> database.
         /// </summary>
-        public static Task<SQLiteTableInfo> GetTableInfoAsync<T>(this SQLiteConnectionBase connection)
+        public static Task<SQLiteTableInfo> GetTableInfo<T>(this SQLiteConnectionBase connection)
         {
-            return connection.GetTableInfoAsync(Table.Make<T>().Name);
+            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLite).Name);
         }
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
         /// </summary>
-        public static async Task<SQLiteTableInfo> GetTableInfoAsync(this SQLiteConnectionBase connection, string tableName)
+        public static async Task<SQLiteTableInfo> GetTableInfo(this SQLiteConnectionBase connection, string tableName)
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
@@ -109,7 +101,7 @@ namespace Easy.Storage.SQLite.Extensions
                 };
             }).ToArray();
 
-            var databaseObjects = await connection.GetDatabaseObjectsAsync();
+            var databaseObjects = await connection.GetDatabaseObjects();
 
             return new SQLiteTableInfo
             {
@@ -122,16 +114,16 @@ namespace Easy.Storage.SQLite.Extensions
         /// <summary>
         /// Returns records matching the given <paramref name="term"/>.
         /// </summary>
-        public static Task<IEnumerable<T>> SearchAsync<T>(this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
+        public static Task<IEnumerable<T>> Search<T>(this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
         {
-            var query = Table.Make<T>().Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
+            var query = Table.MakeOrGet<T>(Dialect.SQLite).Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
             return connection.QueryAsync<T>(query, buffered: buffered);
         }
 
         /// <summary>
         /// Returns every attached database and its alias.
         /// </summary>
-        public static async Task<IDictionary<string, FileInfo>> GetAttachedDatabasesAsync(this SQLiteConnectionBase connection)
+        public static async Task<IDictionary<string, FileInfo>> GetAttachedDatabases(this SQLiteConnectionBase connection)
         {
             return (await connection.QueryAsync<dynamic>(SQLiteSQL.AttachedDatabases))
                         .ToDictionary(r => (string)r.name, r => string.IsNullOrWhiteSpace(r.file) ? null : new FileInfo((string)r.file));

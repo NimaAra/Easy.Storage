@@ -20,7 +20,17 @@
             SqlMapper.AddTypeMap(typeof(DateTime), DbType.DateTime2);
             SqlMapper.AddTypeMap(typeof(DateTime?), DbType.DateTime2);
         }
-        
+
+        /// <summary>
+        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// <param name="dialect">The dialect to use for generating <c>SQL</c> DDL and DML queries.</param>
+        /// </summary>
+        public static IRepository<T> GetRepository<T>(this IDbConnection connection, Dialect dialect)
+        {
+            return new Repository<T>(connection, dialect);
+        }
+
         /// <summary>
         /// Executes the given <paramref name="sql"/>.
         /// </summary>

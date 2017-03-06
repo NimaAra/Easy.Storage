@@ -26,7 +26,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.Exists<Person>()).ShouldBeTrue();
             }
         }
 
@@ -35,7 +35,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                (await conn.ExistsAsync<MyPerson>()).ShouldBeTrue();
+                (await conn.Exists<MyPerson>()).ShouldBeTrue();
             }
         }
 
@@ -44,9 +44,9 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                (await conn.ExistsAsync<NonExistingTable>()).ShouldBeFalse();
+                (await conn.Exists<NonExistingTable>()).ShouldBeFalse();
                 await conn.ExecuteAsync(TableQuery);
-                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.Exists<Person>()).ShouldBeTrue();
             }
         }
 
@@ -77,7 +77,7 @@
                 await conn.ExecuteAsync(TableQuery);
                 await conn.ExecuteAsync(ViewQuery);
 
-                var dbObjects = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var dbObjects = (await conn.GetDatabaseObjects()).ToArray();
 
                 dbObjects.ShouldNotBeEmpty();
                 dbObjects.Length.ShouldBeGreaterThan(2);
@@ -107,7 +107,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var tableInfo = await conn.GetTableInfoAsync<Person>();
+                var tableInfo = await conn.GetTableInfo<Person>();
                 tableInfo.ShouldNotBeNull();
                 tableInfo.Database.ShouldBe("SandBox");
                 tableInfo.Schema.ShouldBe("dbo");
@@ -144,7 +144,7 @@
                 tableInfo.Columns[2].Collation.ShouldBeNull();
                 tableInfo.Columns[2].IsPrimaryKey.ShouldBeFalse();
 
-                var exception = Should.Throw<InvalidOperationException>(async () => await conn.GetTableInfoAsync("Bambolini"));
+                var exception = Should.Throw<InvalidOperationException>(async () => await conn.GetTableInfo("Bambolini"));
                 exception.Message.ShouldBe("Table: Bambolini does not seem to exist.");
             }
         }

@@ -50,7 +50,7 @@ AND
         public void When_adding_in_clause()
         {
             var query = FilteredQuery.Make<Person>();
-            query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, true, "Foo", "Bar");
+            query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, true, new [] { "Foo", "Bar" });
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe(new [] { "Foo", "Bar"});
 
@@ -70,7 +70,7 @@ AND
         public void When_adding_not_in_clause()
         {
             var query = FilteredQuery.Make<Person>();
-            query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, false, "Foo", "Bar");
+            query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, false, new[] { "Foo", "Bar" });
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe(new[] { "Foo", "Bar" });
 
@@ -94,7 +94,7 @@ AND
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
-            var sql = query.Compile(Table.Make<Person>().Delete);
+            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).Delete);
             sql.ShouldBe(@"DELETE FROM [Person]
 WHERE
     1 = 1
@@ -110,7 +110,7 @@ AND
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
-            var sql = query.Compile(Table.Make<Person>().UpdateCustom);
+            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).UpdateCustom);
             sql.ShouldBe(@"UPDATE [Person] SET
     [Name] = @Name,
     [Age] = @Age

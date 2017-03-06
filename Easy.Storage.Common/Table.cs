@@ -4,12 +4,10 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
     using Easy.Common;
     using Easy.Common.Extensions;
     using Easy.Storage.Common.Attributes;
-    using Easy.Storage.Common.Extensions;
 
     /// <summary>
     /// Represents information about the table a model should be stored at.
@@ -18,7 +16,7 @@
     {
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
         
-        internal static Table Make<TItem>(Dialect dialect = Dialect.Generic)
+        internal static Table MakeOrGet<TItem>(Dialect dialect)
         {
             var key = new TableKey(typeof(TItem), dialect);
             return Cache.GetOrAdd(key, theKey => new Table(theKey));
@@ -117,18 +115,6 @@
         /// </summary>
         public string Delete { get; }
 
-        internal string GetSqlWithClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string baseQuery, bool single)
-        {
-            var propertyName = selector.GetPropertyName();
-            var columnName = PropertyNamesToColumns[propertyName];
-
-            const string MultipleClause = " IN @Values";
-            const string SingleClause = " = @Value";
-            
-            var subQuery = $"{Formatter.AndClauseSeparator}({columnName} {(single ? SingleClause : MultipleClause)});";
-            return baseQuery.Replace(";", subQuery);
-        }
-
         private static PropertyInfo GetIdentityColumn(PropertyInfo[] props)
         {
             var possibleIdentityColumns = props.Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(IdentityAttribute)))
@@ -176,7 +162,7 @@
             return aliasAttr != null ? aliasAttr.Name : type.Name;
         }
 
-        private static string EscapeAsSqlName(string name)
+        private static string EscapeAsSQLName(string name)
         {
             if (name.IsNullOrEmptyOrWhiteSpace()) { return name; }
 
@@ -199,7 +185,7 @@
                 var propName = prop.Name;
                 var aliasAttr = prop.GetCustomAttribute<AliasAttribute>();
                 var columnName = aliasAttr == null ? propName : aliasAttr.Name;
-                columnName = EscapeAsSqlName(columnName);
+                columnName = EscapeAsSQLName(columnName);
 
                 result.Add(prop, columnName);
             }

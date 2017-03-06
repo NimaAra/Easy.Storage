@@ -45,7 +45,7 @@
         /// </summary>
         /// <param name="selector">The column to take part in the filter.</param>
         /// <param name="values">The values by which the <paramref name="selector"/> should be filtered.</param>
-        public Filter<T> AndIn<TProperty>(Expression<Func<T, TProperty>> selector, params TProperty[] values)
+        public Filter<T> AndIn<TProperty>(Expression<Func<T, TProperty>> selector, IEnumerable<TProperty> values)
         {
             _query.AddInClause(selector, Formatter.AndClauseSeparator, true, values);
             return this;
@@ -56,7 +56,7 @@
         /// </summary>
         /// <param name="selector">The column to take part in the filter.</param>
         /// <param name="values">The values by which the <paramref name="selector"/> should be filtered.</param>
-        public Filter<T> AndNotIn<TProperty>(Expression<Func<T, TProperty>> selector, params TProperty[] values)
+        public Filter<T> AndNotIn<TProperty>(Expression<Func<T, TProperty>> selector, IEnumerable<TProperty> values)
         {
             _query.AddInClause(selector, Formatter.AndClauseSeparator, false, values);
             return this;
@@ -91,7 +91,7 @@
         /// </summary>
         /// <param name="selector">The column to take part in the filter.</param>
         /// <param name="values">The values by which the <paramref name="selector"/> should be filtered.</param>
-        public Filter<T> OrIn<TProperty>(Expression<Func<T, TProperty>> selector, params TProperty[] values)
+        public Filter<T> OrIn<TProperty>(Expression<Func<T, TProperty>> selector, IEnumerable<TProperty> values)
         {
             _query.AddInClause(selector, Formatter.OrClauseSeparator, true, values);
             return this;
@@ -102,7 +102,7 @@
         /// </summary>
         /// <param name="selector">The column to take part in the filter.</param>
         /// <param name="values">The values by which the <paramref name="selector"/> should be filtered.</param>
-        public Filter<T> OrNotIn<TProperty>(Expression<Func<T, TProperty>> selector, params TProperty[] values)
+        public Filter<T> OrNotIn<TProperty>(Expression<Func<T, TProperty>> selector, IEnumerable<TProperty> values)
         {
             _query.AddInClause(selector, Formatter.OrClauseSeparator, false, values);
             return this;

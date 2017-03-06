@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyTitle("Easy.Storage.SQLServer")]
 
-[assembly: AssemblyVersion("0.7.0.0")]
-[assembly: AssemblyFileVersion("0.7.0.0")]
+[assembly: AssemblyVersion("0.7.1.0")]
+[assembly: AssemblyFileVersion("0.7.1.0")]
 
 [assembly: AssemblyCopyright("Copyright © 2017")]
 

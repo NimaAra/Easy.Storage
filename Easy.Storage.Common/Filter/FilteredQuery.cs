@@ -25,7 +25,7 @@ namespace Easy.Storage.Common.Filter
 
         internal IDictionary<string, object> Parameters { get; }
         
-        internal static FilteredQuery Make<T>() => new FilteredQuery(Table.Make<T>());
+        internal static FilteredQuery Make<T>() => new FilteredQuery(Table.MakeOrGet<T>(Dialect.Generic));
 
         /// <summary>
         /// Compiles and gets the <c>SQL</c> of the <see cref="FilteredQuery"/>.
@@ -72,7 +72,7 @@ namespace Easy.Storage.Common.Filter
             AppendSQL(clause, selector, value, @operator.AsString());
         }
 
-        internal void AddInClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string clause, bool isIn, params TProperty[] values)
+        internal void AddInClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string clause, bool isIn, IEnumerable<TProperty> values)
         {
             var inClause = isIn ? Formatter.InClauseSeparator : Formatter.NotInClauseSeparator;
             AppendSQL(clause, selector, values, inClause);

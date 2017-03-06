@@ -12,22 +12,13 @@
     /// <summary>
     /// Provides a set of methods to help working with <see cref="SqlConnection"/>.
     /// </summary>
-    // ReSharper disable once UnusedMember.Global
     // ReSharper disable once InconsistentNaming
     public static class SQLConnectionExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
-        /// </summary>
-        public static IRepository<T> GetRepository<T>(this SqlConnection connection)
-        {
-            return new Repository<T>(connection, Dialect.SQLServer);
-        }
-
-        /// <summary>
         /// Returns the <c>SQL Server</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjectsAsync(this SqlConnection connection)
+        public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(this SqlConnection connection)
         {
             return connection.QueryAsync<SQLServerObject>(SQLServerSQL.AllObjects);
         }
@@ -35,15 +26,15 @@
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQL Server</c> database.
         /// </summary>
-        public static Task<SQLServerTableInfo> GetTableInfoAsync<T>(this SqlConnection connection)
+        public static Task<SQLServerTableInfo> GetTableInfo<T>(this SqlConnection connection)
         {
-            return connection.GetTableInfoAsync(Table.Make<T>().Name);
+            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLServer).Name);
         }
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
         /// </summary>
-        public static async Task<SQLServerTableInfo> GetTableInfoAsync(this SqlConnection connection, string tableName)
+        public static async Task<SQLServerTableInfo> GetTableInfo(this SqlConnection connection, string tableName)
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
@@ -92,9 +83,9 @@
         /// <summary>
         /// Returns <c>True</c> if a table representing <typeparamref name="T"/> exists on the storage.
         /// </summary>
-        public static async Task<bool> ExistsAsync<T>(this SqlConnection connection)
+        public static async Task<bool> Exists<T>(this SqlConnection connection)
         {
-            var tableName = Table.Make<T>().Name;
+            var tableName = Table.MakeOrGet<T>(Dialect.SQLServer).Name;
             return await connection.ExecuteScalarAsync<uint>(SQLServerSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
     }

@@ -5,6 +5,7 @@
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
+    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SQLite;
     using Easy.Storage.SQLite.Connections;
@@ -23,9 +24,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                (await conn.ExistsAsync<Person>()).ShouldBeFalse();
+                (await conn.Exists<Person>()).ShouldBeFalse();
                 await conn.ExecuteAsync(TableQuery);
-                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.Exists<Person>()).ShouldBeTrue();
             }
         }
 
@@ -34,9 +35,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                (await conn.ExistsAsync<MyPerson>()).ShouldBeFalse();
+                (await conn.Exists<MyPerson>()).ShouldBeFalse();
                 await conn.ExecuteAsync(TableQuery);
-                (await conn.ExistsAsync<MyPerson>()).ShouldBeTrue();
+                (await conn.Exists<MyPerson>()).ShouldBeTrue();
             }
         }
 
@@ -45,13 +46,13 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var snapshot1 = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot1 = (await conn.GetDatabaseObjects()).ToArray();
                 snapshot1.ShouldNotBeNull();
                 snapshot1.ShouldBeEmpty();
 
                 await conn.ExecuteAsync(TableQuery);
 
-                var snapshot2 = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot2 = (await conn.GetDatabaseObjects()).ToArray();
                 snapshot2.ShouldNotBeNull();
                 snapshot2.Length.ShouldBe(1);
 
@@ -61,7 +62,7 @@
 
                 await conn.ExecuteAsync(ViewQuery);
 
-                var snapshot3 = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot3 = (await conn.GetDatabaseObjects()).ToArray();
                 snapshot3.ShouldNotBeNull();
                 snapshot3.Length.ShouldBe(2);
 
@@ -75,7 +76,7 @@
 
                 await conn.ExecuteAsync(TriggerQuery);
 
-                var snapshot4 = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot4 = (await conn.GetDatabaseObjects()).ToArray();
                 snapshot4.ShouldNotBeNull();
                 snapshot4.Length.ShouldBe(3);
 
@@ -93,7 +94,7 @@
 
                 await conn.ExecuteAsync(IndexQuery);
 
-                var snapshot5 = (await conn.GetDatabaseObjectsAsync()).ToArray();
+                var snapshot5 = (await conn.GetDatabaseObjects()).ToArray();
                 snapshot5.ShouldNotBeNull();
                 snapshot5.Length.ShouldBe(4);
 
@@ -121,7 +122,7 @@
             using (var conn = new SQLiteInMemoryConnection())
             {
                 await conn.ExecuteAsync(TableQuery);
-                var tableInfo = await conn.GetTableInfoAsync<Person>();
+                var tableInfo = await conn.GetTableInfo<Person>();
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
@@ -159,7 +160,7 @@
             using (var conn = new SQLiteInMemoryConnection())
             {
                 await conn.ExecuteAsync(TableQuery);
-                var tableInfo = await conn.GetTableInfoAsync<MyPerson>();
+                var tableInfo = await conn.GetTableInfo<MyPerson>();
 
                 tableInfo.ShouldNotBeNull();
                 tableInfo.TableName.ShouldBe("Person");
@@ -196,12 +197,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfoAsync<Person>());
+                var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfo<Person>());
                 ex1.Message.ShouldBe("Table: Person does not exist.");
                 ex1.InnerException.ShouldBeOfType<InvalidOperationException>();
                 ex1.InnerException?.Message.ShouldBe("No columns were selected");
 
-                var ex2 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfoAsync("Bambolini"));
+                var ex2 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfo("Bambolini"));
                 ex2.Message.ShouldBe("Table: Bambolini does not exist.");
                 ex2.InnerException.ShouldBeOfType<InvalidOperationException>();
                 ex2.InnerException?.Message.ShouldBe("No columns were selected");
@@ -213,10 +214,10 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                (await conn.ExistsAsync<Person>()).ShouldBeFalse();
+                (await conn.Exists<Person>()).ShouldBeFalse();
                 conn.State.ShouldBe(ConnectionState.Open);
                 await conn.ExecuteAsync(TableQuery);
-                (await conn.ExistsAsync<Person>()).ShouldBeTrue();
+                (await conn.Exists<Person>()).ShouldBeTrue();
             }
         }
 
@@ -267,8 +268,8 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelOne>());
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelTwo>());
 
-                var repoOne = conn.GetRepository<ModelOne>();
-                var repoTwo = conn.GetRepository<ModelTwo>();
+                var repoOne = conn.GetRepository<ModelOne>(Dialect.SQLite);
+                var repoTwo = conn.GetRepository<ModelTwo>(Dialect.SQLite);
 
                 await repoOne.Insert(new[]
                 {

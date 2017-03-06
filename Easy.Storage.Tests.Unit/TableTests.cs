@@ -13,7 +13,7 @@
         [Test]
         public void When_creating_table()
         {
-            var table = Table.Make<Person>();
+            var table = Table.MakeOrGet<Person>(Dialect.Generic);
             table.Dialect.ShouldBe(Dialect.Generic);
             table.Name.ShouldBe("Person");
             table.Select.ShouldBe("SELECT\r\n"
@@ -49,14 +49,14 @@
         [Test]
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
-            Should.Throw<InvalidOperationException>(() => Table.Make<ModelWithNoIdOrPrimaryKey>())
+            Should.Throw<InvalidOperationException>(() => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(Dialect.Generic))
                 .Message.ShouldBe("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property()
         {
-            var table = Table.Make<SampleModel>();
+            var table = Table.MakeOrGet<SampleModel>(Dialect.Generic);
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("SampleModel");

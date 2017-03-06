@@ -70,7 +70,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 var table = repo.Table;
                 table.Dialect.ShouldBe(Dialect.SQLServer);
                 table.Name.ShouldBe("Person");
@@ -111,7 +111,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -173,7 +173,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -235,7 +235,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -297,7 +297,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -359,7 +359,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -434,7 +434,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -510,7 +510,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -566,7 +566,7 @@
 
                 var filter3 = Filter<Person>.Make
                     .And(p => p.Age, Operator.Equal, 50)
-                    .OrIn(p => p.Name, "P2", "P3", "P4");
+                    .OrIn(p => p.Name, new [] { "P2", "P3", "P4" });
 
                 var filter3Result = (await repo.GetWhere(filter3))
                     .OrderBy(x => x.Name)
@@ -595,7 +595,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -653,7 +653,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -711,7 +711,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -759,7 +759,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -814,7 +814,7 @@
 
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<PersonTemp>();
+                var repo = conn.GetRepository<PersonTemp>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(tableQuery);
                 await repo.DeleteAll();
@@ -861,7 +861,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -914,7 +914,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -967,7 +967,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -1063,7 +1063,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -1159,7 +1159,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -1230,7 +1230,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -1301,7 +1301,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
 
                 await conn.ExecuteAsync(TableQuery);
                 await repo.DeleteAll();
@@ -1380,7 +1380,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1457,7 +1457,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1488,7 +1488,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 (await repo.Get()).ShouldBeEmpty();
                 (await repo.DeleteAll()).ShouldBe(0);
 
@@ -1515,7 +1515,7 @@
             using (var conn = new SqlConnection(ConnectionString))
             {
                 await conn.ExecuteAsync(TableQuery);
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
                 (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
@@ -1560,7 +1560,7 @@
             using (var conn = new SqlConnection(ConnectionString))
             {
                 await conn.ExecuteAsync(TableQuery);
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
 
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
                 (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
@@ -1606,7 +1606,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1636,7 +1636,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1666,7 +1666,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1696,7 +1696,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1726,7 +1726,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1766,7 +1766,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1806,7 +1806,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1851,7 +1851,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<MyPerson>();
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -1911,7 +1911,7 @@ CREATE TABLE SampleModel (
             {
                 await conn.ExecuteAsync(tableQuery);
 
-                (await conn.ExistsAsync<SampleModel>()).ShouldBeTrue();
+                (await conn.Exists<SampleModel>()).ShouldBeTrue();
 
                 await conn.ExecuteAsync("DELETE FROM SampleModel");
                 await conn.ExecuteAsync("DBCC CHECKIDENT (SampleModel, RESEED, 0)");
@@ -1934,7 +1934,7 @@ CREATE TABLE SampleModel (
                     Composite = null
                 };
 
-                var repo = conn.GetRepository<SampleModel>();
+                var repo = conn.GetRepository<SampleModel>(Dialect.SQLServer);
 
                 (await repo.Insert(sample1)).ShouldBe(1);
 
@@ -2002,9 +2002,9 @@ CREATE TABLE Child (
             using (var conn = new SqlConnection(ConnectionString))
             {
                 await conn.ExecuteAsync(tableQuery);
-                (await conn.ExistsAsync<Child>()).ShouldBeTrue();
+                (await conn.Exists<Child>()).ShouldBeTrue();
 
-                var repo = conn.GetRepository<Child>();
+                var repo = conn.GetRepository<Child>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Child, RESEED, 0)");
 

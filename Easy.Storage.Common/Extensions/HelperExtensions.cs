@@ -6,12 +6,14 @@
     /// <summary>
     /// Provides a set of helpful methods for working with various objects.
     /// </summary>
-    internal static class HelperExtensions
+    public static class HelperExtensions
     {
         /// <summary>
         /// Converts the given <paramref name="parameters"/> to <see cref="DynamicParameters"/>.
+        /// <param name="parameters">The parameters to be converted to <see cref="DynamicParameters"/>.</param>
+        /// <param name="template">Can be an anonymous type or a <see cref="DynamicParameters"/> bag.</param>
         /// </summary>
-        internal static DynamicParameters ToDynamicParameters(this IDictionary<string, object> parameters, object template = null)
+        public static DynamicParameters ToDynamicParameters(this IDictionary<string, object> parameters, object template = null)
         {
             var result = template == null ? new DynamicParameters() : new DynamicParameters(template);
             foreach (var pair in parameters)

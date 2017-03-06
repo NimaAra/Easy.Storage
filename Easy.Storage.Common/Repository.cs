@@ -25,10 +25,10 @@ namespace Easy.Storage.Common
         /// <summary>
         /// Creates an instance of the <see cref="Repository{T}"/>.
         /// </summary>
-        internal Repository(IDbConnection dbConnection, Dialect dialect = Dialect.Generic)
+        internal Repository(IDbConnection dbConnection, Dialect dialect)
         {
             _connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
-            Table = Table.Make<T>(dialect);
+            Table = Table.MakeOrGet<T>(dialect);
         }
 
         /// <summary>

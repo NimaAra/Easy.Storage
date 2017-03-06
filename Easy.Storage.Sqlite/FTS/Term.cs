@@ -140,7 +140,7 @@
 
             private TermConfig()
             {
-                _table = Table.Make<T>();
+                _table = Table.MakeOrGet<T>(Dialect.Generic);
                 TableName = "[" + _table.Name + "_fts]";
                 PrefixQuery = $"SELECT {TableName}.[docId] FROM {TableName} WHERE";
             }

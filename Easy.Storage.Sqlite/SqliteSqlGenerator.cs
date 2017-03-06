@@ -24,7 +24,7 @@ namespace Easy.Storage.SQLite
         /// </summary>
         public static string Table<T>()
         {
-            var table = Common.Table.Make<T>();
+            var table = Common.Table.MakeOrGet<T>(Dialect.SQLite);
 
             var builder = StringBuilderCache.Acquire();
             builder.AppendLine($"CREATE TABLE IF NOT EXISTS {table.Name} (");
@@ -50,7 +50,7 @@ namespace Easy.Storage.SQLite
         // ReSharper disable once InconsistentNaming
         public static string FTSTable<T>(FTSTableType type, params Expression<Func<T, object>>[] selector)
         {
-            var table = Common.Table.Make<T>();
+            var table = Common.Table.MakeOrGet<T>(Dialect.SQLite);
             var propNameToColumn = table.PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
             var columns = new List<string>();

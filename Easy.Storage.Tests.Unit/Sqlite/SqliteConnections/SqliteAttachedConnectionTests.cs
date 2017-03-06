@@ -33,7 +33,7 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
                 conn.ServerVersion.ShouldBe("3.14.2");
                 conn.State.ShouldBe(ConnectionState.Closed);
 
-                var attachedDbs = await conn.GetAttachedDatabasesAsync();
+                var attachedDbs = await conn.GetAttachedDatabases();
                 attachedDbs.Count.ShouldBe(4);
 
                 attachedDbs["main"].ShouldBeNull();
@@ -43,7 +43,7 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
 
                 conn.Close();
 
-                attachedDbs = await conn.GetAttachedDatabasesAsync();
+                attachedDbs = await conn.GetAttachedDatabases();
                 attachedDbs.Count.ShouldBe(4);
 
                 conn.DataSource.ShouldBe("");
@@ -95,7 +95,7 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
                 conn.FilesToAttach.ShouldBe(sampleDbs);
                 conn.State.ShouldBe(ConnectionState.Closed);
                 
-                var attachedDbs = await conn.GetAttachedDatabasesAsync();
+                var attachedDbs = await conn.GetAttachedDatabases();
 
                 attachedDbs.Count.ShouldBe(4);
 

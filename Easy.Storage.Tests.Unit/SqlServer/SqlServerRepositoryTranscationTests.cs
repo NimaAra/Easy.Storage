@@ -4,8 +4,8 @@
     using System.Data.SqlClient;
     using System.Linq;
     using System.Threading.Tasks;
+    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
-    using Easy.Storage.SQLServer.Extensions;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
@@ -34,7 +34,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -58,7 +58,7 @@
             {
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -85,7 +85,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -112,7 +112,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -136,7 +136,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -162,7 +162,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -191,7 +191,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -233,7 +233,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -275,7 +275,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -317,7 +317,7 @@
                 conn.Open();
                 await conn.ExecuteAsync(TableQuery);
 
-                var repo = conn.GetRepository<Person>();
+                var repo = conn.GetRepository<Person>(Dialect.SQLServer);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 

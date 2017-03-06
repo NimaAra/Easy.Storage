@@ -54,7 +54,7 @@ AND
         public void When_creating_an_in_filter_as_and()
         {
             var filter = Filter<Person>.Make
-                .AndIn(p => p.Id, 1, 2, 3);
+                .AndIn(p => p.Id, new long[] { 1, 2, 3 });
 
             filter.Parameters.ShouldNotBeNull();
             filter.Parameters["Id1"].ShouldBe(new[] { 1, 2, 3 });
@@ -75,7 +75,7 @@ AND
         public void When_creating_a_notin_filter_as_and()
         {
             var filter = Filter<Person>.Make
-                .AndNotIn(p => p.Id, 1, 2, 3);
+                .AndNotIn(p => p.Id, new long[] { 1, 2, 3 });
 
             filter.Parameters.ShouldNotBeNull();
             filter.Parameters["Id1"].ShouldBe(new[] { 1, 2, 3 });
@@ -147,7 +147,7 @@ OR
         {
             var filter = Filter<Person>.Make
                 .And(p => p.Id, Operator.Equal, 1)
-                .OrIn(p => p.Name, "Foo", "Bar");
+                .OrIn(p => p.Name, new[] { "Foo", "Bar" });
 
             filter.Parameters.ShouldNotBeNull();
             filter.Parameters["Id1"].ShouldBe(1);
@@ -172,7 +172,7 @@ OR
         {
             var filter = Filter<Person>.Make
                 .And(p => p.Id, Operator.Equal, 1)
-                .OrNotIn(p => p.Name, "Foo", "Bar");
+                .OrNotIn(p => p.Name, new[] { "Foo", "Bar" });
 
             filter.Parameters.ShouldNotBeNull();
             filter.Parameters["Id1"].ShouldBe(1);
