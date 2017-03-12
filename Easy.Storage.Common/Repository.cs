@@ -182,7 +182,7 @@ namespace Easy.Storage.Common
             {
                 var pName = propNames[idx];
                 Ensure.That<InvalidDataException>(
-                    Table.PropertyNamesToColumns.TryGetValue(pName, out string colName), 
+                    Table.PropertyNamesToColumns.TryGetValue(pName, out string colName),
                     $"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
 
                 builder.Append(Formatter.Spacer).Append(colName).Append(" = @").Append(pName);
