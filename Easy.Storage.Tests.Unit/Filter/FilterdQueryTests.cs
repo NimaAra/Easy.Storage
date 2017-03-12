@@ -110,8 +110,9 @@ AND
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
-            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).UpdateCustom);
+            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).UpdateAll);
             sql.ShouldBe(@"UPDATE [Person] SET
+    [Id] = @Id,
     [Name] = @Name,
     [Age] = @Age
 WHERE

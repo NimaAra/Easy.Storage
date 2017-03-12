@@ -2,7 +2,7 @@
 {
     using Easy.Storage.Common.Attributes;
 
-    [Alias("Person")]
+    [Alias("[Person]")]
     internal sealed class MyPerson
     {
         [Identity]

@@ -69,34 +69,25 @@
         Task<int> Insert(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
-        /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
+        /// Updates every column in the given <paramref name="item"/> (except for the id column) for the record.
+        /// <remarks>The id of the <paramref name="item"/> is used to identify the record to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
         Task<int> Update(T item, IDbTransaction transaction = null);
 
         /// <summary>
-        /// Updates the given <paramref name="item"/> based on the value of the <paramref name="selector"/>.
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null);
-
-        /// <summary>
-        /// Updates the given <paramref name="item"/> based on the values of the <paramref name="selector"/>.
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values);
-
-        /// <summary>
-        /// Updates the given <paramref name="item"/> based on the given <paramref name="filter"/>.
+        /// Updates every column in the given <paramref name="item"/> (including the id column) for the record.
+        /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
         Task<int> UpdateWhere(T item, Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
-        /// Updates the given <paramref name="items"/> based on the value of their ids in the storage.
+        /// Updates every or specified columns in the given <paramref name="item"/> for the record.
+        /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null);
+        Task<int> UpdatePartialWhere(object item, Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
         /// Deletes a record based on the value of the given <paramref name="selector"/>.

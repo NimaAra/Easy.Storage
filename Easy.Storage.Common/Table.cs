@@ -6,8 +6,8 @@
     using System.Linq;
     using System.Reflection;
     using Easy.Common;
-    using Easy.Common.Extensions;
     using Easy.Storage.Common.Attributes;
+    using Easy.Storage.Common.Extensions;
 
     /// <summary>
     /// Represents information about the table a model should be stored at.
@@ -33,15 +33,15 @@
         private Table(TableKey key)
         {
             Dialect = key.Dialect;
-            Name = GetModelName(key.Type);
+            Name = GetModelName(key.Type).GetAsEscapedSQLName();
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             IdentityColumn = GetIdentityColumn(props);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);
             PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
-            var propNames = PropertyToColumns.Keys.Select(p => p.Name);
-            var colNames = PropertyToColumns.Values;
+            var propNames = PropertyToColumns.Keys.Select(p => p.Name).ToArray();
+            var colNames = PropertyToColumns.Values.ToArray();
 
             var allColNames = PropertyToColumns.Select(kv => kv.Value).ToArray();
             var allPropNames = PropertyToColumns.Select(kv => kv.Key.Name).ToArray();
@@ -49,7 +49,7 @@
             var columns = string.Join(Formatter.ColumnSeparator, allColNames);
             var properties = string.Join(Formatter.ColumnSeparator, allPropNames.Select(x => "@" + x));
 
-            var insertSeg = $"INSERT INTO [{Name}]{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columns}{Formatter.NewLine})";
+            var insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columns}{Formatter.NewLine})";
             var valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{properties}{Formatter.NewLine});";
             var insertAll = GetInsertQueries(Dialect, insertSeg, valuesSeg);
 
@@ -60,17 +60,18 @@
             var columnsMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity);
             var propertiesMinusIdentity = string.Join(Formatter.ColumnSeparator, propNamesMinusIdentity.Select(x => "@" + x));
 
-            insertSeg = $"INSERT INTO [{Name}]{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIdentity}{Formatter.NewLine})";
+            insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIdentity}{Formatter.NewLine})";
             valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIdentity}{Formatter.NewLine});";
             var insertIdentity = GetInsertQueries(Dialect, insertSeg, valuesSeg);
 
-            var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"[{Name}].{col} AS '{prop}'"));
+            var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"{Name}.{col} AS '{prop}'"));
+            var allColsEqualProp = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, propName) => $"{col} = @{propName}"));
             var colEqualPropMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity.Zip(propNamesMinusIdentity, (col, propName) => $"{col} = @{propName}"));
 
-            Select =                $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM [{Name}]{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            UpdateDefault =         $"UPDATE [{Name}] SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[IdentityColumn]} = @{IdentityColumn.Name};";
-            UpdateCustom =          $"UPDATE [{Name}] SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            Delete =                $"DELETE FROM [{Name}]{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            Select =                $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            UpdateAll =             $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{allColsEqualProp}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
+            UpdateDefault =         $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[IdentityColumn]} = @{IdentityColumn.Name};";
+            Delete =                $"DELETE FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
             InsertIdentity =        insertIdentity;
             InsertAll =             insertAll;
         }
@@ -91,6 +92,16 @@
         public string Select { get; }
 
         /// <summary>
+        /// Gets the default <c>UPDATE</c> query to update the model based on the model's Ids.
+        /// </summary>
+        public string UpdateDefault { get; }
+
+        /// <summary>
+        /// Gets the default <c>UPDATE</c> query to update the model based on any of the model's columns.
+        /// </summary>
+        public string UpdateAll { get; }
+
+        /// <summary>
         /// Gets the <c>INSERT</c> query to store the model with an identity column defined.
         /// </summary>
         public string InsertIdentity { get; }
@@ -99,16 +110,6 @@
         /// Gets the <c>INSERT</c> query to store all the columns of the model.
         /// </summary>
         public string InsertAll { get; }
-
-        /// <summary>
-        /// Gets the default <c>UPDATE</c> query to update the model based on the model's Ids.
-        /// </summary>
-        public string UpdateDefault { get; }
-
-        /// <summary>
-        /// Gets the default <c>UPDATE</c> query to update the model based on any of the model's columns.
-        /// </summary>
-        public string UpdateCustom { get; }
 
         /// <summary>
         /// Gets the <c>DELETE</c> query to delete the model.
@@ -158,19 +159,7 @@
             var aliasAttr = type
                 .GetCustomAttributes(typeof(AliasAttribute), false)
                 .FirstOrDefault() as AliasAttribute;
-
             return aliasAttr != null ? aliasAttr.Name : type.Name;
-        }
-
-        private static string EscapeAsSQLName(string name)
-        {
-            if (name.IsNullOrEmptyOrWhiteSpace()) { return name; }
-
-            if (!name.StartsWith("[") && !name.EndsWith("]"))
-            {
-                name = string.Concat("[", name, "]");
-            }
-            return name;
         }
 
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
@@ -185,7 +174,7 @@
                 var propName = prop.Name;
                 var aliasAttr = prop.GetCustomAttribute<AliasAttribute>();
                 var columnName = aliasAttr == null ? propName : aliasAttr.Name;
-                columnName = EscapeAsSQLName(columnName);
+                columnName = columnName.GetAsEscapedSQLName();
 
                 result.Add(prop, columnName);
             }

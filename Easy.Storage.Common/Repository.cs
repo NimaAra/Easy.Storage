@@ -4,6 +4,7 @@ namespace Easy.Storage.Common
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.QueryAsync<T>(sql, parameters, transaction, buffered: true);
+            return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.QueryAsync<T>(sql, parameters, transaction, buffered: true);
+            return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.QueryAsync<T>(sql, parameters, transaction, buffered: true);
+            return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace Easy.Storage.Common
         public async Task<long> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
-            return (await _connection.QueryAsync<long>(insertSql, item, transaction, buffered: true)
+            return (await _connection.QueryAsync<long>(insertSql, item, transaction: transaction, buffered: true)
                 .ConfigureAwait(false)).First();
         }
 
@@ -133,69 +134,69 @@ namespace Easy.Storage.Common
             Ensure.NotNull(items, nameof(items));
 
             var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
-            return _connection.ExecuteAsync(insertSql, items, transaction);
+            return _connection.ExecuteAsync(insertSql, items, transaction: transaction);
         }
 
         /// <summary>
-        /// Updates the given <paramref name="item"/> based on the value of the id in the storage.
+        /// Updates every column in the given <paramref name="item"/> (except for the id column) for the record.
+        /// <remarks>The id of the <paramref name="item"/> is used to identify the record to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
         public Task<int> Update(T item, IDbTransaction transaction = null)
         {
-            return _connection.ExecuteAsync(Table.UpdateDefault, item, transaction);
+            return _connection.ExecuteAsync(Table.UpdateDefault, item, transaction: transaction);
         }
 
         /// <summary>
-        /// Updates the given <paramref name="item"/> based on the value of the <paramref name="selector"/>.
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        public Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
-        {
-            Ensure.NotNull(selector, nameof(selector));
-
-            var filter = Filter<T>.Make.And(selector, Operator.Equal, value);
-            var sql = filter.GetSQL(Table.UpdateCustom);
-            var parameters = filter.Parameters.ToDynamicParameters(item);
-
-            return _connection.ExecuteAsync(sql, parameters, transaction);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="item"/> based on the values of the <paramref name="selector"/>.
-        /// </summary>
-        /// <returns>Number of rows affected</returns>
-        public Task<int> UpdateWhere<TProperty>(T item, Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
-        {
-            Ensure.NotNull(selector, nameof(selector));
-
-            var filter = Filter<T>.Make.AndIn(selector, values);
-            var sql = filter.GetSQL(Table.UpdateCustom);
-            var parameters = filter.Parameters.ToDynamicParameters(item);
-
-            return _connection.ExecuteAsync(sql, parameters, transaction);
-        }
-
-        /// <summary>
-        /// Updates the given <paramref name="item"/> based on the given <paramref name="filter"/>.
+        /// Updates every column in the given <paramref name="item"/> (including the id column) for the record.
+        /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
         public Task<int> UpdateWhere(T item, Filter<T> filter, IDbTransaction transaction = null)
         {
             Ensure.NotNull(filter, nameof(filter));
 
-            var sql = filter.GetSQL(Table.UpdateCustom);
+            var sql = filter.GetSQL(Table.UpdateAll);
             var parameters = filter.Parameters.ToDynamicParameters(item);
 
-            return _connection.ExecuteAsync(sql, parameters, transaction);
+            return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
         /// <summary>
-        /// Updates the given <paramref name="items"/> based on the value of their ids in the storage.
+        /// Updates every or specified columns in the given <paramref name="item"/> for the record.
+        /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
-        public Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null)
+        public Task<int> UpdatePartialWhere(object item, Filter<T> filter, IDbTransaction transaction = null)
         {
-            return _connection.ExecuteAsync(Table.UpdateDefault, items, transaction);
+            Ensure.NotNull(filter, nameof(filter));
+
+            var builder = StringBuilderCache.Acquire();
+            builder.Append("UPDATE ").Append(Table.Name).Append(" SET").AppendLine();
+
+            var propNames = item.GetPropertyNames(true, false);
+
+            Ensure.That<InvalidDataException>(propNames.Any(), "Unable to find any properties in: " + nameof(item));
+
+            for (var idx = 0; idx < propNames.Length; idx++)
+            {
+                var pName = propNames[idx];
+                Ensure.That<InvalidDataException>(
+                    Table.PropertyNamesToColumns.TryGetValue(pName, out string colName), 
+                    $"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
+
+                builder.Append(Formatter.Spacer).Append(colName).Append(" = @").Append(pName);
+
+                if (idx < propNames.Length - 1) { builder.Append(Formatter.ColumnSeparatorNoSpace); }
+            }
+
+            builder.Append(Formatter.NewLine).Append("WHERE 1=1");
+
+            var fullSql = filter.GetSQL(StringBuilderCache.GetStringAndRelease(builder));
+            var parameters = filter.Parameters.ToDynamicParameters();
+            parameters.AddDynamicParams(item);
+
+            return _connection.ExecuteAsync(fullSql, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.ExecuteAsync(sql, parameters, transaction);
+            return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -232,7 +233,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.ExecuteAsync(sql, parameters, transaction);
+            return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -248,7 +249,7 @@ namespace Easy.Storage.Common
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
 
-            return _connection.ExecuteAsync(sql, parameters, transaction);
+            return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -407,7 +408,7 @@ namespace Easy.Storage.Common
         public Task<TProperty> Max<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null)
         {
             Ensure.NotNull(selector, nameof(selector));
-            
+
             var column = Table.PropertyNamesToColumns[selector.GetPropertyName()];
             var query = $"SELECT MAX ({column}) FROM {Table.Name}";
             return _connection.ExecuteScalarAsync<TProperty>(query, transaction: transaction);

@@ -31,7 +31,7 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SQLiteConnectionBase connection)
         {
-            var tableName = Table.MakeOrGet<T>(Dialect.SQLite).Name;
+            var tableName = Table.MakeOrGet<T>(Dialect.SQLite).Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
 
@@ -50,10 +50,12 @@
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
+            var escapedTableName = tableName.GetNameFromEscapedSQLName();
+
             IEnumerable<dynamic> tableInfo;
             try
             {
-                tableInfo = await connection.QueryAsync<dynamic>($"PRAGMA table_info({tableName})").ConfigureAwait(false);
+                tableInfo = await connection.QueryAsync<dynamic>($"PRAGMA table_info({escapedTableName})").ConfigureAwait(false);
             }
             catch (InvalidOperationException e)
             {
@@ -91,7 +93,7 @@
 
                 return new SQLiteColumnInfo
                 {
-                    TableName = tableName,
+                    TableName = escapedTableName,
                     Id = i.cid,
                     Name = i.name,
                     Type = columnType,
@@ -105,8 +107,8 @@
 
             return new SQLiteTableInfo
             {
-                TableName = tableName,
-                SQL = databaseObjects.Single(x => x.Type == SQLiteObjectType.Table && x.Name == tableName).SQL,
+                TableName = escapedTableName,
+                SQL = databaseObjects.Single(x => x.Type == SQLiteObjectType.Table && x.Name == escapedTableName).SQL,
                 Columns = columnsInfo
             };
         }

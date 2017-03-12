@@ -31,9 +31,8 @@
     <DocumentationFile>bin\Release\Easy.Storage.SQLServer.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Easy.Common, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Easy.Common.1.9.0\lib\net45\Easy.Common.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Easy.Common, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Easy.Common.1.10.0\lib\net45\Easy.Common.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />

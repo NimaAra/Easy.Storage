@@ -1,6 +1,9 @@
 ﻿namespace Easy.Storage.Tests.Unit.SQLite
 {
     using System;
+    using System.Data.SQLite;
+    using System.Dynamic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -19,14 +22,14 @@
     internal sealed class SQLiteRepositoryTests : Context
     {
         [Test]
-        public void When_checking_table()
+        public void When_checking_table_non_aliased_model()
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
                 var repo = conn.GetRepository<Person>(Dialect.SQLite);
                 var table = repo.Table;
                 table.Dialect.ShouldBe(Dialect.SQLite);
-                table.Name.ShouldBe("Person");
+                table.Name.ShouldBe("[Person]");
                 table.Select.ShouldBe("SELECT\r\n"
                         + "    [Person].[Id] AS 'Id',\r\n"
                         + "    [Person].[Name] AS 'Name',\r\n"
@@ -50,10 +53,53 @@
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    [Id] = @Id;");
 
-                table.UpdateCustom.ShouldBe("UPDATE [Person] SET\r\n"
+                table.UpdateAll.ShouldBe("UPDATE [Person] SET\r\n"
+                        + "    [Id] = @Id,\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    1 = 1;");
+
+                table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
+            }
+        }
+
+        [Test]
+        public void When_checking_table_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var table = repo.Table;
+                table.Dialect.ShouldBe(Dialect.SQLite);
+                table.Name.ShouldBe("[Person]");
+                table.Select.ShouldBe("SELECT\r\n"
+                                      + "    [Person].[Id] AS 'SomeId',\r\n"
+                                      + "    [Person].[Name] AS 'SomeName',\r\n"
+                                      + "    [Person].[Age] AS 'Age'\r\n"
+                                      + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
+
+                table.InsertIdentity.ShouldBe("INSERT INTO [Person]\r\n"
+                                              + "(\r\n"
+                                              + "    [Name],\r\n"
+                                              + "    [Age]\r\n"
+                                              + ")\r\n"
+                                              + "VALUES\r\n"
+                                              + "(\r\n"
+                                              + "    @SomeName,\r\n"
+                                              + "    @Age\r\n"
+                                              + ");\r\n"
+                                              + "SELECT last_insert_rowid();");
+
+                table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
+                                             + "    [Name] = @SomeName,\r\n"
+                                             + "    [Age] = @Age\r\n"
+                                             + "WHERE\r\n    [Id] = @SomeId;");
+
+                table.UpdateAll.ShouldBe("UPDATE [Person] SET\r\n"
+                                         + "    [Id] = @SomeId,\r\n"
+                                         + "    [Name] = @SomeName,\r\n"
+                                         + "    [Age] = @Age\r\n"
+                                         + "WHERE\r\n    1 = 1;");
 
                 table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
             }
@@ -439,7 +485,7 @@
             }
         }
 
-        [Test] // [ToDo] - Add more filters then do the same for aliased
+        [Test]
         public async Task When_getting_non_aliased_models_by_filter()
         {
             using (var conn = new SQLiteInMemoryConnection())
@@ -517,6 +563,88 @@
 
                 filter3Result[3].Id.ShouldBe(6);
                 filter3Result[3].Name.ShouldBe("P5");
+                filter3Result[3].Age.ShouldBe(50);
+            }
+        }
+
+        [Test]
+        public async Task When_getting_aliased_models_by_filter()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson { SomeName = "P1", Age = 10 },
+                    new MyPerson { SomeName = "P2", Age = 20 },
+                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
+                    new MyPerson { SomeName = "P4", Age = 10 },
+                    new MyPerson { SomeName = "P5", Age = 40 },
+                    new MyPerson { SomeName = "P5", Age = 50 }
+                };
+
+                (await repo.Insert(people)).ShouldBe(6);
+
+                var filter1 = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThan, 30)
+                    .Or(p => p.SomeName, Operator.Equal, "P1");
+
+                var filter1Result = (await repo.GetWhere(filter1)).ToArray();
+                filter1Result.Length.ShouldBe(3);
+
+                filter1Result[0].SomeId.ShouldBe(1);
+                filter1Result[0].SomeName.ShouldBe("P1");
+                filter1Result[0].Age.ShouldBe(10);
+
+                filter1Result[1].SomeId.ShouldBe(5);
+                filter1Result[1].SomeName.ShouldBe("P5");
+                filter1Result[1].Age.ShouldBe(40);
+
+                filter1Result[2].SomeId.ShouldBe(6);
+                filter1Result[2].SomeName.ShouldBe("P5");
+                filter1Result[2].Age.ShouldBe(50);
+
+                var filter2 = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
+                    .Or(p => p.Age, Operator.Equal, 20);
+
+                var filter2Result = (await repo.GetWhere(filter2)).ToArray();
+                filter2Result.Length.ShouldBe(2);
+
+                filter2Result[0].SomeId.ShouldBe(2);
+                filter2Result[0].SomeName.ShouldBe("P2");
+                filter2Result[0].Age.ShouldBe(20);
+
+                filter2Result[1].SomeId.ShouldBe(6);
+                filter2Result[1].SomeName.ShouldBe("P5");
+                filter2Result[1].Age.ShouldBe(50);
+
+                var filter3 = Filter<MyPerson>.Make
+                    .And(p => p.Age, Operator.Equal, 50)
+                    .OrIn(p => p.SomeName, new[] { "P2", "P3", "P4" });
+
+                var filter3Result = (await repo.GetWhere(filter3))
+                    .OrderBy(x => x.SomeName)
+                    .ToArray();
+                filter3Result.Length.ShouldBe(4);
+
+                filter3Result[0].SomeId.ShouldBe(2);
+                filter3Result[0].SomeName.ShouldBe("P2");
+                filter3Result[0].Age.ShouldBe(20);
+
+                filter3Result[1].SomeId.ShouldBe(3);
+                filter3Result[1].SomeName.ShouldBe("P3");
+                filter3Result[1].Age.ShouldBe(30);
+
+                filter3Result[2].SomeId.ShouldBe(4);
+                filter3Result[2].SomeName.ShouldBe("P4");
+                filter3Result[2].Age.ShouldBe(10);
+
+                filter3Result[3].SomeId.ShouldBe(6);
+                filter3Result[3].SomeName.ShouldBe("P5");
                 filter3Result[3].Age.ShouldBe(50);
             }
         }
@@ -767,6 +895,437 @@
         }
 
         [Test]
+        public async Task When_updating_non_aliased_model()
+        {
+            /*
+             * Updating Person with nothing else included should update
+             * all columns for the item EXCEPT THE ID of that record
+             */
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new Person{ Age = 10, Name = "P1"},
+                    new Person{ Age = 20, Name = "P2"},
+                    new Person{ Age = 30, Name = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].Id.ShouldBe(1);
+
+                var personToUpdate = new Person
+                {
+                    Id = 0,
+                    Age = 100
+                };
+
+                (await repo.Update(personToUpdate)).ShouldBe(0);
+
+                personToUpdate.Id = peopleInserted[0].Id;
+                Should.Throw<SQLiteException>(async () => await repo.Update(personToUpdate))
+                    .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
+
+                personToUpdate.Name = peopleInserted[0].Name;
+                (await repo.Update(personToUpdate)).ShouldBe(1);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Id.ShouldBe(1);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Name.ShouldBe("P1");
+
+                var anotherPersonToUpdate = new Person
+                {
+                    Id = 3,
+                    Age = 66,
+                    Name = "P3 - Updated"
+                };
+
+                (await repo.Update(anotherPersonToUpdate)).ShouldBe(1);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(3);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
+
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
+            }
+        }
+
+        [Test]
+        public async Task When_updating_aliased_model()
+        {
+            /*
+             * Updating Person with nothing else included should update
+             * all columns for the item EXCEPT THE ID of that record
+             */
+
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new MyPerson{ Age = 10, SomeName = "P1"},
+                    new MyPerson{ Age = 20, SomeName = "P2"},
+                    new MyPerson{ Age = 30, SomeName = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].SomeId.ShouldBe(1);
+
+                var personToUpdate = new MyPerson
+                {
+                    SomeId = 0,
+                    Age = 100
+                };
+
+                (await repo.Update(personToUpdate)).ShouldBe(0);
+
+                personToUpdate.SomeId = peopleInserted[0].SomeId;
+                Should.Throw<SQLiteException>(async () => await repo.Update(personToUpdate))
+                    .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
+
+                personToUpdate.SomeName = peopleInserted[0].SomeName;
+                (await repo.Update(personToUpdate)).ShouldBe(1);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeId.ShouldBe(1);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeName.ShouldBe("P1");
+                
+                var anotherPersonToUpdate = new MyPerson
+                {
+                    SomeId = 3,
+                    Age = 66,
+                    SomeName = "P3 - Updated"
+                };
+
+                (await repo.Update(anotherPersonToUpdate)).ShouldBe(1);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(3);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
+
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
+            }
+        }
+
+        [Test]
+        public async Task When_updating_non_aliased_model_with_filter()
+        {
+            /*
+             * Updating Person with nothing else included should update
+             * all columns for the item EXCEPT THE ID of that record
+             */
+
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new Person{ Age = 10, Name = "P1"},
+                    new Person{ Age = 20, Name = "P2"},
+                    new Person{ Age = 30, Name = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].Id.ShouldBe(1);
+
+                var personToUpdate = new Person
+                {
+                    Id = 0,
+                    Age = 100
+                };
+
+                var filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 0);
+                (await repo.UpdateWhere(personToUpdate, filter)).ShouldBe(0);
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, peopleInserted[0].Id);
+
+                Should.Throw<SQLiteException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                    .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
+
+                personToUpdate.Name = peopleInserted[0].Name;
+                (await repo.UpdateWhere(personToUpdate, filter)).ShouldBe(1);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Id.ShouldBe(0);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Name.ShouldBe("P1");
+
+                var anotherPersonToUpdate = new Person
+                {
+                    Id = 666,
+                    Age = 66,
+                    Name = "P3 - Updated"
+                };
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 3);
+
+                (await repo.UpdateWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(666);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
+
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
+                (await repo.Count(p => p.Id, Filter<Person>.Make.And(p => p.Id, Operator.Equal, 3))).ShouldBe((ulong)0);
+            }
+        }
+
+        [Test]
+        public async Task When_updating_aliased_model_with_filter()
+        {
+            /*
+             * Updating Person with nothing else included should update
+             * all columns for the item EXCEPT THE ID of that record
+             */
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new MyPerson{ Age = 10, SomeName = "P1"},
+                    new MyPerson{ Age = 20, SomeName = "P2"},
+                    new MyPerson{ Age = 30, SomeName = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].SomeId.ShouldBe(1);
+
+                var personToUpdate = new MyPerson
+                {
+                    SomeId = 0,
+                    Age = 100
+                };
+
+                var filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 0);
+                (await repo.UpdateWhere(personToUpdate, filter)).ShouldBe(0);
+
+                filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, peopleInserted[0].SomeId);
+
+                Should.Throw<SQLiteException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                    .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
+
+                personToUpdate.SomeName = peopleInserted[0].SomeName;
+                (await repo.UpdateWhere(personToUpdate, filter)).ShouldBe(1);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeId.ShouldBe(0);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeName.ShouldBe("P1");
+
+                var anotherPersonToUpdate = new MyPerson
+                {
+                    SomeId = 666,
+                    Age = 66,
+                    SomeName = "P3 - Updated"
+                };
+
+                filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 3);
+
+                (await repo.UpdateWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(666);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
+
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
+                (await repo.Count(p => p.SomeId, Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 3))).ShouldBe((ulong)0);
+            }
+        }
+
+        [Test]
+        public async Task When_partially_updating_non_aliased_model()
+        {
+            /*
+             * Updating with a partial item should update ALL the columns
+             * for the item AND the id/filter for the records to be updated should be supplied
+             */
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new Person{ Age = 10, Name = "P1"},
+                    new Person{ Age = 20, Name = "P2"},
+                    new Person{ Age = 30, Name = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].Id.ShouldBe(1);
+
+                var personToUpdate = new
+                {
+                    Age = 100
+                };
+
+                var filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 0);
+
+                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 1);
+                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(filter)).Single().Id.ShouldBe(1);
+                (await repo.GetWhere(filter)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(filter)).Single().Name.ShouldBe("P1");
+
+                var anotherPersonToUpdate = new Person
+                {
+                    Id = 4,
+                    Age = 66,
+                    Name = "P3 - Updated"
+                };
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 3);
+                (await repo.UpdatePartialWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(4);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
+
+                Should.Throw<InvalidDataException>(async () =>
+                    {
+                        dynamic invalidPartial = new ExpandoObject();
+                        invalidPartial.Age = 555;
+                        invalidPartial.SomeName = "P2 - Updated";
+
+                        filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 2);
+                        await repo.UpdatePartialWhere(invalidPartial, filter);
+                    })
+                    .Message.ShouldBe("Property: 'SomeName' does not exist on the model: 'Person'.");
+
+                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new { }, filter))
+                    .Message.ShouldBe("Unable to find any properties in: item");
+
+                dynamic yetAnotherPersonToUpdate = new ExpandoObject();
+                yetAnotherPersonToUpdate.Age = 555;
+                yetAnotherPersonToUpdate.Name = "P2 - Updated";
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 2);
+                ((int)await repo.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(p => p.Id, 2)).Single().Id.ShouldBe(2);
+                (await repo.GetWhere(p => p.Id, 2)).Single().Age.ShouldBe(555);
+                (await repo.GetWhere(p => p.Id, 2)).Single().Name.ShouldBe("P2 - Updated");
+
+                filter = Filter<Person>.Make.And(p => p.Id, Operator.Equal, 3);
+                (await repo.Count(p => p.Id, filter)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
+            }
+        }
+
+        [Test]
+        public async Task When_partially_updating_aliased_model()
+        {
+            /*
+             * Updating with a partial item should update ALL the columns
+             * for the item AND the id/filter for the records to be updated should be supplied
+             */
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+
+                var peopleToInsert = new[]
+                {
+                    new MyPerson{ Age = 10, SomeName = "P1"},
+                    new MyPerson{ Age = 20, SomeName = "P2"},
+                    new MyPerson{ Age = 30, SomeName = "P3"}
+                };
+
+                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+
+                var peopleInserted = (await repo.Get()).ToArray();
+                peopleInserted.Length.ShouldBe(3);
+
+                peopleInserted[0].SomeId.ShouldBe(1);
+
+                var personToUpdate = new
+                {
+                    Age = 100
+                };
+
+                var filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 0);
+
+                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
+
+                filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 1);
+                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(filter)).Single().SomeId.ShouldBe(1);
+                (await repo.GetWhere(filter)).Single().Age.ShouldBe(100);
+                (await repo.GetWhere(filter)).Single().SomeName.ShouldBe("P1");
+
+                var anotherPersonToUpdate = new MyPerson
+                {
+                    SomeId = 4,
+                    Age = 66,
+                    SomeName = "P3 - Updated"
+                };
+
+                filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 3);
+                (await repo.UpdatePartialWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(4);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().Age.ShouldBe(66);
+                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
+
+                Should.Throw<InvalidDataException>(async () =>
+                {
+                    dynamic invalidPartial = new ExpandoObject();
+                    invalidPartial.Age = 555;
+                    invalidPartial.Name = "P2 - Updated";
+
+                    filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 2);
+                    await repo.UpdatePartialWhere(invalidPartial, filter);
+                })
+                .Message.ShouldBe("Property: 'Name' does not exist on the model: 'MyPerson'.");
+
+                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new {}, filter))
+                    .Message.ShouldBe("Unable to find any properties in: item");
+
+                dynamic yetAnotherPersonToUpdate = new ExpandoObject();
+                yetAnotherPersonToUpdate.Age = 555;
+                yetAnotherPersonToUpdate.SomeName = "P2 - Updated";
+
+                ((int)await repo.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
+
+                (await repo.GetWhere(p => p.SomeId, 2)).Single().SomeId.ShouldBe(2);
+                (await repo.GetWhere(p => p.SomeId, 2)).Single().Age.ShouldBe(555);
+                (await repo.GetWhere(p => p.SomeId, 2)).Single().SomeName.ShouldBe("P2 - Updated");
+
+                filter = Filter<MyPerson>.Make.And(p => p.SomeId, Operator.Equal, 3);
+                (await repo.Count(p => p.SomeId, filter)).ShouldBe((ulong)0);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
+            }
+        }
+
+        [Test]
         public async Task When_updating_single_by_id_non_aliased_model()
         {
             using (var conn = new SQLiteInMemoryConnection())
@@ -890,8 +1449,9 @@
 
                 var insertedPeople = (await repo.Get()).ToArray();
 
-                var template1 = new Person { Name = "P0", Age = 0 };
-                (await repo.UpdateWhere(template1, p => p.Age, 10)).ShouldBe(1);
+                var template1 = new { Name = "P0", Age = 0 };
+                var filter = Filter<Person>.Make.And(p => p.Age, Operator.Equal, 10);
+                (await repo.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
                 var snapshot1 = (await repo.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
@@ -907,8 +1467,9 @@
                     snapshot1[i].Age.ShouldBe(insertedPeople[i].Age);
                 }
 
-                var template2 = new Person { Name = "P100", Age = 100 };
-                (await repo.UpdateWhere(template2, p => p.Name, "P5")).ShouldBe(3);
+                var template2 = new { Name = "P100", Age = 100 };
+                filter = Filter<Person>.Make.And(p => p.Name, Operator.Equal, "P5");
+                (await repo.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
                 var snapshot2 = (await repo.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
@@ -932,8 +1493,9 @@
                 snapshot2[6].Name.ShouldBe("P100");
                 snapshot2[6].Age.ShouldBe(100);
 
-                var template3 = new Person { Name = "P200", Age = 200 };
-                (await repo.UpdateWhere(template3, p => p.Id, null, 1, 2, 3)).ShouldBe(3);
+                var template3 = new { Name = "P200", Age = 200 };
+                filter = Filter<Person>.Make.AndIn(p => p.Id, new long[] {1, 2, 3});
+                (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
@@ -983,8 +1545,9 @@
 
                 var insertedPeople = (await repo.Get()).ToArray();
 
-                var template1 = new MyPerson { SomeName = "P0", Age = 0 };
-                (await repo.UpdateWhere(template1, p => p.Age, 10)).ShouldBe(1);
+                var template1 = new { SomeName = "P0", Age = 0 };
+                var filter = Filter<MyPerson>.Make.And(p => p.Age, Operator.Equal, 10);
+                (await repo.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
                 var snapshot1 = (await repo.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
@@ -1000,8 +1563,10 @@
                     snapshot1[i].Age.ShouldBe(insertedPeople[i].Age);
                 }
 
-                var template2 = new MyPerson { SomeName = "P100", Age = 100 };
-                (await repo.UpdateWhere(template2, p => p.SomeName, "P5")).ShouldBe(3);
+                var template2 = new { SomeName = "P100", Age = 100 };
+                filter = Filter<MyPerson>.Make.And(p => p.SomeName, Operator.Equal, "P5");
+
+                (await repo.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
                 var snapshot2 = (await repo.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
@@ -1025,12 +1590,13 @@
                 snapshot2[6].SomeName.ShouldBe("P100");
                 snapshot2[6].Age.ShouldBe(100);
 
-                var template3 = new MyPerson { SomeName = "P200", Age = 200 };
-                (await repo.UpdateWhere(template3, p => p.SomeId, null, 1, 2, 3)).ShouldBe(3);
+                var template3 = new { SomeName = "P200", Age = 200 };
+                filter = Filter<MyPerson>.Make.AndIn(p => p.SomeId, new long[] {1, 2, 3});
+                (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
-
+                
                 snapshot3[0].SomeId.ShouldBe(1);
                 snapshot3[0].SomeName.ShouldBe("P200");
                 snapshot3[0].Age.ShouldBe(200);
@@ -1049,142 +1615,6 @@
                     snapshot3[i].SomeName.ShouldBe(snapshot2[i].SomeName);
                     snapshot3[i].Age.ShouldBe(snapshot2[i].Age);
                 }
-            }
-        }
-
-        [Test]
-        public async Task When_updating_multiple_non_aliased_model()
-        {
-            using (var conn = new SQLiteInMemoryConnection())
-            {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
-                await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
-
-                var people = new[]
-                {
-                    new Person { Name = "P1", Age = 10 },
-                    new Person { Name = "P2", Age = 20 },
-                    new Person { Id = 123, Name = "P3", Age = 30 },
-                    new Person { Name = "P4", Age = 40 }
-                };
-
-                (await repo.Insert(people)).ShouldBe(4);
-
-                var insertedPeople = (await repo.Get()).ToArray();
-
-                var someOtherPerson = new Person { Name = "Santa", Age = 96 };
-                (await repo.Insert(someOtherPerson)).ShouldBe(5);
-
-                (await repo.Get()).Count().ShouldBe(people.Length + 1);
-
-                insertedPeople.Length.ShouldBe(4);
-
-                // update the people
-                Array.ForEach(insertedPeople, p =>
-                {
-                    p.Name = p.Name + "-updated";
-                    p.Age = p.Age * 2;
-                });
-
-                (await repo.Update(insertedPeople)).ShouldBe(insertedPeople.Length);
-
-                (await repo.Get()).Count().ShouldBe(people.Length + 1);
-
-                var allPeople = (await repo.Get()).OrderBy(p => p.Id).ToArray();
-
-                var p1 = allPeople[0];
-                p1.Id.ShouldBe(1);
-                p1.Name.ShouldBe("P1-updated");
-                p1.Age.ShouldBe(20);
-
-                var p2 = allPeople[1];
-                p2.Id.ShouldBe(2);
-                p2.Name.ShouldBe("P2-updated");
-                p2.Age.ShouldBe(40);
-
-                var p3 = allPeople[2];
-                p3.Id.ShouldBe(3);
-                p3.Name.ShouldBe("P3-updated");
-                p3.Age.ShouldBe(60);
-
-                var p4 = allPeople[3];
-                p4.Id.ShouldBe(4);
-                p4.Name.ShouldBe("P4-updated");
-                p4.Age.ShouldBe(80);
-
-                var p5 = allPeople[4];
-                p5.Id.ShouldBe(5);
-                p5.Name.ShouldBe(someOtherPerson.Name);
-                p5.Age.ShouldBe(someOtherPerson.Age);
-            }
-        }
-
-        [Test]
-        public async Task When_updating_multiple_aliased_model()
-        {
-            using (var conn = new SQLiteInMemoryConnection())
-            {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
-                await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
-
-                var people = new[]
-                {
-                    new MyPerson { SomeName = "P1", Age = 10 },
-                    new MyPerson { SomeName = "P2", Age = 20 },
-                    new MyPerson { SomeId = 123, SomeName = "P3", Age = 30 },
-                    new MyPerson { SomeName = "P4", Age = 40 }
-                };
-
-                (await repo.Insert(people)).ShouldBe(4);
-
-                var insertedPeople = (await repo.Get()).ToArray();
-
-                var someOtherPerson = new MyPerson { SomeName = "Santa", Age = 96 };
-                (await repo.Insert(someOtherPerson)).ShouldBe(5);
-
-                (await repo.Get()).Count().ShouldBe(people.Length + 1);
-
-                insertedPeople.Length.ShouldBe(4);
-
-                // update the people
-                Array.ForEach(insertedPeople, p =>
-                {
-                    p.SomeName = p.SomeName + "-updated";
-                    p.Age = p.Age * 2;
-                });
-
-                (await repo.Update(insertedPeople)).ShouldBe(insertedPeople.Length);
-
-                (await repo.Get()).Count().ShouldBe(people.Length + 1);
-
-                var allPeople = (await repo.Get()).OrderBy(p => p.SomeId).ToArray();
-
-                var p1 = allPeople[0];
-                p1.SomeId.ShouldBe(1);
-                p1.SomeName.ShouldBe("P1-updated");
-                p1.Age.ShouldBe(20);
-
-                var p2 = allPeople[1];
-                p2.SomeId.ShouldBe(2);
-                p2.SomeName.ShouldBe("P2-updated");
-                p2.Age.ShouldBe(40);
-
-                var p3 = allPeople[2];
-                p3.SomeId.ShouldBe(3);
-                p3.SomeName.ShouldBe("P3-updated");
-                p3.Age.ShouldBe(60);
-
-                var p4 = allPeople[3];
-                p4.SomeId.ShouldBe(4);
-                p4.SomeName.ShouldBe("P4-updated");
-                p4.Age.ShouldBe(80);
-
-                var p5 = allPeople[4];
-                p5.SomeId.ShouldBe(5);
-                p5.SomeName.ShouldBe(someOtherPerson.SomeName);
-                p5.Age.ShouldBe(someOtherPerson.Age);
             }
         }
 
@@ -1210,12 +1640,17 @@
 
                 (await repo.Insert(people)).ShouldBe(7);
 
-                var template1 = new MyPerson { SomeName = "P0", Age = 0 };
-
                 var filter = Filter<MyPerson>.Make
                     .And(p => p.Age, Operator.GreaterThanOrEqual, 50);
+                Should.Throw<SQLiteException>(async () =>
+                {
+                    var templateWithIdZero = new MyPerson { SomeName = "P0", Age = 0 };
+                    await repo.UpdateWhere(templateWithIdZero, filter);
+                })
+                .Message.ShouldBe("constraint failed\r\nUNIQUE constraint failed: Person.Id");
 
-                var updatedCount = await repo.UpdateWhere(template1, filter);
+                var template = new { SomeName = "P0", Age = 0 };
+                var updatedCount = await repo.UpdatePartialWhere(template, filter);
                 updatedCount.ShouldBe(3);
 
                 (await repo.GetWhere(p => p.SomeId, 5)).Single().SomeName.ShouldBe("P0");
@@ -1975,7 +2410,7 @@
         }
 
         [Test]
-        public async Task When_doing_multiple_operations_with_sample_model()
+        public async Task When_executing_multiple_operations_with_sample_model()
         {
             var tableQuery = SQLiteSQLGenerator.Table<SampleModel>();
 

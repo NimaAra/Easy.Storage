@@ -130,7 +130,7 @@
                 tableInfo.Columns[1].Position.ShouldBe(2);
                 tableInfo.Columns[1].MaximumLength.ShouldBe(50);
                 tableInfo.Columns[1].Scale.ShouldBeNull();
-                tableInfo.Columns[1].IsNullable.ShouldBeTrue();
+                tableInfo.Columns[1].IsNullable.ShouldBeFalse();
                 tableInfo.Columns[1].Collation.ShouldBe("Latin1_General_CS_AS");
                 tableInfo.Columns[1].IsPrimaryKey.ShouldBeFalse();
 

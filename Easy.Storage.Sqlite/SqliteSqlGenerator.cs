@@ -9,6 +9,7 @@ namespace Easy.Storage.SQLite
     using Easy.Common.Extensions;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Attributes;
+    using Easy.Storage.Common.Extensions;
     using Easy.Storage.SQLite.Models;
 
     /// <summary>
@@ -26,8 +27,10 @@ namespace Easy.Storage.SQLite
         {
             var table = Common.Table.MakeOrGet<T>(Dialect.SQLite);
 
+            var tableName = table.Name.GetNameFromEscapedSQLName();
+
             var builder = StringBuilderCache.Acquire();
-            builder.AppendLine($"CREATE TABLE IF NOT EXISTS {table.Name} (");
+            builder.AppendLine($"CREATE TABLE IF NOT EXISTS {tableName} (");
             builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
 
             foreach (var pair in table.PropertyToColumns)
@@ -64,8 +67,7 @@ namespace Easy.Storage.SQLite
                 {
                     var propName = item.GetPropertyName();
 
-                    string column;
-                    if (propNameToColumn.TryGetValue(propName, out column))
+                    if (propNameToColumn.TryGetValue(propName, out string column))
                     {
                         columns.Add(column);
                     }
@@ -76,7 +78,8 @@ namespace Easy.Storage.SQLite
                 }
             }
 
-            var ftsTableName = string.Concat(table.Name, "_fts");
+            var tableName = table.Name.GetNameFromEscapedSQLName();
+            var ftsTableName = string.Concat(tableName, "_fts");
             var ftsColumns = string.Join(", ", columns);
 
             switch (type)
@@ -87,23 +90,23 @@ namespace Easy.Storage.SQLite
                     return $"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"\", {ftsColumns});";
                 case FTSTableType.ExternalContent:
                     var builder = StringBuilderCache.Acquire();
-                    builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"{table.Name}\", {ftsColumns});");
+                    builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"{tableName}\", {ftsColumns});");
                     builder.AppendLine();
 
                     var ftsTriggerColumns = string.Join(", ", columns.Select(c => "new." + c));
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bu BEFORE UPDATE ON {table.Name} BEGIN");
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bu BEFORE UPDATE ON {tableName} BEGIN");
                     builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
                     builder.AppendLine("END;");
                     builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_bd BEFORE DELETE ON {table.Name} BEGIN");
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bd BEFORE DELETE ON {tableName} BEGIN");
                     builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
                     builder.AppendLine("END;");
                     builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_au AFTER UPDATE ON {table.Name} BEGIN");
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_au AFTER UPDATE ON {tableName} BEGIN");
                     builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
                     builder.AppendLine("END;");
                     builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {table.Name}_ai AFTER INSERT ON {table.Name} BEGIN");
+                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_ai AFTER INSERT ON {tableName} BEGIN");
                     builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
                     builder.Append("END;");
                     return StringBuilderCache.GetStringAndRelease(builder);

@@ -198,7 +198,7 @@
             using (var conn = new SQLiteInMemoryConnection())
             {
                 var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfo<Person>());
-                ex1.Message.ShouldBe("Table: Person does not exist.");
+                ex1.Message.ShouldBe("Table: [Person] does not exist.");
                 ex1.InnerException.ShouldBeOfType<InvalidOperationException>();
                 ex1.InnerException?.Message.ShouldBe("No columns were selected");
 

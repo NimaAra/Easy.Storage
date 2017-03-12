@@ -8,6 +8,7 @@
     using Easy.Common;
     using Easy.Common.Extensions;
     using Easy.Storage.Common;
+    using Easy.Storage.Common.Extensions;
 
     /// <summary>
     /// Represents an object for creating <c>Full Text Search</c> queries.
@@ -141,7 +142,7 @@
             private TermConfig()
             {
                 _table = Table.MakeOrGet<T>(Dialect.Generic);
-                TableName = "[" + _table.Name + "_fts]";
+                TableName = "[" + _table.Name.GetNameFromEscapedSQLName() + "_fts]";
                 PrefixQuery = $"SELECT {TableName}.[docId] FROM {TableName} WHERE";
             }
 

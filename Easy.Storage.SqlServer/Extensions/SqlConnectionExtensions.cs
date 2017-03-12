@@ -28,7 +28,7 @@
         /// </summary>
         public static Task<SQLServerTableInfo> GetTableInfo<T>(this SqlConnection connection)
         {
-            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLServer).Name);
+            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLServer).Name.GetNameFromEscapedSQLName());
         }
 
         /// <summary>
@@ -85,7 +85,7 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SqlConnection connection)
         {
-            var tableName = Table.MakeOrGet<T>(Dialect.SQLServer).Name;
+            var tableName = Table.MakeOrGet<T>(Dialect.SQLServer).Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(SQLServerSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
     }
