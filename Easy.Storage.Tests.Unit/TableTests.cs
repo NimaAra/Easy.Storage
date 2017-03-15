@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using Easy.Storage.Common;
+    using Easy.Storage.SQLite;
+    using Easy.Storage.SQLServer;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
@@ -13,8 +15,9 @@
         [Test]
         public void When_creating_table()
         {
-            var table = Table.MakeOrGet<Person>(Dialect.Generic);
-            table.Dialect.ShouldBe(Dialect.Generic);
+            var table = Table.MakeOrGet<Person>(GenericSQLDialect.Instance);
+            table.Dialect.ShouldBe(GenericSQLDialect.Instance);
+            table.Dialect.Type.ShouldBe(DialectType.Generic);
             table.Name.ShouldBe("[Person]");
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [Person].[Id] AS 'Id',\r\n"
@@ -33,7 +36,7 @@
                     + "    @Age\r\n"
                     + ");");
 
-            table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [Person] SET\r\n"
                     + "    [Name] = @Name,\r\n"
                     + "    [Age] = @Age\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
@@ -50,14 +53,14 @@
         [Test]
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
-            Should.Throw<InvalidOperationException>(() => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(Dialect.Generic))
+            Should.Throw<InvalidOperationException>(() => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance))
                 .Message.ShouldBe("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_generic_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(Dialect.Generic);
+            var table = Table.MakeOrGet<SampleModel>(GenericSQLDialect.Instance);
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("[SampleModel]");
@@ -107,7 +110,7 @@
                     + "    @DateTimeOffset\r\n"
                     + ");");
 
-            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -140,7 +143,7 @@
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_sqlite_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(Dialect.SQLite);
+            var table = Table.MakeOrGet<SampleModel>(SQLiteDialect.Instance);
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("[SampleModel]");
@@ -189,9 +192,9 @@
                                           + "    @DateTime,\r\n"
                                           + "    @DateTimeOffset\r\n"
                                           + ");\r\n"
-                                          +"SELECT last_insert_rowid();");
+                                          +"SELECT last_insert_rowid() AS Id;");
 
-            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
                                          + "    [Text] = @Text,\r\n"
                                          + "    [Int] = @Int,\r\n"
                                          + "    [Decimal] = @Decimal,\r\n"
@@ -224,7 +227,7 @@
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_sqlserver_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(Dialect.SQLServer);
+            var table = Table.MakeOrGet<SampleModel>(SQLServerDialect.Instance);
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("[SampleModel]");
@@ -276,7 +279,7 @@
                                           + ");\r\n"
                                           + "SELECT Id FROM @InsertedRows;");
 
-            table.UpdateDefault.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
                                          + "    [Text] = @Text,\r\n"
                                          + "    [Int] = @Int,\r\n"
                                          + "    [Decimal] = @Decimal,\r\n"

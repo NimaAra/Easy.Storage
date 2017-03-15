@@ -18,6 +18,7 @@
         
         internal static Table MakeOrGet<TItem>(Dialect dialect)
         {
+            Ensure.NotNull(dialect, nameof(dialect));
             var key = new TableKey(typeof(TItem), dialect);
             return Cache.GetOrAdd(key, theKey => new Table(theKey));
         }
@@ -25,59 +26,27 @@
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
-        // ReSharper disable once InconsistentNaming
-        private const string SQLServerInsertedRowDeclarationClause = "DECLARE @InsertedRows AS TABLE (Id BIGINT);";
-        // ReSharper disable once InconsistentNaming
-        private const string SQLServerSelectInsertedRowClause = "SELECT Id FROM @InsertedRows;";
-
+        
         private Table(TableKey key)
         {
             Dialect = key.Dialect;
             Name = GetModelName(key.Type).GetAsEscapedSQLName();
-            var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
+            var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             IdentityColumn = GetIdentityColumn(props);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);
             PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
-            var propNames = PropertyToColumns.Keys.Select(p => p.Name).ToArray();
-            var colNames = PropertyToColumns.Values.ToArray();
-
-            var allColNames = PropertyToColumns.Select(kv => kv.Value).ToArray();
-            var allPropNames = PropertyToColumns.Select(kv => kv.Key.Name).ToArray();
-
-            var columns = string.Join(Formatter.ColumnSeparator, allColNames);
-            var properties = string.Join(Formatter.ColumnSeparator, allPropNames.Select(x => "@" + x));
-
-            var insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columns}{Formatter.NewLine})";
-            var valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{properties}{Formatter.NewLine});";
-            var insertAll = GetInsertQueries(Dialect, insertSeg, valuesSeg);
-
-            var propToColsMinusIdentity = PropertyToColumns.Where(p => p.Key != IdentityColumn).ToArray();
-            var colNamesMinusIdentity = propToColsMinusIdentity.Select(kv => kv.Value).ToArray();
-            var propNamesMinusIdentity = propToColsMinusIdentity.Select(kv => kv.Key.Name).ToArray();
-
-            var columnsMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity);
-            var propertiesMinusIdentity = string.Join(Formatter.ColumnSeparator, propNamesMinusIdentity.Select(x => "@" + x));
-
-            insertSeg = $"INSERT INTO {Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsMinusIdentity}{Formatter.NewLine})";
-            valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{propertiesMinusIdentity}{Formatter.NewLine});";
-            var insertIdentity = GetInsertQueries(Dialect, insertSeg, valuesSeg);
-
-            var colsAsPropNameAlias = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, prop) => $"{Name}.{col} AS '{prop}'"));
-            var allColsEqualProp = string.Join(Formatter.ColumnSeparator, colNames.Zip(propNames, (col, propName) => $"{col} = @{propName}"));
-            var colEqualPropMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity.Zip(propNamesMinusIdentity, (col, propName) => $"{col} = @{propName}"));
-
-            Select =                $"SELECT{Formatter.NewLine}{Formatter.Spacer}{colsAsPropNameAlias}{Formatter.NewLine}FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            UpdateAll =             $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{allColsEqualProp}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            UpdateDefault =         $"UPDATE {Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{PropertyToColumns[IdentityColumn]} = @{IdentityColumn.Name};";
-            Delete =                $"DELETE FROM {Name}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}1 = 1;";
-            InsertIdentity =        insertIdentity;
-            InsertAll =             insertAll;
+            Select = Dialect.GetSelectQuery(this);
+            Delete = Dialect.GetDeleteQuery(this);
+            UpdateAll = Dialect.GetUpdateQuery(this, true);
+            UpdateIdentity = Dialect.GetUpdateQuery(this, false);
+            InsertAll = Dialect.GetInsertQuery(this, true);
+            InsertIdentity = Dialect.GetInsertQuery(this, false);
         }
 
         /// <summary>
-        /// Gets the type of the <c>SQL</c> database.
+        /// Gets the <see cref="Dialect"/> used to generate this instance.
         /// </summary>
         public Dialect Dialect { get; }
 
@@ -94,7 +63,7 @@
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on the model's Ids.
         /// </summary>
-        public string UpdateDefault { get; }
+        public string UpdateIdentity { get; }
 
         /// <summary>
         /// Gets the default <c>UPDATE</c> query to update the model based on any of the model's columns.
@@ -118,7 +87,8 @@
 
         private static PropertyInfo GetIdentityColumn(PropertyInfo[] props)
         {
-            var possibleIdentityColumns = props.Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(IdentityAttribute)))
+            var possibleIdentityColumns = props
+                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(IdentityAttribute)))
                 .ToArray();
 
             Ensure.That<InvalidOperationException>(possibleIdentityColumns.Length <= 1,
@@ -127,31 +97,11 @@
             // A marked Identity property has precedence over default Id property
             if (possibleIdentityColumns.Length == 1) { return possibleIdentityColumns[0]; }
 
-            var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id" &&
-                (p.PropertyType == typeof(int) || p.PropertyType == typeof(long)));
+            var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id");
 
             if (defaultIdProp != null) { return defaultIdProp; }
 
             throw new InvalidOperationException("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
-        }
-
-        private string GetInsertQueries(Dialect dialect, string insertSegment, string valuesSegment)
-        {
-            switch (dialect)
-            {
-                case Dialect.SQLite:
-                    return $"{insertSegment}{valuesSegment}{Formatter.NewLine}SELECT last_insert_rowid();";
-
-                case Dialect.SQLServer:
-                    var idColumnName = PropertyToColumns[IdentityColumn];
-                    var outputClause = $"OUTPUT Inserted.{idColumnName} INTO @InsertedRows";
-                    return $"{SQLServerInsertedRowDeclarationClause}{Formatter.NewLine}{insertSegment} {outputClause}{valuesSegment}{Formatter.NewLine}{SQLServerSelectInsertedRowClause}";
-
-                case Dialect.Generic:
-                    return $"{insertSegment}{valuesSegment}";
-            }
-
-            throw new ArgumentOutOfRangeException(nameof(dialect), dialect, null);
         }
 
         private static string GetModelName(Type type)

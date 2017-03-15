@@ -16,6 +16,15 @@
     public static class SQLConnectionExtensions
     {
         /// <summary>
+        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// </summary>
+        public static IRepository<T> GetRepository<T>(this SqlConnection connection)
+        {
+            return new Repository<T>(connection, SQLServerDialect.Instance);
+        }
+
+        /// <summary>
         /// Returns the <c>SQL Server</c> objects in the database.
         /// </summary>
         public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(this SqlConnection connection)
@@ -28,7 +37,7 @@
         /// </summary>
         public static Task<SQLServerTableInfo> GetTableInfo<T>(this SqlConnection connection)
         {
-            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLServer).Name.GetNameFromEscapedSQLName());
+            return connection.GetTableInfo(Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName());
         }
 
         /// <summary>
@@ -85,7 +94,7 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SqlConnection connection)
         {
-            var tableName = Table.MakeOrGet<T>(Dialect.SQLServer).Name.GetNameFromEscapedSQLName();
+            var tableName = Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(SQLServerSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
     }

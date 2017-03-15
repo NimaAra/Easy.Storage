@@ -57,7 +57,7 @@
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        Task<long> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
+        Task<dynamic> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
         /// Inserts the given <paramref name="items"/> to the storage.

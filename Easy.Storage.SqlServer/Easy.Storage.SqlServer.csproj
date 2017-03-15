@@ -48,6 +48,7 @@
     <Compile Include="Models\SQLServerObjectType.cs" />
     <Compile Include="Models\SQLServerDataType.cs" />
     <Compile Include="Models\SQLServerTableInfo.cs" />
+    <Compile Include="SQLServerDialect.cs" />
     <Compile Include="SQLServerSQL.cs" />
   </ItemGroup>
   <ItemGroup>

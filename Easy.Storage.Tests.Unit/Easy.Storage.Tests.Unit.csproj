@@ -50,6 +50,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dialect\GenericSQLDialectTests.cs" />
+    <Compile Include="Dialect\SQLiteDialectTests.cs" />
+    <Compile Include="Dialect\SQLServerDialectTests.cs" />
     <Compile Include="Filter\FilterdQueryTests.cs" />
     <Compile Include="Filter\FilterTests.cs" />
     <Compile Include="Models\Child.cs" />

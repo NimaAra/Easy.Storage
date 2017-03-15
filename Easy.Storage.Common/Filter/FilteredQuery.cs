@@ -25,7 +25,7 @@ namespace Easy.Storage.Common.Filter
 
         internal IDictionary<string, object> Parameters { get; }
         
-        internal static FilteredQuery Make<T>() => new FilteredQuery(Table.MakeOrGet<T>(Dialect.Generic));
+        internal static FilteredQuery Make<T>() => new FilteredQuery(Table.MakeOrGet<T>(GenericSQLDialect.Instance));
 
         /// <summary>
         /// Compiles and gets the <c>SQL</c> of the <see cref="FilteredQuery"/>.

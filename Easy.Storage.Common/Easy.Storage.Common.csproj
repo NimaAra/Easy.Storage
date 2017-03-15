@@ -49,13 +49,15 @@
     <Compile Include="Attributes\AliasAttribute.cs" />
     <Compile Include="Attributes\IgnoreAttribute.cs" />
     <Compile Include="Attributes\IdentityAttribute.cs" />
-    <Compile Include="Dialect.cs" />
+    <Compile Include="DialectType.cs" />
     <Compile Include="Extensions\DbConnectionExtensions.cs" />
     <Compile Include="Extensions\HelperExtensions.cs" />
     <Compile Include="Extensions\Reader.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Filter\FilteredQuery.cs" />
     <Compile Include="Filter\Operator.cs" />
+    <Compile Include="Dialect.cs" />
+    <Compile Include="GenericSQLDialect.cs" />
     <Compile Include="TypeHandlers\DateTimeOffsetHandler.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="TypeHandlers\GuidHandler.cs" />

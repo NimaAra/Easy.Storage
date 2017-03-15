@@ -4,7 +4,6 @@
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SQLite;
     using Easy.Storage.SQLite.Connections;
@@ -56,7 +55,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Debug, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var selectAllTerm = Term<FTSContext.Log>.All;
@@ -90,7 +89,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
@@ -123,7 +122,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Cat and a Dog"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
@@ -151,7 +150,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a very big cat"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
@@ -185,7 +184,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Parrot"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
@@ -219,7 +218,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "There is a Parrot"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All
@@ -248,7 +247,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Fatal, Message = "software development in Mac OS operating system may be fun!"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All;
@@ -319,7 +318,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "football is awesome"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All.And(Match.All, l => l.Message, "John", "Mary", "football");
@@ -366,7 +365,7 @@
                     new FTSContext.Log {Level = FTSContext.Level.Warn, Message = "football is awesome"}
                 };
 
-                var repo = conn.GetRepository<FTSContext.Log>(Dialect.SQLite);
+                var repo = conn.GetRepository<FTSContext.Log>(SQLiteDialect.Instance);
                 await repo.Insert(logs);
 
                 var term = Term<FTSContext.Log>.All.And(Match.Any, l => l.Message, "John", "Mary", "football");

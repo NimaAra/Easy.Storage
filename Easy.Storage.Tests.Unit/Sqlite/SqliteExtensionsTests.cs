@@ -5,7 +5,6 @@
     using System.Data.SQLite;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SQLite;
     using Easy.Storage.SQLite.Connections;
@@ -268,8 +267,8 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelOne>());
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelTwo>());
 
-                var repoOne = conn.GetRepository<ModelOne>(Dialect.SQLite);
-                var repoTwo = conn.GetRepository<ModelTwo>(Dialect.SQLite);
+                var repoOne = conn.GetRepository<ModelOne>(SQLiteDialect.Instance);
+                var repoTwo = conn.GetRepository<ModelTwo>(SQLiteDialect.Instance);
 
                 await repoOne.Insert(new[]
                 {

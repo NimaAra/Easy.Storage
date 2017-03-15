@@ -4,8 +4,8 @@
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
+    using Easy.Storage.SQLite;
     using Easy.Storage.SQLite.Connections;
     using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
@@ -30,7 +30,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person);
 
                     using (var tran = conn.BeginTransaction())
@@ -61,7 +61,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
 
                     using (var tran = conn.BeginTransaction())
                     {
@@ -94,7 +94,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     using (var tran = conn.BeginTransaction())
                     {
                         await repo.Insert(person);
@@ -127,7 +127,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     using (var tran = conn.BeginTransaction())
                     {
                         await repo.Insert(person);
@@ -158,7 +158,7 @@
 
                     var person1 = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person1);
 
                     using (var tran = conn.BeginTransaction())
@@ -192,7 +192,7 @@
 
                     var person1 = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person1);
 
                     using (var tran = conn.BeginTransaction())
@@ -228,7 +228,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person);
 
                     var insertedPerson = (await repo.Get()).Single();
@@ -277,7 +277,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person);
 
                     var insertedPerson = (await repo.Get()).Single();
@@ -326,7 +326,7 @@
 
                     var person = new Person {Name = "P1", Age = 10};
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person);
 
                     var insertedPerson = (await repo.Get()).Single();
@@ -376,7 +376,7 @@
 
                     var person = new Person { Name = "P1", Age = 10 };
 
-                    var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                    var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                     await repo.Insert(person);
 
                     var insertedPerson = (await repo.Get()).Single();

@@ -45,7 +45,7 @@
             using (var conn = new SqlConnection(ConnectionString))
             {
                 (await conn.Exists<NonExistingTable>()).ShouldBeFalse();
-                await conn.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(DefaultTableQuery);
                 (await conn.Exists<Person>()).ShouldBeTrue();
             }
         }
@@ -74,7 +74,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(DefaultTableQuery);
                 await conn.ExecuteAsync(ViewQuery);
 
                 var dbObjects = (await conn.GetDatabaseObjects()).ToArray();
@@ -105,7 +105,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.ExecuteAsync(TableQuery);
+                await conn.ExecuteAsync(DefaultTableQuery);
 
                 var tableInfo = await conn.GetTableInfo<Person>();
                 tableInfo.ShouldNotBeNull();

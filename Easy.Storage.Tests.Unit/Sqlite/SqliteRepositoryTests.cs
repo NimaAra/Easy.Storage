@@ -26,9 +26,10 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 var table = repo.Table;
-                table.Dialect.ShouldBe(Dialect.SQLite);
+                table.Dialect.ShouldBe(SQLiteDialect.Instance);
+                table.Dialect.Type.ShouldBe(DialectType.SQLite);
                 table.Name.ShouldBe("[Person]");
                 table.Select.ShouldBe("SELECT\r\n"
                         + "    [Person].[Id] AS 'Id',\r\n"
@@ -46,9 +47,9 @@
                         + "    @Name,\r\n"
                         + "    @Age\r\n"
                         + ");\r\n"
-                        + "SELECT last_insert_rowid();");
+                        + "SELECT last_insert_rowid() AS Id;");
 
-                table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
+                table.UpdateIdentity.ShouldBe("UPDATE [Person] SET\r\n"
                         + "    [Name] = @Name,\r\n"
                         + "    [Age] = @Age\r\n"
                         + "WHERE\r\n    [Id] = @Id;");
@@ -68,9 +69,10 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 var table = repo.Table;
-                table.Dialect.ShouldBe(Dialect.SQLite);
+                table.Dialect.ShouldBe(SQLiteDialect.Instance);
+                table.Dialect.Type.ShouldBe(DialectType.SQLite);
                 table.Name.ShouldBe("[Person]");
                 table.Select.ShouldBe("SELECT\r\n"
                                       + "    [Person].[Id] AS 'SomeId',\r\n"
@@ -88,9 +90,9 @@
                                               + "    @SomeName,\r\n"
                                               + "    @Age\r\n"
                                               + ");\r\n"
-                                              + "SELECT last_insert_rowid();");
+                                              + "SELECT last_insert_rowid() AS Id;");
 
-                table.UpdateDefault.ShouldBe("UPDATE [Person] SET\r\n"
+                table.UpdateIdentity.ShouldBe("UPDATE [Person] SET\r\n"
                                              + "    [Name] = @SomeName,\r\n"
                                              + "    [Age] = @Age\r\n"
                                              + "WHERE\r\n    [Id] = @SomeId;");
@@ -110,7 +112,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.GetLazy()).ShouldBeEmpty();
 
@@ -169,7 +171,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.GetLazy()).ShouldBeEmpty();
 
@@ -228,7 +230,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>();
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -287,7 +289,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -346,7 +348,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -418,7 +420,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -490,7 +492,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -572,7 +574,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -654,12 +656,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                (await repo.Insert(p1)).ShouldBe(1);
+                ((long)await repo.Insert(p1)).ShouldBe(1);
 
                 (await repo.Get()).Count().ShouldBe(1);
 
@@ -670,7 +672,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.Insert(p2)).ShouldBe(2);
+                ((long)await repo.Insert(p2)).ShouldBe(2);
 
                 (await repo.Get()).Count().ShouldBe(2);
 
@@ -681,7 +683,7 @@
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new Person { Id = 1, Name = "P3", Age = 30 };
-                (await repo.Insert(p3)).ShouldBe(3);
+                ((long)await repo.Insert(p3)).ShouldBe(3);
 
                 (await repo.Get()).Count().ShouldBe(3);
 
@@ -692,7 +694,7 @@
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new Person { Id = 4, Name = "P4", Age = 40 };
-                (await repo.Insert(p4)).ShouldBe(4);
+                ((long)await repo.Insert(p4)).ShouldBe(4);
 
                 (await repo.Get()).Count().ShouldBe(4);
 
@@ -709,12 +711,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                (await repo.Insert(p1)).ShouldBe(1);
+                ((long)await repo.Insert(p1)).ShouldBe(1);
 
                 (await repo.Get()).Count().ShouldBe(1);
 
@@ -725,7 +727,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.Insert(p2)).ShouldBe(2);
+                ((long)await repo.Insert(p2)).ShouldBe(2);
 
                 (await repo.Get()).Count().ShouldBe(2);
 
@@ -736,7 +738,7 @@
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new MyPerson { SomeId = 1, SomeName = "P3", Age = 30 };
-                (await repo.Insert(p3)).ShouldBe(3);
+                ((long)await repo.Insert(p3)).ShouldBe(3);
 
                 (await repo.Get()).Count().ShouldBe(3);
 
@@ -747,7 +749,7 @@
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new MyPerson { SomeId = 4, SomeName = "P4", Age = 40 };
-                (await repo.Insert(p4)).ShouldBe(4);
+                ((long)await repo.Insert(p4)).ShouldBe(4);
 
                 (await repo.Get()).Count().ShouldBe(4);
 
@@ -764,7 +766,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -809,7 +811,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -854,7 +856,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQueryWithNoIdentity);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -903,7 +905,7 @@
              */
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
 
@@ -965,7 +967,7 @@
 
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
@@ -1027,7 +1029,7 @@
 
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
 
@@ -1093,7 +1095,7 @@
              */
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
@@ -1159,7 +1161,7 @@
              */
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
 
@@ -1247,7 +1249,7 @@
              */
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
@@ -1330,12 +1332,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                (await repo.Insert(p1)).ShouldBe(1);
+                ((long)await repo.Insert(p1)).ShouldBe(1);
 
                 var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
@@ -1344,7 +1346,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                (await repo.Insert(p2)).ShouldBe(2);
+                ((long)await repo.Insert(p2)).ShouldBe(2);
 
                 var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -1380,12 +1382,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                (await repo.Insert(p1)).ShouldBe(1);
+                ((long)await repo.Insert(p1)).ShouldBe(1);
 
                 var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
@@ -1394,7 +1396,7 @@
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                (await repo.Insert(p2)).ShouldBe(2);
+                ((long)await repo.Insert(p2)).ShouldBe(2);
 
                 var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -1430,7 +1432,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1526,7 +1528,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1623,7 +1625,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1664,7 +1666,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1738,7 +1740,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1812,7 +1814,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1849,7 +1851,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1878,7 +1880,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -1907,7 +1909,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
@@ -1953,7 +1955,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
@@ -1999,7 +2001,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
@@ -2034,7 +2036,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Get()).ShouldBeEmpty();
@@ -2069,7 +2071,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -2103,7 +2105,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -2136,7 +2138,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -2172,7 +2174,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -2208,7 +2210,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 
@@ -2242,7 +2244,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Min(p => p.Id)).ShouldBe(0);
@@ -2270,7 +2272,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Min(p => p.SomeId)).ShouldBe(0);
@@ -2298,7 +2300,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Min(p => p.SomeId)).ShouldBe(0);
@@ -2328,7 +2330,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<Person>(Dialect.SQLite);
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Max(p => p.Id)).ShouldBe(0);
@@ -2356,7 +2358,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Max(p => p.SomeId)).ShouldBe(0);
@@ -2384,7 +2386,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetRepository<MyPerson>(Dialect.SQLite);
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
                 (await repo.Max(p => p.SomeId)).ShouldBe(0);
@@ -2435,9 +2437,9 @@
                     Composite = null
                 };
 
-                var repo = conn.GetRepository<SampleModel>(Dialect.SQLite);
+                var repo = conn.GetRepository<SampleModel>(SQLiteDialect.Instance);
 
-                (await repo.Insert(sample1)).ShouldBe(1);
+                ((long)await repo.Insert(sample1)).ShouldBe(1);
 
                 var insertedSample1 = (await repo.Get()).Single();
                 insertedSample1.Id.ShouldBe(1);
@@ -2498,7 +2500,7 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<Child>());
                 (await conn.Exists<Child>()).ShouldBeTrue();
 
-                var repo = conn.GetRepository<Child>(Dialect.SQLite);
+                var repo = conn.GetRepository<Child>(SQLiteDialect.Instance);
 
                 var child1 = new Child
                 {
@@ -2509,7 +2511,7 @@
                     Toy = "Toy-1"
                 };
 
-                var insertedId1 = await repo.Insert(child1);
+                long insertedId1 = await repo.Insert(child1);
                 insertedId1.ShouldBe(1);
 
                 var retrievedChild1 = (await repo.GetWhere(c => c.Id, insertedId1)).First();
@@ -2528,7 +2530,7 @@
                     Toy = "Toy-2"
                 };
 
-                var insertedId2 = await repo.Insert(child2);
+                long insertedId2 = await repo.Insert(child2);
                 insertedId2.ShouldBe(2);
 
                 var retrievedChild2 = (await repo.GetWhere(c => c.Id, insertedId2)).First();

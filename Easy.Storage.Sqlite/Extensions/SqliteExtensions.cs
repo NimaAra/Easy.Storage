@@ -19,6 +19,15 @@
     public static class SQLiteExtensions
     {
         /// <summary>
+        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// </summary>
+        public static IRepository<T> GetRepository<T>(this SQLiteConnectionBase connection)
+        {
+            return new Repository<T>(connection, SQLiteDialect.Instance);
+        }
+
+        /// <summary>
         /// Returns the <c>SQLite</c> objects in the database.
         /// </summary>
         public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(this SQLiteConnectionBase connection)
@@ -31,7 +40,7 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SQLiteConnectionBase connection)
         {
-            var tableName = Table.MakeOrGet<T>(Dialect.SQLite).Name.GetNameFromEscapedSQLName();
+            var tableName = Table.MakeOrGet<T>(SQLiteDialect.Instance).Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
         }
 
@@ -40,7 +49,7 @@
         /// </summary>
         public static Task<SQLiteTableInfo> GetTableInfo<T>(this SQLiteConnectionBase connection)
         {
-            return connection.GetTableInfo(Table.MakeOrGet<T>(Dialect.SQLite).Name);
+            return connection.GetTableInfo(Table.MakeOrGet<T>(SQLiteDialect.Instance).Name);
         }
 
         /// <summary>
@@ -118,7 +127,7 @@
         /// </summary>
         public static Task<IEnumerable<T>> Search<T>(this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
         {
-            var query = Table.MakeOrGet<T>(Dialect.SQLite).Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
+            var query = Table.MakeOrGet<T>(SQLiteDialect.Instance).Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
             return connection.QueryAsync<T>(query, buffered: buffered);
         }
 

@@ -115,11 +115,11 @@ namespace Easy.Storage.Common
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The inserted id of the <paramref name="item"/>.</returns>
-        public async Task<long> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
+        public async Task<object> Insert(T item, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
-            return (await _connection.QueryAsync<long>(insertSql, item, transaction: transaction, buffered: true)
-                .ConfigureAwait(false)).First();
+            return (await _connection.QueryAsync<dynamic>(insertSql, item, transaction: transaction, buffered: true)
+                .ConfigureAwait(false)).First().Id;
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Easy.Storage.Common
         /// <returns>Number of rows affected</returns>
         public Task<int> Update(T item, IDbTransaction transaction = null)
         {
-            return _connection.ExecuteAsync(Table.UpdateDefault, item, transaction: transaction);
+            return _connection.ExecuteAsync(Table.UpdateIdentity, item, transaction: transaction);
         }
 
         /// <summary>

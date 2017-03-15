@@ -141,7 +141,7 @@
 
             private TermConfig()
             {
-                _table = Table.MakeOrGet<T>(Dialect.Generic);
+                _table = Table.MakeOrGet<T>(GenericSQLDialect.Instance);
                 TableName = "[" + _table.Name.GetNameFromEscapedSQLName() + "_fts]";
                 PrefixQuery = $"SELECT {TableName}.[docId] FROM {TableName} WHERE";
             }

@@ -94,7 +94,7 @@ AND
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
-            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).Delete);
+            var sql = query.Compile(Table.MakeOrGet<Person>(GenericSQLDialect.Instance).Delete);
             sql.ShouldBe(@"DELETE FROM [Person]
 WHERE
     1 = 1
@@ -110,7 +110,7 @@ AND
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
-            var sql = query.Compile(Table.MakeOrGet<Person>(Dialect.Generic).UpdateAll);
+            var sql = query.Compile(Table.MakeOrGet<Person>(GenericSQLDialect.Instance).UpdateAll);
             sql.ShouldBe(@"UPDATE [Person] SET
     [Id] = @Id,
     [Name] = @Name,

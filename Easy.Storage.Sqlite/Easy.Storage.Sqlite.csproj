@@ -67,6 +67,7 @@
     <Compile Include="Models\SQLiteDataType.cs" />
     <Compile Include="Models\SQLiteObject.cs" />
     <Compile Include="Models\SQLiteObjectType.cs" />
+    <Compile Include="SQLiteDialect.cs" />
     <Compile Include="SQLiteHelper.cs" />
     <Compile Include="Models\SQLiteTableInfo.cs" />
     <Compile Include="SQLiteSQL.cs" />
