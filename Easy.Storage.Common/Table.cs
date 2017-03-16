@@ -10,7 +10,7 @@
     using Easy.Storage.Common.Extensions;
 
     /// <summary>
-    /// Represents information about the table a model should be stored at.
+    /// Represents all the required information about a given table and a matching <c>C# POCO</c>.
     /// </summary>
     public sealed class Table
     {
@@ -30,10 +30,11 @@
         private Table(TableKey key)
         {
             Dialect = key.Dialect;
-            Name = GetModelName(key.Type).GetAsEscapedSQLName();
+            ModelType = key.Type;
+            Name = GetModelName(ModelType).GetAsEscapedSQLName();
 
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            IdentityColumn = GetIdentityColumn(props);
+            IdentityColumn = GetIdentityColumn(ModelType, props);
             PropertyToColumns = GetPropertiesToColumnsMappings(props);
             PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
@@ -49,6 +50,11 @@
         /// Gets the <see cref="Dialect"/> used to generate this instance.
         /// </summary>
         public Dialect Dialect { get; }
+
+        /// <summary>
+        /// Gets the type of the model represented by this instance.
+        /// </summary>
+        public Type ModelType { get; }
 
         /// <summary>
         /// Gets the name by which the model will be stored as.
@@ -85,7 +91,7 @@
         /// </summary>
         public string Delete { get; }
 
-        private static PropertyInfo GetIdentityColumn(PropertyInfo[] props)
+        private static PropertyInfo GetIdentityColumn(Type modelType, PropertyInfo[] props)
         {
             var possibleIdentityColumns = props
                 .Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(IdentityAttribute)))
@@ -97,11 +103,11 @@
             // A marked Identity property has precedence over default Id property
             if (possibleIdentityColumns.Length == 1) { return possibleIdentityColumns[0]; }
 
-            var defaultIdProp = props.SingleOrDefault(p => p.Name == "Id");
+            var defaultIdProp = props.SingleOrDefault(p => p.Name.Equals("Id", StringComparison.Ordinal));
 
             if (defaultIdProp != null) { return defaultIdProp; }
 
-            throw new InvalidOperationException("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
+            throw new InvalidOperationException($"The model: '{modelType.Name}' does not have a default 'Id' property specified or any of its members marked as 'Identity'.");
         }
 
         private static string GetModelName(Type type)

@@ -18,6 +18,7 @@
             var table = Table.MakeOrGet<Person>(GenericSQLDialect.Instance);
             table.Dialect.ShouldBe(GenericSQLDialect.Instance);
             table.Dialect.Type.ShouldBe(DialectType.Generic);
+            table.ModelType.ShouldBe(typeof(Person));
             table.Name.ShouldBe("[Person]");
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [Person].[Id] AS 'Id',\r\n"
@@ -54,7 +55,7 @@
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
             Should.Throw<InvalidOperationException>(() => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance))
-                .Message.ShouldBe("The model does not have a default 'Id' property specified or any of its members marked as Identity.");
+                .Message.ShouldBe("The model: 'ModelWithNoIdOrPrimaryKey' does not have a default 'Id' property specified or any of its members marked as 'Identity'.");
         }
 
         [Test]
@@ -63,6 +64,9 @@
             var table = Table.MakeOrGet<SampleModel>(GenericSQLDialect.Instance);
 
             table.ShouldNotBeNull();
+            table.Dialect.ShouldBe(GenericSQLDialect.Instance);
+            table.Dialect.Type.ShouldBe(DialectType.Generic);
+            table.ModelType.ShouldBe(typeof(SampleModel));
             table.Name.ShouldBe("[SampleModel]");
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
