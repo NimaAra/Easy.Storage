@@ -57,6 +57,8 @@
             await When_updating_single_by_id_aliased_model();
             await When_updating_custom_non_aliased_model();
             await When_updating_custom_aliased_model();
+            await When_updating_multiple_non_aliased_models();
+            await When_updating_multiple_aliased_models();
             await When_deleting_non_aliased_model();
             await When_deleting_aliased_model();
             await When_deleting_all_non_aliased_model();
@@ -1811,6 +1813,112 @@
                     snapshot3[i].SomeName.ShouldBe(snapshot2[i].SomeName);
                     snapshot3[i].Age.ShouldBe(snapshot2[i].Age);
                 }
+            }
+        }
+
+        private static async Task When_updating_multiple_non_aliased_models()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<Person>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new Person {Name = "P1", Age = 10},
+                    new Person {Name = "P2", Age = 10},
+                    new Person {Name = "P3", Age = 20}
+                };
+
+                (await repo.Insert(people)).ShouldBe(3);
+
+                var existing = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                existing.Length.ShouldBe(3);
+
+                var toUpdate = new[]
+                {
+                    new Person {Name = "P1-updated", Age = 12},
+                    new Person {Name = "P2-updated", Age = 10}
+                };
+
+                toUpdate[0].Id = existing[0].Id;
+                toUpdate[1].Id = existing[1].Id;
+
+                (await repo.Update(toUpdate)).ShouldBe(2);
+
+                var finalItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+
+                finalItems.Length.ShouldBe(3);
+
+                finalItems[0].Id.ShouldBe(toUpdate[0].Id);
+                finalItems[0].Name.ShouldBe(toUpdate[0].Name);
+                finalItems[0].Age.ShouldBe(toUpdate[0].Age);
+
+                finalItems[1].Id.ShouldBe(toUpdate[1].Id);
+                finalItems[1].Name.ShouldBe(toUpdate[1].Name);
+                finalItems[1].Age.ShouldBe(toUpdate[1].Age);
+
+                finalItems[2].Id.ShouldBe(existing[2].Id);
+                finalItems[2].Name.ShouldBe(existing[2].Name);
+                finalItems[2].Age.ShouldBe(existing[2].Age);
+            }
+        }
+
+        private static async Task When_updating_multiple_aliased_models()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson {SomeName = "P1", Age = 10},
+                    new MyPerson {SomeName = "P2", Age = 10},
+                    new MyPerson {SomeName = "P3", Age = 20}
+                };
+
+                (await repo.Insert(people)).ShouldBe(3);
+
+                var existing = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                existing.Length.ShouldBe(3);
+
+                var toUpdate = new[]
+                {
+                    new MyPerson {SomeName = "P1-updated", Age = 12},
+                    new MyPerson {SomeName = "P2-updated", Age = 10}
+                };
+
+                toUpdate[0].SomeId = existing[0].SomeId;
+                toUpdate[1].SomeId = existing[1].SomeId;
+
+                (await repo.Update(toUpdate)).ShouldBe(2);
+
+                var finalItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+
+                finalItems.Length.ShouldBe(3);
+
+                finalItems[0].SomeId.ShouldBe(toUpdate[0].SomeId);
+                finalItems[0].SomeName.ShouldBe(toUpdate[0].SomeName);
+                finalItems[0].Age.ShouldBe(toUpdate[0].Age);
+
+                finalItems[1].SomeId.ShouldBe(toUpdate[1].SomeId);
+                finalItems[1].SomeName.ShouldBe(toUpdate[1].SomeName);
+                finalItems[1].Age.ShouldBe(toUpdate[1].Age);
+
+                finalItems[2].SomeId.ShouldBe(existing[2].SomeId);
+                finalItems[2].SomeName.ShouldBe(existing[2].SomeName);
+                finalItems[2].Age.ShouldBe(existing[2].Age);
             }
         }
 

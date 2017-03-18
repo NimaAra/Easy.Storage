@@ -76,6 +76,13 @@
         Task<int> Update(T item, IDbTransaction transaction = null);
 
         /// <summary>
+        /// Updates every column for each of the items in the given <paramref name="items"/> (except for the id column) for the record.
+        /// <remarks>The id of each item in the <paramref name="items"/> is used to identify the record to be updated.</remarks>.
+        /// </summary>
+        /// <returns>Number of rows affected</returns>
+        Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null);
+
+        /// <summary>
         /// Updates every column in the given <paramref name="item"/> (including the id column) for the record.
         /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>

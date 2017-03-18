@@ -148,6 +148,16 @@ namespace Easy.Storage.Common
         }
 
         /// <summary>
+        /// Updates every column for each of the items in the given <paramref name="items"/> (except for the id column) for the record.
+        /// <remarks>The id of each item in the <paramref name="items"/> is used to identify the record to be updated.</remarks>.
+        /// </summary>
+        /// <returns>Number of rows affected</returns>
+        public Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null)
+        {
+            return _connection.ExecuteAsync(Table.UpdateIdentity, items, transaction: transaction);
+        }
+
+        /// <summary>
         /// Updates every column in the given <paramref name="item"/> (including the id column) for the record.
         /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
@@ -158,7 +168,6 @@ namespace Easy.Storage.Common
 
             var sql = filter.GetSQL(Table.UpdateAll);
             var parameters = filter.Parameters.ToDynamicParameters(item);
-
             return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 

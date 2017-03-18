@@ -544,7 +544,7 @@
 
                 var filter3 = Filter<Person>.Make
                     .And(p => p.Age, Operator.Equal, 50)
-                    .OrIn(p => p.Name, new [] { "P2", "P3", "P4" });
+                    .OrIn(p => p.Name, new[] { "P2", "P3", "P4" });
 
                 var filter3Result = (await repo.GetWhere(filter3))
                     .OrderBy(x => x.Name)
@@ -554,11 +554,11 @@
                 filter3Result[0].Id.ShouldBe(2);
                 filter3Result[0].Name.ShouldBe("P2");
                 filter3Result[0].Age.ShouldBe(20);
-                      
+
                 filter3Result[1].Id.ShouldBe(3);
                 filter3Result[1].Name.ShouldBe("P3");
                 filter3Result[1].Age.ShouldBe(30);
-                      
+
                 filter3Result[2].Id.ShouldBe(4);
                 filter3Result[2].Name.ShouldBe("P4");
                 filter3Result[2].Age.ShouldBe(10);
@@ -1002,7 +1002,7 @@
                 (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeId.ShouldBe(1);
                 (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().Age.ShouldBe(100);
                 (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeName.ShouldBe("P1");
-                
+
                 var anotherPersonToUpdate = new MyPerson
                 {
                     SomeId = 3,
@@ -1308,7 +1308,7 @@
                 })
                 .Message.ShouldBe("Property: 'Name' does not exist on the model: 'MyPerson'.");
 
-                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new {}, filter))
+                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new { }, filter))
                     .Message.ShouldBe("Unable to find any properties in: item");
 
                 dynamic yetAnotherPersonToUpdate = new ExpandoObject();
@@ -1496,7 +1496,7 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { Name = "P200", Age = 200 };
-                filter = Filter<Person>.Make.AndIn(p => p.Id, new long[] {1, 2, 3});
+                filter = Filter<Person>.Make.AndIn(p => p.Id, new long[] { 1, 2, 3 });
                 (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();
@@ -1593,12 +1593,12 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { SomeName = "P200", Age = 200 };
-                filter = Filter<MyPerson>.Make.AndIn(p => p.SomeId, new long[] {1, 2, 3});
+                filter = Filter<MyPerson>.Make.AndIn(p => p.SomeId, new long[] { 1, 2, 3 });
                 (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
-                
+
                 snapshot3[0].SomeId.ShouldBe(1);
                 snapshot3[0].SomeName.ShouldBe("P200");
                 snapshot3[0].Age.ShouldBe(200);
@@ -1658,6 +1658,106 @@
                 (await repo.GetWhere(p => p.SomeId, 5)).Single().SomeName.ShouldBe("P0");
                 (await repo.GetWhere(p => p.SomeId, 6)).Single().SomeName.ShouldBe("P0");
                 (await repo.GetWhere(p => p.SomeId, 7)).Single().SomeName.ShouldBe("P0");
+            }
+        }
+
+        [Test]
+        public async Task When_updating_multiple_non_aliased_models()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new Person {Name = "P1", Age = 10},
+                    new Person {Name = "P2", Age = 10},
+                    new Person {Name = "P3", Age = 20}
+                };
+
+                (await repo.Insert(people)).ShouldBe(3);
+
+                var existing = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                existing.Length.ShouldBe(3);
+
+                var toUpdate = new[]
+                {
+                    new Person {Name = "P1-updated", Age = 12},
+                    new Person {Name = "P2-updated", Age = 10}
+                };
+
+                toUpdate[0].Id = existing[0].Id;
+                toUpdate[1].Id = existing[1].Id;
+
+                (await repo.Update(toUpdate)).ShouldBe(2);
+
+                var finalItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+
+                finalItems.Length.ShouldBe(3);
+
+                finalItems[0].Id.ShouldBe(toUpdate[0].Id);
+                finalItems[0].Name.ShouldBe(toUpdate[0].Name);
+                finalItems[0].Age.ShouldBe(toUpdate[0].Age);
+
+                finalItems[1].Id.ShouldBe(toUpdate[1].Id);
+                finalItems[1].Name.ShouldBe(toUpdate[1].Name);
+                finalItems[1].Age.ShouldBe(toUpdate[1].Age);
+
+                finalItems[2].Id.ShouldBe(existing[2].Id);
+                finalItems[2].Name.ShouldBe(existing[2].Name);
+                finalItems[2].Age.ShouldBe(existing[2].Age);
+            }
+        }
+
+        [Test]
+        public async Task When_updating_multiple_aliased_models()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Get()).ShouldBeEmpty();
+
+                var people = new[]
+                {
+                    new MyPerson {SomeName = "P1", Age = 10},
+                    new MyPerson {SomeName = "P2", Age = 10},
+                    new MyPerson {SomeName = "P3", Age = 20}
+                };
+
+                (await repo.Insert(people)).ShouldBe(3);
+
+                var existing = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                existing.Length.ShouldBe(3);
+
+                var toUpdate = new[]
+                {
+                    new MyPerson {SomeName = "P1-updated", Age = 12},
+                    new MyPerson {SomeName = "P2-updated", Age = 10}
+                };
+
+                toUpdate[0].SomeId = existing[0].SomeId;
+                toUpdate[1].SomeId = existing[1].SomeId;
+
+                (await repo.Update(toUpdate)).ShouldBe(2);
+
+                var finalItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+
+                finalItems.Length.ShouldBe(3);
+
+                finalItems[0].SomeId.ShouldBe(toUpdate[0].SomeId);
+                finalItems[0].SomeName.ShouldBe(toUpdate[0].SomeName);
+                finalItems[0].Age.ShouldBe(toUpdate[0].Age);
+
+                finalItems[1].SomeId.ShouldBe(toUpdate[1].SomeId);
+                finalItems[1].SomeName.ShouldBe(toUpdate[1].SomeName);
+                finalItems[1].Age.ShouldBe(toUpdate[1].Age);
+
+                finalItems[2].SomeId.ShouldBe(existing[2].SomeId);
+                finalItems[2].SomeName.ShouldBe(existing[2].SomeName);
+                finalItems[2].Age.ShouldBe(existing[2].Age);
             }
         }
 
@@ -2025,7 +2125,7 @@
 
                 var filter = Filter<MyPerson>.Make
                     .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
-                
+
                 (await repo.Count(p => p.SomeId, filter)).ShouldBe((ulong)3);
                 (await repo.Count(p => p.Age, filter, true)).ShouldBe((ulong)1);
             }
