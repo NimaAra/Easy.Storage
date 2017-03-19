@@ -13,5 +13,8 @@
         public string SomeName { get; set; }
 
         public int Age { get; set; }
+
+        [Ignore]
+        public string Foo { get; set; }
     }
 }

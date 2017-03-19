@@ -47,6 +47,10 @@
             await When_inserting_model_with_no_identity_column();
             await When_inserting_model_with_string_identity_column();
             await When_inserting_model_with_guid_identity_column();
+            await When_inserting_partial_non_aliased_model();
+            await When_inserting_partial_aliased_model();
+            await When_inserting_multiple_partial_non_aliased_models();
+            await When_inserting_multiple_partial_aliased_models();
             await When_updating_non_aliased_model();
             await When_updating_aliased_model();
             await When_updating_non_aliased_model_with_filter();
@@ -1098,6 +1102,220 @@
             }
         }
 
+        private static async Task When_inserting_partial_non_aliased_model()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<Person>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var newItemWithIdentity = new
+                {
+                    Id = 1,
+                    Age = 10,
+                    Name = "P1"
+                };
+
+                Should.Throw<SqlException>(async () => await repo.InsertPartial(newItemWithIdentity));
+
+                var newItemWithNoIdentity = new
+                {
+                    Age = 20,
+                    Name = "P2"
+                };
+
+                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                insertedIdWithNoIdentity.ShouldBe(1);
+
+                var person = new Person { Name = "P3" };
+
+                var insertedPerson = (long) await repo.Insert(person);
+                insertedPerson.ShouldBe(2);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                allItems.Length.ShouldBe(2);
+
+                allItems[0].Id.ShouldBe(1);
+                allItems[0].Age.ShouldBe(20);
+                allItems[0].Name.ShouldBe("P2");
+
+                allItems[1].Id.ShouldBe(2);
+                allItems[1].Age.ShouldBe(0);
+                allItems[1].Name.ShouldBe("P3");
+            }
+        }
+
+        private static async Task When_inserting_partial_aliased_model()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var newItemWithIdentity = new
+                {
+                    SomeId = 1,
+                    Age = 10,
+                    SomeName = "P1"
+                };
+
+                Should.Throw<SqlException>(async () => await repo.InsertPartial(newItemWithIdentity));
+
+                var newItemWithNoIdentity = new
+                {
+                    Age = 20,
+                    SomeName = "P2"
+                };
+
+                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                insertedIdWithNoIdentity.ShouldBe(1);
+
+                var person = new MyPerson { SomeName = "P3" };
+
+                var insertedPerson = (long)await repo.Insert(person);
+                insertedPerson.ShouldBe(2);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                allItems.Length.ShouldBe(2);
+
+                allItems[0].SomeId.ShouldBe(1);
+                allItems[0].Age.ShouldBe(20);
+                allItems[0].SomeName.ShouldBe("P2");
+
+                allItems[1].SomeId.ShouldBe(2);
+                allItems[1].Age.ShouldBe(0);
+                allItems[1].SomeName.ShouldBe("P3");
+            }
+        }
+
+        private static async Task When_inserting_multiple_partial_non_aliased_models()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<Person>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var batch1 = new[]
+                {
+                    new
+                    {
+                        Age = 10,
+                        Name = "P1"
+                    },
+                    new
+                    {
+                        Age = 20,
+                        Name = "P2"
+                    }
+                };
+
+                var batch2 = new[]
+                {
+                    new Person
+                    {
+                        Age = 30,
+                        Name = "P3"
+                    },
+                    new Person
+                    {
+                        Age = 40,
+                        Name = "P4"
+                    }
+                };
+
+                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                batch1InsertedCount.ShouldBe(2);
+
+                Should.Throw<SqlException>(async () => await repo.InsertPartial(batch2))
+                    .Message.ShouldBe("Cannot insert explicit value for identity column in table 'Person' when IDENTITY_INSERT is set to OFF.");
+
+                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                allItems.Length.ShouldBe(2);
+
+                allItems[0].Id.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].Name.ShouldBe("P1");
+
+                allItems[1].Id.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].Name.ShouldBe("P2");
+            }
+        }
+
+        private static async Task When_inserting_multiple_partial_aliased_models()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLServerDialect.Instance);
+
+                await conn.ExecuteAsync(DefaultTableQuery);
+                await repo.DeleteAll();
+                await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
+
+                (await repo.Get()).ShouldBeEmpty();
+
+                var batch1 = new[]
+                {
+                    new
+                    {
+                        Age = 10,
+                        SomeName = "P1"
+                    },
+                    new
+                    {
+                        Age = 20,
+                        SomeName = "P2"
+                    }
+                };
+
+                var batch2 = new[]
+                {
+                    new MyPerson
+                    {
+                        Age = 30,
+                        SomeName = "P3"
+                    },
+                    new MyPerson
+                    {
+                        Age = 40,
+                        SomeName = "P4"
+                    }
+                };
+
+                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                batch1InsertedCount.ShouldBe(2);
+
+                Should.Throw<SqlException>(async () => await repo.InsertPartial(batch2))
+                    .Message.ShouldBe("Cannot insert explicit value for identity column in table 'Person' when IDENTITY_INSERT is set to OFF.");
+
+                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                allItems.Length.ShouldBe(2);
+
+                allItems[0].SomeId.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].SomeName.ShouldBe("P1");
+
+                allItems[1].SomeId.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].SomeName.ShouldBe("P2");
+            }
+        }
+
         private static async Task When_updating_non_aliased_model()
         {
             /*
@@ -1690,7 +1908,7 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { Name = "P200", Age = 200 };
-                filter = Filter<Person>.Make.AndIn(p => p.Id, new long[] {1, 2, 3});
+                filter = Filter<Person>.Make.AndIn(p => p.Id, new long[] { 1, 2, 3 });
                 (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();
@@ -1789,7 +2007,7 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { SomeName = "P200", Age = 200 };
-                filter = Filter<MyPerson>.Make.AndIn(p => p.SomeId, new long[] {1, 2, 3});
+                filter = Filter<MyPerson>.Make.AndIn(p => p.SomeId, new long[] { 1, 2, 3 });
                 (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
                 var snapshot3 = (await repo.Get()).ToArray();

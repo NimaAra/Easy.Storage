@@ -4,7 +4,6 @@ namespace Easy.Storage.Common
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.IO;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
@@ -69,7 +68,6 @@ namespace Easy.Storage.Common
             var filter = Filter<T>.Make.And(selector, Operator.Equal, value);
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
@@ -88,7 +86,6 @@ namespace Easy.Storage.Common
             var filter = Filter<T>.Make.AndIn(selector, values);
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
@@ -104,7 +101,6 @@ namespace Easy.Storage.Common
 
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
         }
 
@@ -138,6 +134,37 @@ namespace Easy.Storage.Common
         }
 
         /// <summary>
+        /// Inserts every specified columns in the given <paramref name="item"/> as the record.
+        /// </summary>
+        /// <param name="item">The item to be inserted.</param>
+        /// <param name="transaction">The transaction</param>
+        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
+        public async Task<object> InsertPartial(object item, IDbTransaction transaction = null)
+        {
+            Ensure.NotNull(item, nameof(item));
+
+            var sql = Table.Dialect.GetPartialInsertQuery<T>(Table, item);
+            return (await _connection.QueryAsync<dynamic>(sql, item, transaction: transaction, buffered: true)
+                .ConfigureAwait(false)).First().Id;
+        }
+
+        /// <summary>
+        /// Inserts every specified columns of every item in the given <paramref name="items"/> as the record.
+        /// </summary>
+        /// <param name="items">The items to be inserted.</param>
+        /// <param name="transaction">The transaction</param>
+        /// <returns>Number of inserted rows</returns>
+        public Task<int> InsertPartial(IEnumerable<object> items, IDbTransaction transaction = null)
+        {
+            // ReSharper disable once PossibleMultipleEnumeration
+            Ensure.NotNull(items, nameof(items));
+
+            // ReSharper disable once PossibleMultipleEnumeration
+            var sql = Table.Dialect.GetPartialInsertQuery<T>(Table, items.First());
+            return _connection.ExecuteAsync(sql, items, transaction: transaction);
+        }
+
+        /// <summary>
         /// Updates every column in the given <paramref name="item"/> (except for the id column) for the record.
         /// <remarks>The id of the <paramref name="item"/> is used to identify the record to be updated.</remarks>.
         /// </summary>
@@ -154,6 +181,8 @@ namespace Easy.Storage.Common
         /// <returns>Number of rows affected</returns>
         public Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null)
         {
+            Ensure.NotNull(items, nameof(items));
+
             return _connection.ExecuteAsync(Table.UpdateIdentity, items, transaction: transaction);
         }
 
@@ -172,40 +201,19 @@ namespace Easy.Storage.Common
         }
 
         /// <summary>
-        /// Updates every or specified columns in the given <paramref name="item"/> for the record.
+        /// Updates every specified columns in the given <paramref name="item"/> for the record.
         /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>
         public Task<int> UpdatePartialWhere(object item, Filter<T> filter, IDbTransaction transaction = null)
         {
+            Ensure.NotNull(item, nameof(item));
             Ensure.NotNull(filter, nameof(filter));
 
-            var builder = StringBuilderCache.Acquire();
-            builder.Append("UPDATE ").Append(Table.Name).Append(" SET").AppendLine();
-
-            var propNames = item.GetPropertyNames(true, false);
-
-            Ensure.That<InvalidDataException>(propNames.Any(), "Unable to find any properties in: " + nameof(item));
-
-            for (var idx = 0; idx < propNames.Length; idx++)
-            {
-                var pName = propNames[idx];
-                Ensure.That<InvalidDataException>(
-                    Table.PropertyNamesToColumns.TryGetValue(pName, out string colName),
-                    $"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
-
-                builder.Append(Formatter.Spacer).Append(colName).Append(" = @").Append(pName);
-
-                if (idx < propNames.Length - 1) { builder.Append(Formatter.ColumnSeparatorNoSpace); }
-            }
-
-            builder.Append(Formatter.NewLine).Append("WHERE 1=1");
-
-            var fullSql = filter.GetSQL(StringBuilderCache.GetStringAndRelease(builder));
+            var sql = Table.Dialect.GetPartialUpdateQuery(Table, item, filter);
             var parameters = filter.Parameters.ToDynamicParameters();
             parameters.AddDynamicParams(item);
-
-            return _connection.ExecuteAsync(fullSql, parameters, transaction: transaction);
+            return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
         /// <summary>
@@ -222,7 +230,6 @@ namespace Easy.Storage.Common
             var filter = Filter<T>.Make.And(selector, Operator.Equal, value);
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
@@ -241,7 +248,6 @@ namespace Easy.Storage.Common
             var filter = Filter<T>.Make.AndIn(selector, values);
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
@@ -257,7 +263,6 @@ namespace Easy.Storage.Common
 
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.ExecuteAsync(sql, parameters, transaction: transaction);
         }
 
@@ -301,7 +306,6 @@ namespace Easy.Storage.Common
 
             var sql = filter.GetSQL(query);
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.ExecuteScalarAsync<ulong>(sql, parameters, transaction: transaction);
         }
 
@@ -337,7 +341,6 @@ namespace Easy.Storage.Common
 
             var sql = filter.GetSQL(query);
             var parameters = filter.Parameters.ToDynamicParameters();
-
             return _connection.ExecuteScalarAsync<long>(sql, parameters, transaction: transaction);
         }
 

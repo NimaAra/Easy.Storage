@@ -23,6 +23,7 @@
             return Cache.GetOrAdd(key, theKey => new Table(theKey));
         }
 
+        internal readonly HashSet<string> IgnoredProperties;
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
@@ -35,8 +36,11 @@
 
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             IdentityColumn = GetIdentityColumn(ModelType, props);
-            PropertyToColumns = GetPropertiesToColumnsMappings(props);
+
+            PropertyToColumns = GetPropertiesToColumnsMappings(props, out HashSet<string> ignoredProperties);
             PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
+
+            IgnoredProperties = ignoredProperties;
 
             Select = Dialect.GetSelectQuery(this);
             Delete = Dialect.GetDeleteQuery(this);
@@ -119,13 +123,19 @@
         }
 
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(PropertyInfo[] properties)
+        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(PropertyInfo[] properties, out HashSet<string> ignored)
         {
+            var ignoredProperties = new HashSet<string>();
             var result = new Dictionary<PropertyInfo, string>();
+
             foreach (var prop in properties)
             {
                 var ignoreAttr = prop.GetCustomAttribute<IgnoreAttribute>();
-                if (ignoreAttr != null) { continue; }
+                if (ignoreAttr != null)
+                {
+                    ignoredProperties.Add(prop.Name);
+                    continue;
+                }
 
                 var propName = prop.Name;
                 var aliasAttr = prop.GetCustomAttribute<AliasAttribute>();
@@ -135,6 +145,7 @@
                 result.Add(prop, columnName);
             }
 
+            ignored = ignoredProperties;
             return result;
         }
 

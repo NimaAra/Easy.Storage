@@ -1,8 +1,11 @@
 ﻿namespace Easy.Storage.Tests.Unit.Dialect
 {
     using System;
+    using System.IO;
     using Easy.Storage.Common;
+    using Easy.Storage.Common.Filter;
     using Easy.Storage.SQLServer;
+    using Easy.Storage.Tests.Unit.Models;
     using NUnit.Framework;
     using Shouldly;
 
@@ -19,6 +22,128 @@
             instanceOne.ShouldBeSameAs(instanceTwo);
 
             SQLServerDialect.Instance.Type.ShouldBe(DialectType.SQLServer);
+        }
+
+        [Test]
+        public void When_getting_partial_update_query()
+        {
+            var dialect = SQLServerDialect.Instance;
+            var table = Table.MakeOrGet<Person>(dialect);
+            var filter = Filter<Person>.Make.And(x => x.Id, Operator.Equal, 1);
+
+            var person = new Person { Age = 10, Name = "Joe"};
+            dialect.GetPartialUpdateQuery(table, person, filter)
+                .ShouldBe(@"UPDATE [Person] SET
+    [Id] = @Id,
+    [Name] = @Name,
+    [Age] = @Age
+WHERE 1=1
+AND
+    ([Id]=@Id1);");
+
+            var item = new { Age = 20, Name = "Bob"};
+            dialect.GetPartialUpdateQuery(table, item, filter)
+                .ShouldBe(@"UPDATE [Person] SET
+    [Age] = @Age,
+    [Name] = @Name
+WHERE 1=1
+AND
+    ([Id]=@Id1);");
+
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyFilter = Filter<Lonely>.Make.And(x => x.Id, Operator.Equal, 1);
+            var lonely = new Lonely { Id = 1 };
+            dialect.GetPartialUpdateQuery(lonelyTable, lonely, lonelyFilter)
+                .ShouldBe(@"UPDATE [Lonely] SET
+    [Id] = @Id
+WHERE 1=1
+AND
+    ([Id]=@Id1);");
+        }
+
+        [Test]
+        public void When_getting_partial_insert_query()
+        {
+            var dialect = SQLServerDialect.Instance;
+            var table = Table.MakeOrGet<Person>(dialect);
+
+            var itemWithAllProperties = new { Id = 1, Name = "Foo", Age = 123 };
+            dialect.GetPartialInsertQuery<Person>(table, itemWithAllProperties)
+                .ShouldBe(@"DECLARE @InsertedRows AS TABLE (Id BIGINT);
+INSERT INTO [Person]
+(
+    [Id],
+    [Name],
+    [Age]
+) OUTPUT Inserted.[Id] INTO @InsertedRows
+VALUES
+(
+    @Id,
+    @Name,
+    @Age
+);
+SELECT Id FROM @InsertedRows;");
+
+            var itemWithSomeProperties = new { Name = "Foo" };
+            dialect.GetPartialInsertQuery<Person>(table, itemWithSomeProperties)
+                .ShouldBe(@"DECLARE @InsertedRows AS TABLE (Id BIGINT);
+INSERT INTO [Person]
+(
+    [Name]
+) OUTPUT Inserted.[Id] INTO @InsertedRows
+VALUES
+(
+    @Name
+);
+SELECT Id FROM @InsertedRows;");
+
+            var itemWithNoProperties = new { };
+            Should.Throw<InvalidDataException>(() => dialect.GetPartialInsertQuery<Person>(table, itemWithNoProperties))
+                .Message.ShouldBe("Unable to find any properties in: item");
+
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonely = new Lonely { Id = 1 };
+            dialect.GetPartialInsertQuery<Lonely>(lonelyTable, lonely)
+                .ShouldBe(@"DECLARE @InsertedRows AS TABLE (Id BIGINT);
+INSERT INTO [Lonely]
+(
+    [Id]
+) OUTPUT Inserted.[Id] INTO @InsertedRows
+VALUES
+(
+    @Id
+);
+SELECT Id FROM @InsertedRows;");
+        }
+
+        [Test]
+        public void When_getting_insert_query_single_property()
+        {
+            var dialect = SQLServerDialect.Instance;
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            dialect.GetInsertQuery(lonelyTable, true)
+                .ShouldBe(@"DECLARE @InsertedRows AS TABLE (Id BIGINT);
+INSERT INTO [Lonely]
+(
+    [Id]
+) OUTPUT Inserted.[Id] INTO @InsertedRows
+VALUES
+(
+    @Id
+);
+SELECT Id FROM @InsertedRows;");
+
+            dialect.GetInsertQuery(lonelyTable, false)
+                .ShouldBe(@"DECLARE @InsertedRows AS TABLE (Id BIGINT);
+INSERT INTO [Lonely]
+(
+    
+) OUTPUT Inserted.[Id] INTO @InsertedRows
+VALUES
+(
+    
+);
+SELECT Id FROM @InsertedRows;");
         }
 
         [Test]

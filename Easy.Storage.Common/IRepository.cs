@@ -69,6 +69,22 @@
         Task<int> Insert(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null);
 
         /// <summary>
+        /// Inserts every specified columns in the given <paramref name="item"/> as the record.
+        /// </summary>
+        /// <param name="item">The item to be inserted.</param>
+        /// <param name="transaction">The transaction</param>
+        /// <returns>The inserted id of the <paramref name="item"/>.</returns>
+        Task<object> InsertPartial(object item, IDbTransaction transaction = null);
+
+        /// <summary>
+        /// Inserts every specified columns of every item in the given <paramref name="items"/> as the record.
+        /// </summary>
+        /// <param name="items">The items to be inserted.</param>
+        /// <param name="transaction">The transaction</param>
+        /// <returns>Number of inserted rows</returns>
+        Task<int> InsertPartial(IEnumerable<object> items, IDbTransaction transaction = null);
+
+        /// <summary>
         /// Updates every column in the given <paramref name="item"/> (except for the id column) for the record.
         /// <remarks>The id of the <paramref name="item"/> is used to identify the record to be updated.</remarks>.
         /// </summary>
@@ -90,7 +106,7 @@
         Task<int> UpdateWhere(T item, Filter<T> filter, IDbTransaction transaction = null);
 
         /// <summary>
-        /// Updates every or specified columns in the given <paramref name="item"/> for the record.
+        /// Updates every specified columns in the given <paramref name="item"/> for the record.
         /// <remarks>The <paramref name="filter"/> is used to identify the record(s) to be updated.</remarks>.
         /// </summary>
         /// <returns>Number of rows affected</returns>

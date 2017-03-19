@@ -1,7 +1,11 @@
 ﻿namespace Easy.Storage.Common
 {
+    using Easy.Storage.Common.Filter;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using Easy.Common;
+    using Easy.Common.Extensions;
 
     /// <summary>
     /// An abstraction for specifying the set of commands and languages
@@ -19,6 +23,8 @@
         /// </summary>
         public DialectType Type { get; }
 
+        internal abstract string GetPartialInsertQuery<T>(Table table, object item);
+        
         internal virtual string GetSelectQuery(Table table)
         {
             var propNames = table.PropertyToColumns.Keys.Select(p => p.Name).ToArray();
@@ -52,6 +58,37 @@
             var propNamesMinusIdentity = propToColsMinusIdentity.Select(kv => kv.Key.Name).ToArray();
             var colEqualPropMinusIdentity = string.Join(Formatter.ColumnSeparator, colNamesMinusIdentity.Zip(propNamesMinusIdentity, (col, propName) => $"{col} = @{propName}"));
             return $"UPDATE {table.Name} SET{Formatter.NewLine}{Formatter.Spacer}{colEqualPropMinusIdentity}{Formatter.NewLine}WHERE{Formatter.NewLine}{Formatter.Spacer}{table.PropertyToColumns[table.IdentityColumn]} = @{table.IdentityColumn.Name};";
+        }
+
+        internal string GetPartialUpdateQuery<T>(Table table, object item, Filter<T> filter)
+        {
+            var builder = StringBuilderCache.Acquire();
+            builder.Append("UPDATE ").Append(table.Name).Append(" SET").AppendLine();
+
+            var propNames = item.GetPropertyNames(true, false);
+
+            Ensure.That<InvalidDataException>(propNames.Any(), "Unable to find any properties in: " + nameof(item));
+
+            foreach (var pName in propNames)
+            {
+                if (table.IgnoredProperties.Contains(pName)) { continue; }
+
+                Ensure.That<InvalidDataException>(
+                    table.PropertyNamesToColumns.TryGetValue(pName, out string colName),
+                    $"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
+
+                builder.Append(Formatter.Spacer)
+                    .Append(colName).Append(" = @").Append(pName)
+                    .Append(Formatter.ColumnSeparatorNoSpace);
+            }
+
+            builder.Remove(
+                builder.Length - Formatter.ColumnSeparatorNoSpace.Length,
+                Formatter.ColumnSeparatorNoSpace.Length);
+
+            builder.Append(Formatter.NewLine).Append("WHERE 1=1");
+
+            return filter.GetSQL(StringBuilderCache.GetStringAndRelease(builder));
         }
 
         protected KeyValuePair<string, string> GetColumnsAndProperties(Table table, bool includeIdentity)

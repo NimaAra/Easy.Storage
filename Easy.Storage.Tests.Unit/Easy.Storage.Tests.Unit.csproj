@@ -56,6 +56,7 @@
     <Compile Include="Filter\FilterdQueryTests.cs" />
     <Compile Include="Filter\FilterTests.cs" />
     <Compile Include="Models\Child.cs" />
+    <Compile Include="Models\Lonely.cs" />
     <Compile Include="Models\ModelWithNoIdOrPrimaryKey.cs" />
     <Compile Include="Models\MyPerson.cs" />
     <Compile Include="Models\Parent.cs" />

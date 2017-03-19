@@ -897,6 +897,242 @@
         }
 
         [Test]
+        public async Task When_inserting_partial_non_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong) 0);
+
+                var newItemWithIdentity = new
+                {
+                    Id = 1,
+                    Age = 10,
+                    Name = "P1"
+                };
+
+                var insertedIdWithIdentity = (long)await repo.InsertPartial(newItemWithIdentity);
+                insertedIdWithIdentity.ShouldBe(1);
+
+                var newItemWithNoIdentity = new
+                {
+                    Age = 20,
+                    Name = "P2"
+                };
+
+                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                insertedIdWithNoIdentity.ShouldBe(2);
+
+                var person = new Person { Name = "P3" };
+
+                var insertedPerson = (long) await repo.Insert(person);
+                insertedPerson.ShouldBe(3);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                allItems.Length.ShouldBe(3);
+
+                allItems[0].Id.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].Name.ShouldBe("P1");
+
+                allItems[1].Id.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].Name.ShouldBe("P2");
+
+                allItems[2].Id.ShouldBe(3);
+                allItems[2].Age.ShouldBe(0);
+                allItems[2].Name.ShouldBe("P3");
+            }
+        }
+
+        [Test]
+        public async Task When_inserting_partial_aliased_model()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+
+                var newItemWithIdentity = new
+                {
+                    SomeId = 1,
+                    Age = 10,
+                    SomeName = "P1"
+                };
+
+                var insertedIdWithIdentity = (long)await repo.InsertPartial(newItemWithIdentity);
+                insertedIdWithIdentity.ShouldBe(1);
+
+                var newItemWithNoIdentity = new
+                {
+                    Age = 20,
+                    SomeName = "P2"
+                };
+
+                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                insertedIdWithNoIdentity.ShouldBe(2);
+
+                var person = new MyPerson { SomeName = "P3" };
+
+                var insertedPerson = (long)await repo.Insert(person);
+                insertedPerson.ShouldBe(3);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                allItems.Length.ShouldBe(3);
+
+                allItems[0].SomeId.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].SomeName.ShouldBe("P1");
+
+                allItems[1].SomeId.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].SomeName.ShouldBe("P2");
+
+                allItems[2].SomeId.ShouldBe(3);
+                allItems[2].Age.ShouldBe(0);
+                allItems[2].SomeName.ShouldBe("P3");
+            }
+        }
+
+        [Test]
+        public async Task When_inserting_multiple_partial_non_aliased_models()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<Person>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+
+                var batch1 = new[]
+                {
+                    new
+                    {
+                        Id = 1,
+                        Age = 10,
+                        Name = "P1"
+                    },
+                    new
+                    {
+                        Id = 2,
+                        Age = 20,
+                        Name = "P2"
+                    }
+                };
+
+                var batch2 = new[]
+                {
+                    new Person
+                    {
+                        Id = 3,
+                        Age = 30,
+                        Name = "P3"
+                    },
+                    new Person
+                    {
+                        Id = 4,
+                        Age = 40,
+                        Name = "P4"
+                    }
+                };
+
+                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                batch1InsertedCount.ShouldBe(2);
+
+                var batch2InsertedCount = await repo.InsertPartial(batch2);
+                batch2InsertedCount.ShouldBe(2);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                allItems.Length.ShouldBe(4);
+
+                allItems[0].Id.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].Name.ShouldBe("P1");
+
+                allItems[1].Id.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].Name.ShouldBe("P2");
+
+                allItems[2].Id.ShouldBe(3);
+                allItems[2].Age.ShouldBe(30);
+                allItems[2].Name.ShouldBe("P3");
+
+                allItems[3].Id.ShouldBe(4);
+                allItems[3].Age.ShouldBe(40);
+                allItems[3].Name.ShouldBe("P4");
+            }
+        }
+
+        [Test]
+        public async Task When_inserting_multiple_partial_aliased_models()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                var repo = conn.GetRepository<MyPerson>(SQLiteDialect.Instance);
+                await conn.ExecuteAsync(TableQuery);
+                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+
+                var batch1 = new[]
+                {
+                    new
+                    {
+                        SomeId = 1,
+                        Age = 10,
+                        SomeName = "P1"
+                    },
+                    new
+                    {
+                        SomeId = 2,
+                        Age = 20,
+                        SomeName = "P2"
+                    }
+                };
+
+                var batch2 = new[]
+                {
+                    new MyPerson
+                    {
+                        SomeId = 3,
+                        Age = 30,
+                        SomeName = "P3"
+                    },
+                    new MyPerson
+                    {
+                        SomeId = 4,
+                        Age = 40,
+                        SomeName = "P4"
+                    }
+                };
+
+                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                batch1InsertedCount.ShouldBe(2);
+
+                var batch2InsertedCount = await repo.InsertPartial(batch2);
+                batch2InsertedCount.ShouldBe(2);
+
+                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                allItems.Length.ShouldBe(4);
+
+                allItems[0].SomeId.ShouldBe(1);
+                allItems[0].Age.ShouldBe(10);
+                allItems[0].SomeName.ShouldBe("P1");
+
+                allItems[1].SomeId.ShouldBe(2);
+                allItems[1].Age.ShouldBe(20);
+                allItems[1].SomeName.ShouldBe("P2");
+
+                allItems[2].SomeId.ShouldBe(3);
+                allItems[2].Age.ShouldBe(30);
+                allItems[2].SomeName.ShouldBe("P3");
+
+                allItems[3].SomeId.ShouldBe(4);
+                allItems[3].Age.ShouldBe(40);
+                allItems[3].SomeName.ShouldBe("P4");
+            }
+        }
+
+        [Test]
         public async Task When_updating_non_aliased_model()
         {
             /*
