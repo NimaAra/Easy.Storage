@@ -803,6 +803,10 @@
                 p4.Id.ShouldBe(4);
                 p4.Name.ShouldBe("P4");
                 p4.Age.ShouldBe(40);
+
+                var emptyCollection = Enumerable.Empty<Person>();
+                (await repo.Insert(emptyCollection)).ShouldBe(0);
+                (await repo.Insert(emptyCollection, false)).ShouldBe(0);
             }
         }
 
@@ -848,6 +852,10 @@
                 p4.SomeId.ShouldBe(4);
                 p4.SomeName.ShouldBe("P4");
                 p4.Age.ShouldBe(40);
+
+                var emptyCollection = Enumerable.Empty<MyPerson>();
+                (await repo.Insert(emptyCollection)).ShouldBe(0);
+                (await repo.Insert(emptyCollection, false)).ShouldBe(0);
             }
         }
 
@@ -1061,6 +1069,9 @@
                 allItems[3].Id.ShouldBe(4);
                 allItems[3].Age.ShouldBe(40);
                 allItems[3].Name.ShouldBe("P4");
+
+                var emptyCollection = Enumerable.Empty<object>();
+                (await repo.InsertPartial(emptyCollection)).ShouldBe(0);
             }
         }
 
@@ -1129,6 +1140,9 @@
                 allItems[3].SomeId.ShouldBe(4);
                 allItems[3].Age.ShouldBe(40);
                 allItems[3].SomeName.ShouldBe("P4");
+
+                var emptyCollection = Enumerable.Empty<object>();
+                (await repo.InsertPartial(emptyCollection)).ShouldBe(0);
             }
         }
 

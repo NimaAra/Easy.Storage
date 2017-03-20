@@ -4,6 +4,7 @@ namespace Easy.Storage.Common
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace Easy.Storage.Common
         /// The <see cref="IDbConnection"/> used by the <see cref="Repository{T}"/>.
         /// </summary>
         private readonly IDbConnection _connection;
+
+        private readonly Task<int> _cachedZeroTask = Task.FromResult(0);
 
         /// <summary>
         /// Creates an instance of the <see cref="Repository{T}"/>.
@@ -125,9 +128,12 @@ namespace Easy.Storage.Common
         /// <param name="modelHasIdentityColumn">The flag indicating whether the table has an identity column.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
+        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public Task<int> Insert(IEnumerable<T> items, bool modelHasIdentityColumn = true, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
+
+            if (!items.Any()) { return _cachedZeroTask; }
 
             var insertSql = modelHasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
             return _connection.ExecuteAsync(insertSql, items, transaction: transaction);
@@ -154,12 +160,13 @@ namespace Easy.Storage.Common
         /// <param name="items">The items to be inserted.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>Number of inserted rows</returns>
+        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public Task<int> InsertPartial(IEnumerable<object> items, IDbTransaction transaction = null)
         {
-            // ReSharper disable once PossibleMultipleEnumeration
             Ensure.NotNull(items, nameof(items));
 
-            // ReSharper disable once PossibleMultipleEnumeration
+            if (!items.Any()) { return _cachedZeroTask; }
+
             var sql = Table.Dialect.GetPartialInsertQuery<T>(Table, items.First());
             return _connection.ExecuteAsync(sql, items, transaction: transaction);
         }
