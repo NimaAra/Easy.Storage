@@ -72,14 +72,14 @@
     <Compile Include="SQLite\SQLiteConnections\SQLiteInMemoryConnectionTests.cs" />
     <Compile Include="SQLite\SQLiteExtensionsTests.cs" />
     <Compile Include="SQLite\SQLiteFunction\SQLiteFunctionTests.cs" />
-    <Compile Include="SQLite\SQLiteRepositoryTests.cs" />
+    <Compile Include="SQLite\SQLiteStorageContextTests.cs" />
     <Compile Include="SQLite\SQLiteHelperTests.cs" />
-    <Compile Include="SQLite\SQLiteRepositoryTranscationTests.cs" />
+    <Compile Include="SQLite\SQLiteStorageContextTranscationTests.cs" />
     <Compile Include="SQLite\SQLiteSQLGeneratorTests.cs" />
     <Compile Include="SQLServer\Context.cs" />
     <Compile Include="SQLServer\SQLServerColumnTypeParsingTests.cs" />
-    <Compile Include="SQLServer\SQLServerRepositoryTests.cs" />
-    <Compile Include="SQLServer\SQLServerRepositoryTranscationTests.cs" />
+    <Compile Include="SQLServer\SQLServerStorageContextTests.cs" />
+    <Compile Include="SQLServer\SQLServerStorageContextTranscationTests.cs" />
     <Compile Include="SQLServer\SQLServerExtensionsTests.cs" />
     <Compile Include="TableTests.cs" />
   </ItemGroup>

@@ -16,12 +16,12 @@
     public static class SQLConnectionExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
+        /// Gets an instance of the <see cref="StorageContext{T}"/> for the given <typeparamref name="T"/>.
         /// <param name="connection">The database connection.</param>
         /// </summary>
-        public static IRepository<T> GetRepository<T>(this SqlConnection connection)
+        public static IStorageContext<T> GetStorageContext<T>(this SqlConnection connection)
         {
-            return new Repository<T>(connection, SQLServerDialect.Instance);
+            return new StorageContext<T>(connection, SQLServerDialect.Instance);
         }
 
         /// <summary>

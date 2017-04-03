@@ -267,8 +267,8 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelOne>());
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelTwo>());
 
-                var repoOne = conn.GetRepository<ModelOne>(SQLiteDialect.Instance);
-                var repoTwo = conn.GetRepository<ModelTwo>(SQLiteDialect.Instance);
+                var repoOne = conn.GetStorageContext<ModelOne>(SQLiteDialect.Instance);
+                var repoTwo = conn.GetStorageContext<ModelTwo>(SQLiteDialect.Instance);
 
                 await repoOne.Insert(new[]
                 {

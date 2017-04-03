@@ -19,12 +19,12 @@
     public static class SQLiteExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="Repository{T}"/> for the given <typeparamref name="T"/>.
+        /// Gets an instance of the <see cref="StorageContext{T}"/> for the given <typeparamref name="T"/>.
         /// <param name="connection">The database connection.</param>
         /// </summary>
-        public static IRepository<T> GetRepository<T>(this SQLiteConnectionBase connection)
+        public static IStorageContext<T> GetStorageContext<T>(this SQLiteConnectionBase connection)
         {
-            return new Repository<T>(connection, SQLiteDialect.Instance);
+            return new StorageContext<T>(connection, SQLiteDialect.Instance);
         }
 
         /// <summary>
