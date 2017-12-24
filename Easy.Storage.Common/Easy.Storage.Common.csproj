@@ -57,6 +57,7 @@
     <Compile Include="Filter\FilteredQuery.cs" />
     <Compile Include="Filter\Operator.cs" />
     <Compile Include="Dialect.cs" />
+    <Compile Include="Query.cs" />
     <Compile Include="GenericSQLDialect.cs" />
     <Compile Include="TypeHandlers\DateTimeOffsetHandler.cs" />
     <Compile Include="Extensions\EnumExtensions.cs" />

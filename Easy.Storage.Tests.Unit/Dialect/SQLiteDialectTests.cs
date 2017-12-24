@@ -29,7 +29,7 @@
         {
             var dialect = SQLiteDialect.Instance;
             var table = Table.MakeOrGet<Person>(dialect);
-            var filter = Filter<Person>.Make.And(x => x.Id, Operator.Equal, 1);
+            var filter = Query<Person>.Filter.And(x => x.Id, Operator.Equal, 1);
 
             var person = new Person { Age = 10, Name = "Joe" };
             dialect.GetPartialUpdateQuery(table, person, filter)
@@ -51,7 +51,7 @@ AND
     ([Id]=@Id1);");
 
             var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
-            var lonelyFilter = Filter<Lonely>.Make.And(x => x.Id, Operator.Equal, 1);
+            var lonelyFilter = Query<Lonely>.Filter.And(x => x.Id, Operator.Equal, 1);
             var lonely = new Lonely { Id = 1 };
             dialect.GetPartialUpdateQuery(lonelyTable, lonely, lonelyFilter)
                 .ShouldBe(@"UPDATE [Lonely] SET
