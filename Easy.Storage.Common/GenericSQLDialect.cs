@@ -14,6 +14,7 @@ namespace Easy.Storage.Common
         /// </summary>
         public static GenericSQLDialect Instance { get; } = new GenericSQLDialect();
 
-        internal override string GetPartialInsertQuery<T>(Table table, object item) => throw new System.NotImplementedException();
+        internal override string GetPartialInsertQuery<T>(Table table, object item) 
+            => throw new System.NotImplementedException();
     }
 }
