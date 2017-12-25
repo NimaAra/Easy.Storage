@@ -13,6 +13,9 @@
     /// </summary>
     public abstract class Dialect
     {
+        /// <summary>
+        /// Creates an instance of the <see cref="Dialect"/>.
+        /// </summary>
         protected Dialect(DialectType type)
         {
             Type = type;
@@ -91,7 +94,10 @@
             return filter.GetSQL(StringBuilderCache.GetStringAndRelease(builder));
         }
 
-        protected KeyValuePair<string, string> GetColumnsAndProperties(Table table, bool includeIdentity)
+        /// <summary>
+        /// Gets the columns and their corresponding property names.
+        /// </summary>
+        protected static KeyValuePair<string, string> GetColumnsAndProperties(Table table, bool includeIdentity)
         {
             var allColNames = table.PropertyToColumns.Select(kv => kv.Value).ToArray();
             var allPropNames = table.PropertyToColumns.Select(kv => kv.Key.Name).ToArray();

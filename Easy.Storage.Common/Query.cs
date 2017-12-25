@@ -20,8 +20,8 @@
         public static Filter<T> Filter => new Filter<T>();
     }
 
-    // [ToDo] - CoMPLETE
-    public sealed class OrderBy<T>
+    // [ToDo] - CoMPLETE make public?
+    internal sealed class OrderBy<T>
     {
         private readonly Queue<KeyValuePair<string, bool>> _clauses;
 
