@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  
   <PropertyGroup>
     <PackageId>Easy.Storage.SQLite</PackageId>
     <Description>A fast and easy to use library for managing data with a SQLite database based on Dapper.</Description>
@@ -18,10 +19,14 @@
     <AssemblyName>Easy.Storage.SQLite</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="Easy.Storage.SQLite.v3.ncrunchproject" />
+  </ItemGroup>
 	
-	<ItemGroup>
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.103" />
-    <PackageReference Include="Easy.Common" Version="1.10.0" />
+  <ItemGroup>
+    <PackageReference Include="Easy.Common" Version="2.8.0" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.106" PrivateAssets="none" />
   </ItemGroup>
 	
 	<ItemGroup>
@@ -35,8 +40,5 @@
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net452|AnyCPU'">
-	  <DocumentationFile>bin\Release\net452\Easy.Storage.SQLite.xml</DocumentationFile>
-	</PropertyGroup>
+
 </Project>

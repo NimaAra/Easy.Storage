@@ -24,7 +24,7 @@
             {
                 var selectAllTerm = Term<FTSContext.Log>.All;
                 Should.Throw<SQLiteException>(async () => await conn.Search(selectAllTerm))
-                    .Message.ShouldBe("SQL logic error or missing database\r\nno such table: Log");
+                    .Message.ShouldBe("SQL logic error\r\nno such table: Log");
             }
         }
 

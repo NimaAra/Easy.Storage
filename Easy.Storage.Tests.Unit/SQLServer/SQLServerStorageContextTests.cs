@@ -87,7 +87,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>();
+                var repo = conn.GetDBContext<Person>();
                 var table = repo.Table;
                 table.Dialect.ShouldBe(SQLServerDialect.Instance);
                 table.Dialect.Type.ShouldBe(DialectType.SQLServer);

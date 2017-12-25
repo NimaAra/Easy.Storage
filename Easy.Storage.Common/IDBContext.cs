@@ -10,7 +10,8 @@
     /// <summary>
     /// Specifies the contract that the storage context would need to implement.
     /// </summary>
-    public interface IStorageContext<T>
+    // ReSharper disable once InconsistentNaming
+    public interface IDBContext<T>
     {
         /// <summary>
         /// Gets the underlying connection.

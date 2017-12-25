@@ -198,13 +198,9 @@
             {
                 var ex1 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfo<Person>());
                 ex1.Message.ShouldBe("Table: [Person] does not exist.");
-                ex1.InnerException.ShouldBeOfType<InvalidOperationException>();
-                ex1.InnerException?.Message.ShouldBe("No columns were selected");
-
+                
                 var ex2 = Should.Throw<InvalidOperationException>(() => conn.GetTableInfo("Bambolini"));
                 ex2.Message.ShouldBe("Table: Bambolini does not exist.");
-                ex2.InnerException.ShouldBeOfType<InvalidOperationException>();
-                ex2.InnerException?.Message.ShouldBe("No columns were selected");
             }
         }
 
@@ -232,7 +228,7 @@
                 allRows.ShouldBeEmpty();
 
                 var ex = Should.Throw<SQLiteException>(async () =>  await conn.ExecuteAsync("SELECT * FROM SomeTable;"));
-                ex.Message.ShouldBe("SQL logic error or missing database\r\nno such table: SomeTable");
+                ex.Message.ShouldBe("SQL logic error\r\nno such table: SomeTable");
                 ex.InnerException.ShouldBeNull();
             }
         }

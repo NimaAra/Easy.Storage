@@ -14,16 +14,18 @@ namespace Easy.Storage.Common
     using Easy.Storage.Common.Filter;
 
     /// <summary>
-    /// Represents the context for retrieving records of the given <typeparamref name="T"/> type from the storage.
+    /// Represents the context for retrieving records of the given <typeparamref name="T"/> 
+    /// type from the storage.
     /// </summary>
-    public sealed class StorageContext<T> : IStorageContext<T>
+    // ReSharper disable once InconsistentNaming
+    public sealed class DBContext<T> : IDBContext<T>
     {
         private readonly Task<int> _cachedZeroTask = Task.FromResult(0);
 
         /// <summary>
-        /// Creates an instance of the <see cref="StorageContext{T}"/>.
+        /// Creates an instance of the <see cref="DBContext{T}"/>.
         /// </summary>
-        internal StorageContext(IDbConnection dbConnection, Dialect dialect)
+        internal DBContext(IDbConnection dbConnection, Dialect dialect)
         {
             Connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
             Table = Table.MakeOrGet<T>(dialect);
@@ -44,18 +46,14 @@ namespace Easy.Storage.Common
         /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
         public Task<IEnumerable<T>> Get(IDbTransaction transaction = null)
-        {
-            return Connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: true);
-        }
+            => Connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: true);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// <remarks>This method returns a non-buffered result.</remarks>
         /// </summary>
         public Task<IEnumerable<T>> GetLazy(IDbTransaction transaction = null)
-        {
-            return Connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: false);
-        }
+            => Connection.QueryAsync<T>(Table.Select, transaction: transaction, buffered: false);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
@@ -177,9 +175,7 @@ namespace Easy.Storage.Common
         /// </summary>
         /// <returns>Number of rows affected</returns>
         public Task<int> Update(T item, IDbTransaction transaction = null)
-        {
-            return Connection.ExecuteAsync(Table.UpdateIdentity, item, transaction: transaction);
-        }
+            => Connection.ExecuteAsync(Table.UpdateIdentity, item, transaction: transaction);
 
         /// <summary>
         /// Updates every column for each of the items in the given <paramref name="items"/> (except for the id column) for the record.
@@ -189,7 +185,6 @@ namespace Easy.Storage.Common
         public Task<int> Update(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-
             return Connection.ExecuteAsync(Table.UpdateIdentity, items, transaction: transaction);
         }
 
@@ -276,10 +271,8 @@ namespace Easy.Storage.Common
         /// <summary>
         /// Deletes all the records.
         /// </summary>
-        public Task<int> DeleteAll(IDbTransaction transaction = null)
-        {
-            return Connection.ExecuteAsync(Table.Delete, transaction: transaction);
-        }
+        public Task<int> DeleteAll(IDbTransaction transaction = null) 
+            => Connection.ExecuteAsync(Table.Delete, transaction: transaction);
 
         /// <summary>
         /// Returns the count of records based on the given <paramref name="selector"/>.

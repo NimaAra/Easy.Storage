@@ -171,7 +171,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetStorageContext<MyPerson>();
+                var repo = conn.GetDBContext<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.GetLazy()).ShouldBeEmpty();
 
@@ -230,7 +230,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetStorageContext<Person>();
+                var repo = conn.GetDBContext<Person>();
                 await conn.ExecuteAsync(TableQuery);
                 (await repo.Get()).ShouldBeEmpty();
 

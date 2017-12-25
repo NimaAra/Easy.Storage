@@ -16,29 +16,25 @@
     public static class SQLConnectionExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="StorageContext{T}"/> for the given <typeparamref name="T"/>.
+        /// Gets an instance of the <see cref="IDBContext{T}"/> for the given <typeparamref name="T"/>.
         /// <param name="connection">The database connection.</param>
         /// </summary>
-        public static IStorageContext<T> GetStorageContext<T>(this SqlConnection connection)
-        {
-            return new StorageContext<T>(connection, SQLServerDialect.Instance);
-        }
+        // ReSharper disable once InconsistentNaming
+        public static IDBContext<T> GetDBContext<T>(this SqlConnection connection) 
+            => new DBContext<T>(connection, SQLServerDialect.Instance);
 
         /// <summary>
         /// Returns the <c>SQL Server</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(this SqlConnection connection)
-        {
-            return connection.QueryAsync<SQLServerObject>(SQLServerSQL.AllObjects);
-        }
+        public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(
+            this SqlConnection connection) 
+                => connection.QueryAsync<SQLServerObject>(SQLServerSQL.AllObjects);
 
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQL Server</c> database.
         /// </summary>
         public static Task<SQLServerTableInfo> GetTableInfo<T>(this SqlConnection connection)
-        {
-            return connection.GetTableInfo(Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName());
-        }
+            => connection.GetTableInfo(Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName());
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
@@ -47,7 +43,9 @@
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
-            dynamic tableInfo = await connection.QueryAsync<dynamic>(SQLServerSQL.TableInfo, new { tableName }).ConfigureAwait(false);
+            dynamic tableInfo = await connection.QueryAsync<dynamic>(
+                SQLServerSQL.TableInfo, new { tableName })
+                .ConfigureAwait(false);
 
             string database = null, schema = null;
             var counter = 0;
@@ -95,7 +93,9 @@
         public static async Task<bool> Exists<T>(this SqlConnection connection)
         {
             var tableName = Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName();
-            return await connection.ExecuteScalarAsync<uint>(SQLServerSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
+            return await connection.ExecuteScalarAsync<uint>(
+                       SQLServerSQL.TableExists, new { tableName })
+                       .ConfigureAwait(false) != 0;
         }
     }
 }

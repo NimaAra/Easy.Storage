@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.SQLite", "Easy.Storage.Sqlite\Easy.Storage.SQLite.csproj", "{800D2B81-5854-4184-8A08-6F13143DA1A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Easy.Storage.SQLite", "Easy.Storage.Sqlite\Easy.Storage.SQLite.csproj", "{800D2B81-5854-4184-8A08-6F13143DA1A3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6985A4A8-2091-4CBC-AEC8-8B0914C93D47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.Tests.Unit", "Easy.Storage.Tests.Unit\Easy.Storage.Tests.Unit.csproj", "{BDF1E797-BB7F-42A9-97AE-A9299562F134}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Easy.Storage.Tests.Unit", "Easy.Storage.Tests.Unit\Easy.Storage.Tests.Unit.csproj", "{BDF1E797-BB7F-42A9-97AE-A9299562F134}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.Common", "Easy.Storage.Common\Easy.Storage.Common.csproj", "{45DA2F67-F774-4C43-A27B-349FFC4752F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Easy.Storage.Common", "Easy.Storage.Common\Easy.Storage.Common.csproj", "{45DA2F67-F774-4C43-A27B-349FFC4752F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Easy.Storage.SQLServer", "Easy.Storage.SqlServer\Easy.Storage.SQLServer.csproj", "{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Easy.Storage.SQLServer", "Easy.Storage.SqlServer\Easy.Storage.SQLServer.csproj", "{0D5C8FF9-B247-429C-8A77-260E08FFD7A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,5 +41,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BDF1E797-BB7F-42A9-97AE-A9299562F134} = {6985A4A8-2091-4CBC-AEC8-8B0914C93D47}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86914E66-EEB0-43A2-BB21-9A4C897F329F}
 	EndGlobalSection
 EndGlobal

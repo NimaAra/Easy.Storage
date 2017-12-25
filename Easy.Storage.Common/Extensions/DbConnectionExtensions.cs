@@ -22,13 +22,13 @@
         }
 
         /// <summary>
-        /// Gets an instance of the <see cref="StorageContext{T}"/> for the given <typeparamref name="T"/>.
+        /// Gets an instance of the <see cref="DBContext{T}"/> for the given <typeparamref name="T"/>.
         /// <param name="connection">The database connection.</param>
         /// <param name="dialect">The dialect to use for generating <c>SQL</c> DDL and DML queries.</param>
         /// </summary>
-        public static IStorageContext<T> GetStorageContext<T>(this IDbConnection connection, Dialect dialect)
+        public static IDBContext<T> GetStorageContext<T>(this IDbConnection connection, Dialect dialect)
         {
-            return new StorageContext<T>(connection, dialect);
+            return new DBContext<T>(connection, dialect);
         }
 
         /// <summary>

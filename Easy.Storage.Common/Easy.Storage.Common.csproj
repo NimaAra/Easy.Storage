@@ -18,10 +18,14 @@
     <AssemblyName>Easy.Storage.Common</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="Easy.Storage.Common.v3.ncrunchproject" />
+  </ItemGroup>
 	
 	<ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.2" />
-    <PackageReference Include="Easy.Common" Version="1.10.0" />
+    <PackageReference Include="Dapper" Version="1.50.4" />
+    <PackageReference Include="Easy.Common" Version="2.8.0" />
   </ItemGroup>
 	
 	<ItemGroup>
@@ -31,8 +35,5 @@
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <DocumentationFile>bin\Release\net452\Easy.Storage.Common.xml</DocumentationFile>
-	</PropertyGroup>
+
 </Project>

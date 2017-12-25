@@ -19,21 +19,19 @@
     public static class SQLiteExtensions
     {
         /// <summary>
-        /// Gets an instance of the <see cref="StorageContext{T}"/> for the given <typeparamref name="T"/>.
+        /// Gets an instance of the <see cref="IDBContext{T}"/> for the given <typeparamref name="T"/>.
         /// <param name="connection">The database connection.</param>
         /// </summary>
-        public static IStorageContext<T> GetStorageContext<T>(this SQLiteConnectionBase connection)
-        {
-            return new StorageContext<T>(connection, SQLiteDialect.Instance);
-        }
+        // ReSharper disable once InconsistentNaming
+        public static IDBContext<T> GetDBContext<T>(this SQLiteConnectionBase connection) 
+            => new DBContext<T>(connection, SQLiteDialect.Instance);
 
         /// <summary>
         /// Returns the <c>SQLite</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(this SQLiteConnectionBase connection)
-        {
-            return connection.QueryAsync<SQLiteObject>(SQLiteSQL.Master);
-        }
+        public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(
+            this SQLiteConnectionBase connection) 
+                => connection.QueryAsync<SQLiteObject>(SQLiteSQL.Master);
 
         /// <summary>
         /// Returns <c>True</c> if a table representing <typeparamref name="T"/> exists on the storage.
@@ -41,16 +39,15 @@
         public static async Task<bool> Exists<T>(this SQLiteConnectionBase connection)
         {
             var tableName = Table.MakeOrGet<T>(SQLiteDialect.Instance).Name.GetNameFromEscapedSQLName();
-            return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName }).ConfigureAwait(false) != 0;
+            return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName })
+                       .ConfigureAwait(false) != 0;
         }
 
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQLite</c> database.
         /// </summary>
         public static Task<SQLiteTableInfo> GetTableInfo<T>(this SQLiteConnectionBase connection)
-        {
-            return connection.GetTableInfo(Table.MakeOrGet<T>(SQLiteDialect.Instance).Name);
-        }
+             => connection.GetTableInfo(Table.MakeOrGet<T>(SQLiteDialect.Instance).Name);
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
@@ -61,14 +58,13 @@
 
             var escapedTableName = tableName.GetNameFromEscapedSQLName();
 
-            IEnumerable<dynamic> tableInfo;
-            try
+            dynamic[] tableInfo = (await connection.QueryAsync<dynamic>(
+                $"PRAGMA table_info({escapedTableName})")
+                .ConfigureAwait(false)).ToArray();
+
+            if (tableInfo.Length == 0)
             {
-                tableInfo = await connection.QueryAsync<dynamic>($"PRAGMA table_info({escapedTableName})").ConfigureAwait(false);
-            }
-            catch (InvalidOperationException e)
-            {
-                throw new InvalidOperationException($"Table: {tableName} does not exist.", e);
+                throw new InvalidOperationException($"Table: {tableName} does not exist.");
             }
 
             var columnsInfo = tableInfo.Select(i =>
@@ -112,12 +108,13 @@
                 };
             }).ToArray();
 
-            var databaseObjects = await connection.GetDatabaseObjects();
+            var databaseObjects = await connection.GetDatabaseObjects().ConfigureAwait(false);
 
             return new SQLiteTableInfo
             {
                 TableName = escapedTableName,
-                SQL = databaseObjects.Single(x => x.Type == SQLiteObjectType.Table && x.Name == escapedTableName).SQL,
+                SQL = databaseObjects.Single(
+                    x => x.Type == SQLiteObjectType.Table && x.Name == escapedTableName).SQL,
                 Columns = columnsInfo
             };
         }
@@ -134,10 +131,11 @@
         /// <summary>
         /// Returns every attached database and its alias.
         /// </summary>
-        public static async Task<IDictionary<string, FileInfo>> GetAttachedDatabases(this SQLiteConnectionBase connection)
-        {
-            return (await connection.QueryAsync<dynamic>(SQLiteSQL.AttachedDatabases))
-                        .ToDictionary(r => (string)r.name, r => string.IsNullOrWhiteSpace(r.file) ? null : new FileInfo((string)r.file));
-        }
+        public static async Task<IDictionary<string, FileInfo>> GetAttachedDatabases(
+            this SQLiteConnectionBase connection) 
+                => (await connection.QueryAsync<dynamic>(SQLiteSQL.AttachedDatabases).ConfigureAwait(false))
+                    .ToDictionary(
+                        r => (string)r.name, 
+                        r => string.IsNullOrWhiteSpace(r.file) ? null : new FileInfo((string)r.file));
     }
 }
