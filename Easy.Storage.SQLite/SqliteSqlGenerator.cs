@@ -25,26 +25,20 @@ namespace Easy.Storage.SQLite
         /// </summary>
         public static string Table<T>()
         {
-            var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance);
-
+            var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty);
             var tableName = table.Name.GetNameFromEscapedSQLName();
+            return TableImpl(table, tableName);
+        }
 
-            var builder = StringBuilderCache.Acquire();
-            builder.AppendLine($"CREATE TABLE IF NOT EXISTS {tableName} (");
-            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
-
-            foreach (var pair in table.PropertyToColumns)
-            {
-                var sqliteType = GetSQLiteType(pair.Key.PropertyType).ToString();
-                var isIdColumn = table.IdentityColumn == pair.Key;
-
-                builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
-            }
-
-            builder.Remove(builder.Length - 3, 1);
-            builder.Append(");");
-
-            return StringBuilderCache.GetStringAndRelease(builder);
+        /// <summary>
+        /// Returns a <c>CREATE TABLE</c> script for the given <paramref name="tableName"/>
+        /// mapped to the given <typeparamref name="T"/> model.
+        /// </summary>
+        public static string Table<T>(string tableName)
+        {
+            var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, tableName);
+            var name = table.Name.GetNameFromEscapedSQLName();
+            return TableImpl(table, name);
         }
 
         /// <summary>
@@ -53,7 +47,7 @@ namespace Easy.Storage.SQLite
         // ReSharper disable once InconsistentNaming
         public static string FTSTable<T>(FTSTableType type, params Expression<Func<T, object>>[] selector)
         {
-            var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance);
+            var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty);
             var propNameToColumn = table.PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
 
             var columns = new List<string>();
@@ -113,6 +107,26 @@ namespace Easy.Storage.SQLite
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+        }
+
+        private static string TableImpl(Table table, string tableName)
+        {
+            var builder = StringBuilderCache.Acquire();
+            builder.AppendLine($"CREATE TABLE IF NOT EXISTS {tableName} (");
+            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
+
+            foreach (var pair in table.PropertyToColumns)
+            {
+                var sqliteType = GetSQLiteType(pair.Key.PropertyType).ToString();
+                var isIdColumn = table.IdentityColumn == pair.Key;
+
+                builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
+            }
+
+            builder.Remove(builder.Length - 3, 1);
+            builder.Append(");");
+
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 
         private static SQLiteDataType GetSQLiteType(Type type)

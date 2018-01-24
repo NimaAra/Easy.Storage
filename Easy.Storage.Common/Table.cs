@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Reflection;
     using Easy.Common;
+    using Easy.Common.Extensions;
     using Easy.Storage.Common.Attributes;
     using Easy.Storage.Common.Extensions;
 
@@ -16,10 +17,19 @@
     {
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
         
-        internal static Table MakeOrGet<TItem>(Dialect dialect)
+        internal static Table MakeOrGet<TItem>(Dialect dialect, string name)
         {
             Ensure.NotNull(dialect, nameof(dialect));
-            var key = new TableKey(typeof(TItem), dialect);
+
+            var tableName = name;
+            var modelType = typeof(TItem);
+            
+            if (tableName.IsNullOrEmptyOrWhiteSpace())
+            {
+                tableName = GetModelName(modelType);
+            }
+
+            var key = new TableKey(modelType, dialect, tableName.GetAsEscapedSQLName());
             return Cache.GetOrAdd(key, theKey => new Table(theKey));
         }
 
@@ -32,7 +42,7 @@
         {
             Dialect = key.Dialect;
             ModelType = key.Type;
-            Name = GetModelName(ModelType).GetAsEscapedSQLName();
+            Name = key.Name;
 
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             IdentityColumn = GetIdentityColumn(ModelType, props);
@@ -151,14 +161,16 @@
 
         private struct TableKey : IEquatable<TableKey>
         {
-            public TableKey(Type type, Dialect dialect)
+            public TableKey(Type type, Dialect dialect, string name)
             {
                 Type = type;
                 Dialect = dialect;
+                Name = name;
             }
 
             internal Type Type { get; }
             internal Dialect Dialect { get; }
+            internal string Name { get; }
 
             #region Equality
 
@@ -167,26 +179,17 @@
                 return GetHashCode() == other.GetHashCode();
             }
 
-            public static bool operator ==(TableKey left, TableKey right)
-            {
-                return left.Equals(right);
-            }
+            public static bool operator ==(TableKey left, TableKey right) => left.Equals(right);
 
-            public static bool operator !=(TableKey left, TableKey right)
-            {
-                return !left.Equals(right);
-            }
+            public static bool operator !=(TableKey left, TableKey right) => !left.Equals(right);
 
             public override bool Equals(object obj)
             {
                 if (ReferenceEquals(null, obj)) return false;
-                return obj is TableKey && Equals((TableKey) obj);
+                return obj is TableKey key && Equals(key);
             }
 
-            public override int GetHashCode()
-            {
-                return HashHelper.GetHashCode(Type, Dialect);
-            }
+            public override int GetHashCode() => HashHelper.GetHashCode(Type, Dialect, Name);
 
             #endregion
         }

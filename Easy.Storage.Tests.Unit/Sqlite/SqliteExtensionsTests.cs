@@ -41,6 +41,17 @@
         }
 
         [Test]
+        public async Task When_checking_if_table_exists_overriding_model_table()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                (await conn.Exists("Person")).ShouldBeFalse();
+                await conn.ExecuteAsync(TableQuery);
+                (await conn.Exists("Person")).ShouldBeTrue();
+            }
+        }
+
+        [Test]
         public async Task When_getting_objects_of_a_table()
         {
             using (var conn = new SQLiteInMemoryConnection())
@@ -263,8 +274,8 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelOne>());
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<ModelTwo>());
 
-                var repoOne = conn.GetStorageContext<ModelOne>(SQLiteDialect.Instance);
-                var repoTwo = conn.GetStorageContext<ModelTwo>(SQLiteDialect.Instance);
+                var repoOne = conn.GetDBContext<ModelOne>(SQLiteDialect.Instance);
+                var repoTwo = conn.GetDBContext<ModelTwo>(SQLiteDialect.Instance, "ModelTwo");
 
                 await repoOne.Insert(new[]
                 {

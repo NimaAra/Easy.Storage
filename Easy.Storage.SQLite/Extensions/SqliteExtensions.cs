@@ -27,6 +27,15 @@
             => new DBContext<T>(connection, SQLiteDialect.Instance);
 
         /// <summary>
+        /// Gets an instance of the <see cref="DBContext{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// <param name="tableName">The name of the table to map the <typeparamref name="T"/> to.</param>
+        /// </summary>
+        public static IDBContext<T> GetDBContext<T>(
+            this SQLiteConnectionBase connection, string tableName)
+                => new DBContext<T>(connection, SQLiteDialect.Instance, tableName);
+
+        /// <summary>
         /// Returns the <c>SQLite</c> objects in the database.
         /// </summary>
         public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(
@@ -38,8 +47,20 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SQLiteConnectionBase connection)
         {
-            var tableName = Table.MakeOrGet<T>(SQLiteDialect.Instance).Name.GetNameFromEscapedSQLName();
+            var tableName = Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty)
+                .Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(SQLiteSQL.TableExists, new { tableName })
+                       .ConfigureAwait(false) != 0;
+        }
+
+        /// <summary>
+        /// Returns <c>True</c> if the given <paramref name="table"/> exists on the storage.
+        /// </summary>
+        public static async Task<bool> Exists(this SQLiteConnectionBase connection, string table)
+        {
+            Ensure.NotNullOrEmptyOrWhiteSpace(table);
+            return await connection.ExecuteScalarAsync<uint>(
+                           SQLiteSQL.TableExists, new { tableName = table })
                        .ConfigureAwait(false) != 0;
         }
 
@@ -47,12 +68,13 @@
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQLite</c> database.
         /// </summary>
         public static Task<SQLiteTableInfo> GetTableInfo<T>(this SQLiteConnectionBase connection)
-             => connection.GetTableInfo(Table.MakeOrGet<T>(SQLiteDialect.Instance).Name);
+             => connection.GetTableInfo(Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty).Name);
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
         /// </summary>
-        public static async Task<SQLiteTableInfo> GetTableInfo(this SQLiteConnectionBase connection, string tableName)
+        public static async Task<SQLiteTableInfo> GetTableInfo(
+            this SQLiteConnectionBase connection, string tableName)
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(tableName);
 
@@ -122,9 +144,22 @@
         /// <summary>
         /// Returns records matching the given <paramref name="term"/>.
         /// </summary>
-        public static Task<IEnumerable<T>> Search<T>(this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
+        public static Task<IEnumerable<T>> Search<T>(
+            this SQLiteConnectionBase connection, ITerm<T> term, bool buffered = true)
         {
-            var query = Table.MakeOrGet<T>(SQLiteDialect.Instance).Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
+            var query = Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty)
+                .Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
+            return connection.QueryAsync<T>(query, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Returns records matching the given <paramref name="term"/>.
+        /// </summary>
+        public static Task<IEnumerable<T>> Search<T>(
+            this SQLiteConnectionBase connection, ITerm<T> term, string tableName, bool buffered = true)
+        {
+            var query = Table.MakeOrGet<T>(SQLiteDialect.Instance, tableName)
+                .Select.Replace($"{Formatter.Spacer}1 = 1;", $"rowId IN {Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{term}{Formatter.NewLine});");
             return connection.QueryAsync<T>(query, buffered: buffered);
         }
 

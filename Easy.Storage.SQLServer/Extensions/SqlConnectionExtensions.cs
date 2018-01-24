@@ -24,6 +24,15 @@
             => new DBContext<T>(connection, SQLServerDialect.Instance);
 
         /// <summary>
+        /// Gets an instance of the <see cref="DBContext{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// <param name="tableName">The name of the table to map the <typeparamref name="T"/> to.</param>
+        /// </summary>
+        public static IDBContext<T> GetDBContext<T>(
+            this SqlConnection connection, string tableName)
+                => new DBContext<T>(connection, SQLServerDialect.Instance, tableName);
+
+        /// <summary>
         /// Returns the <c>SQL Server</c> objects in the database.
         /// </summary>
         public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(
@@ -34,7 +43,7 @@
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQL Server</c> database.
         /// </summary>
         public static Task<SQLServerTableInfo> GetTableInfo<T>(this SqlConnection connection)
-            => connection.GetTableInfo(Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName());
+            => connection.GetTableInfo(Table.MakeOrGet<T>(SQLServerDialect.Instance, string.Empty).Name.GetNameFromEscapedSQLName());
 
         /// <summary>
         /// Returns the information relating to the <paramref name="tableName"/>.
@@ -92,9 +101,20 @@
         /// </summary>
         public static async Task<bool> Exists<T>(this SqlConnection connection)
         {
-            var tableName = Table.MakeOrGet<T>(SQLServerDialect.Instance).Name.GetNameFromEscapedSQLName();
+            var tableName = Table.MakeOrGet<T>(SQLServerDialect.Instance, string.Empty).Name.GetNameFromEscapedSQLName();
             return await connection.ExecuteScalarAsync<uint>(
                        SQLServerSQL.TableExists, new { tableName })
+                       .ConfigureAwait(false) != 0;
+        }
+
+        /// <summary>
+        /// Returns <c>True</c> if the given <paramref name="table"/> exists on the storage.
+        /// </summary>
+        public static async Task<bool> Exists(this SqlConnection connection, string table)
+        {
+            Ensure.NotNullOrEmptyOrWhiteSpace(table);
+            return await connection.ExecuteScalarAsync<uint>(
+                           SQLServerSQL.TableExists, new { tableName = table })
                        .ConfigureAwait(false) != 0;
         }
     }

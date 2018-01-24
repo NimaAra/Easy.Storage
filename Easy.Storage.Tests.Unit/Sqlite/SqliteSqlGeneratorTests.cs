@@ -33,6 +33,27 @@
         }
 
         [Test]
+        public void When_generating_table_sql_for_model_with_overridden_name()
+        {
+            var tableSql = SQLiteSQLGenerator.Table<SampleModel>("FooFoo");
+
+            tableSql.ShouldNotBeNullOrWhiteSpace();
+            tableSql.ShouldBe("CREATE TABLE IF NOT EXISTS FooFoo (\r\n"
+                              + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),\r\n"
+                              + "    [Id] INTEGER PRIMARY KEY NOT NULL,\r\n"
+                              + "    [Text] TEXT NOT NULL,\r\n"
+                              + "    [Int] INTEGER NOT NULL,\r\n"
+                              + "    [Decimal] REAL NOT NULL,\r\n"
+                              + "    [Double] REAL NOT NULL,\r\n"
+                              + "    [Float] REAL NOT NULL,\r\n"
+                              + "    [Flag] INTEGER NOT NULL,\r\n"
+                              + "    [Binary] BLOB NOT NULL,\r\n"
+                              + "    [Key] TEXT NOT NULL,\r\n"
+                              + "    [DateTime] TEXT NOT NULL,\r\n"
+                              + "    [DateTimeOffset] TEXT NOT NULL\r\n);");
+        }
+
+        [Test]
         public void When_generating_full_text_search_with_content_table_sql()
         {
             Should.Throw<KeyNotFoundException>(() => SQLiteSQLGenerator.FTSTable<SampleModel>(FTSTableType.Content, m => m.Composite))

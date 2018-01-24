@@ -25,10 +25,10 @@ namespace Easy.Storage.Common
         /// <summary>
         /// Creates an instance of the <see cref="DBContext{T}"/>.
         /// </summary>
-        internal DBContext(IDbConnection dbConnection, Dialect dialect)
+        internal DBContext(IDbConnection dbConnection, Dialect dialect, string tableName = "")
         {
             Connection = Ensure.NotNull(dbConnection, nameof(dbConnection));
-            Table = Table.MakeOrGet<T>(dialect);
+            Table = Table.MakeOrGet<T>(dialect, tableName);
         }
 
         /// <summary>

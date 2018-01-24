@@ -32,6 +32,7 @@
         {
             When_checking_table_non_aliased_model();
             When_checking_table_aliased_model();
+            When_checking_overridden_table_model();
             await When_getting_non_aliased_models_lazily();
             await When_getting_aliased_models_lazily();
             await When_getting_non_aliased_models();
@@ -131,7 +132,51 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
+                var table = repo.Table;
+                table.Dialect.ShouldBe(SQLServerDialect.Instance);
+                table.Dialect.Type.ShouldBe(DialectType.SQLServer);
+                table.Name.ShouldBe("[Person]");
+
+                table.Select.ShouldBe("SELECT\r\n"
+                                      + "    [Person].[Id] AS 'SomeId',\r\n"
+                                      + "    [Person].[Name] AS 'SomeName',\r\n"
+                                      + "    [Person].[Age] AS 'Age'\r\n"
+                                      + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
+
+                table.InsertIdentity.ShouldBe("DECLARE @InsertedRows AS TABLE (Id BIGINT);\r\n"
+                                              + "INSERT INTO [Person]\r\n"
+                                              + "(\r\n"
+                                              + "    [Name],\r\n"
+                                              + "    [Age]\r\n"
+                                              + ") OUTPUT Inserted.[Id] INTO @InsertedRows\r\n"
+                                              + "VALUES\r\n"
+                                              + "(\r\n"
+                                              + "    @SomeName,\r\n"
+                                              + "    @Age\r\n"
+                                              + ");\r\n"
+                                              + "SELECT Id FROM @InsertedRows;");
+
+                table.UpdateIdentity.ShouldBe("UPDATE [Person] SET\r\n"
+                                             + "    [Name] = @SomeName,\r\n"
+                                             + "    [Age] = @Age\r\n"
+                                             + "WHERE\r\n    [Id] = @SomeId;");
+
+                table.UpdateAll.ShouldBe("UPDATE [Person] SET\r\n"
+                                            + "    [Id] = @SomeId,\r\n"
+                                            + "    [Name] = @SomeName,\r\n"
+                                            + "    [Age] = @Age\r\n"
+                                            + "WHERE\r\n    1 = 1;");
+
+                table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
+            }
+        }
+
+        private static void When_checking_overridden_table_model()
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                var repo = conn.GetDBContext<AnotherPerson>("Person");
                 var table = repo.Table;
                 table.Dialect.ShouldBe(SQLServerDialect.Instance);
                 table.Dialect.Type.ShouldBe(DialectType.SQLServer);
@@ -175,7 +220,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>();
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -237,7 +282,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -299,7 +344,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -361,7 +406,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -423,7 +468,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -498,7 +543,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -573,7 +618,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -658,7 +703,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -743,7 +788,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -801,7 +846,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -859,7 +904,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -911,7 +956,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -970,7 +1015,7 @@
 
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<PersonTemp>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<PersonTemp>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(tableQuery);
                 await repo.DeleteAll();
@@ -1017,7 +1062,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<TableWithStringIdQuery>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<TableWithStringIdQuery>(SQLServerDialect.Instance);
                 await conn.ExecuteAsync(TableWithStringIdQuery);
                 await repo.DeleteAll();
 
@@ -1063,7 +1108,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<TableWithGuidIdQuery>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<TableWithGuidIdQuery>(SQLServerDialect.Instance);
                 await conn.ExecuteAsync(TableWithGuidIdQuery);
                 await repo.DeleteAll();
 
@@ -1114,7 +1159,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1162,7 +1207,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1210,7 +1255,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1272,7 +1317,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1338,7 +1383,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1402,7 +1447,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1466,7 +1511,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1533,7 +1578,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1603,7 +1648,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1679,7 +1724,7 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1748,7 +1793,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1801,7 +1846,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1854,7 +1899,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -1953,7 +1998,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -2052,7 +2097,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -2105,7 +2150,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -2158,7 +2203,7 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
                 await repo.DeleteAll();
@@ -2237,7 +2282,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2314,7 +2359,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2345,7 +2390,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 (await repo.Get()).ShouldBeEmpty();
                 (await repo.DeleteAll()).ShouldBe(0);
 
@@ -2372,7 +2417,7 @@
             using (var conn = new SqlConnection(ConnectionString))
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
                 (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
@@ -2417,7 +2462,7 @@
             using (var conn = new SqlConnection(ConnectionString))
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
                 (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
@@ -2463,7 +2508,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2493,7 +2538,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2523,7 +2568,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2553,7 +2598,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2583,7 +2628,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2623,7 +2668,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2663,7 +2708,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<Person>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2708,7 +2753,7 @@
             {
                 await conn.ExecuteAsync(DefaultTableQuery);
 
-                var repo = conn.GetStorageContext<MyPerson>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
@@ -2791,7 +2836,7 @@ CREATE TABLE SampleModel (
                     Composite = null
                 };
 
-                var repo = conn.GetStorageContext<SampleModel>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<SampleModel>(SQLServerDialect.Instance);
 
                 ((long)await repo.Insert(sample1)).ShouldBe(1);
 
@@ -2861,7 +2906,7 @@ CREATE TABLE Child (
                 await conn.ExecuteAsync(tableQuery);
                 (await conn.Exists<Child>()).ShouldBeTrue();
 
-                var repo = conn.GetStorageContext<Child>(SQLServerDialect.Instance);
+                var repo = conn.GetDBContext<Child>(SQLServerDialect.Instance);
                 await repo.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Child, RESEED, 0)");
 

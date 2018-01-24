@@ -11,9 +11,9 @@
     /// <summary>
     /// Provides a set of helper methods for when working with <see cref="IDbConnection"/>.
     /// </summary>
-    public static class DbConnectionExtensions
+    public static class DBConnectionExtensions
     {
-        static DbConnectionExtensions()
+        static DBConnectionExtensions()
         {
             SqlMapper.AddTypeHandler(new GuidHandler());
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
@@ -26,10 +26,18 @@
         /// <param name="connection">The database connection.</param>
         /// <param name="dialect">The dialect to use for generating <c>SQL</c> DDL and DML queries.</param>
         /// </summary>
-        public static IDBContext<T> GetStorageContext<T>(this IDbConnection connection, Dialect dialect)
-        {
-            return new DBContext<T>(connection, dialect);
-        }
+        public static IDBContext<T> GetDBContext<T>(this IDbConnection connection, Dialect dialect)
+            => new DBContext<T>(connection, dialect);
+
+        /// <summary>
+        /// Gets an instance of the <see cref="DBContext{T}"/> for the given <typeparamref name="T"/>.
+        /// <param name="connection">The database connection.</param>
+        /// <param name="dialect">The dialect to use for generating <c>SQL</c> DDL and DML queries.</param>
+        /// <param name="tableName">The name of the table to map the <typeparamref name="T"/> to.</param>
+        /// </summary>
+        public static IDBContext<T> GetDBContext<T>(
+            this IDbConnection connection, Dialect dialect, string tableName)
+                => new DBContext<T>(connection, dialect, tableName);
 
         /// <summary>
         /// Executes the given <paramref name="sql"/>.
@@ -42,10 +50,8 @@
             IDbTransaction transaction = null,
             int? commandTimeout = null,
             CommandType? commandType = null,
-            CancellationToken cToken = default(CancellationToken))
-        {
-            return connection.ExecuteAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
-        }
+            CancellationToken cToken = default(CancellationToken)) 
+                => connection.ExecuteAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
 
         /// <summary>
         /// Executes the given <paramref name="sql"/> and returns the result of the query.
@@ -58,10 +64,8 @@
             int? commandTimeout = null, 
             CommandType? commandType = null, 
             bool buffered = true, 
-            CancellationToken cToken = default(CancellationToken))
-        {
-            return connection.QueryAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken));
-        }
+            CancellationToken cToken = default(CancellationToken)) 
+                => connection.QueryAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken));
 
         /// <summary>
         /// Executes the given <paramref name="sql"/> that returns a single value.
@@ -73,10 +77,8 @@
             IDbTransaction transaction = null,
             int? commandTimeout = null,
             CommandType? commandType = null,
-            CancellationToken cToken = default(CancellationToken))
-        {
-            return connection.ExecuteScalarAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
-        }
+            CancellationToken cToken = default(CancellationToken)) 
+                => connection.ExecuteScalarAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
 
         /// <summary>
         /// Execute a command that returns multiple result sets, and access each in turn.
@@ -92,9 +94,7 @@
             int? commandTimeout = null,
             CommandType? commandType = null,
             bool buffered = true,
-            CancellationToken cToken = default(CancellationToken))
-        {
-            return new Reader(await connection.QueryMultipleAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)));
-        }
+            CancellationToken cToken = default(CancellationToken)) 
+                => new Reader(await connection.QueryMultipleAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)));
     }
 }

@@ -10,23 +10,23 @@
     using Shouldly;
 
     [TestFixture]
-    internal sealed class TableTests
+    internal sealed class OverrriddenTableTests
     {
         [Test]
         public void When_creating_table()
         {
-            var table = Table.MakeOrGet<Person>(GenericSQLDialect.Instance, string.Empty);
+            var table = Table.MakeOrGet<Person>(GenericSQLDialect.Instance, "Foo");
             table.Dialect.ShouldBe(GenericSQLDialect.Instance);
             table.Dialect.Type.ShouldBe(DialectType.Generic);
             table.ModelType.ShouldBe(typeof(Person));
-            table.Name.ShouldBe("[Person]");
+            table.Name.ShouldBe("[Foo]");
             table.Select.ShouldBe("SELECT\r\n"
-                    + "    [Person].[Id] AS 'Id',\r\n"
-                    + "    [Person].[Name] AS 'Name',\r\n"
-                    + "    [Person].[Age] AS 'Age'\r\n"
-                    + "FROM [Person]\r\nWHERE\r\n    1 = 1;");
+                    + "    [Foo].[Id] AS 'Id',\r\n"
+                    + "    [Foo].[Name] AS 'Name',\r\n"
+                    + "    [Foo].[Age] AS 'Age'\r\n"
+                    + "FROM [Foo]\r\nWHERE\r\n    1 = 1;");
 
-            table.InsertIdentity.ShouldBe("INSERT INTO [Person]\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO [Foo]\r\n"
                     + "(\r\n"
                     + "    [Name],\r\n"
                     + "    [Age]\r\n"
@@ -37,58 +37,58 @@
                     + "    @Age\r\n"
                     + ");");
 
-            table.UpdateIdentity.ShouldBe("UPDATE [Person] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [Foo] SET\r\n"
                     + "    [Name] = @Name,\r\n"
                     + "    [Age] = @Age\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateAll.ShouldBe("UPDATE [Person] SET\r\n"
+            table.UpdateAll.ShouldBe("UPDATE [Foo] SET\r\n"
                     + "    [Id] = @Id,\r\n"
                     + "    [Name] = @Name,\r\n"
                     + "    [Age] = @Age\r\n"
                     + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM [Person]\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [Foo]\r\nWHERE\r\n    1 = 1;");
         }
 
         [Test]
         public void When_creating_table_for_model_with_no_id_or_identity_attribute()
         {
             Should.Throw<InvalidOperationException>(
-                    () => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance, string.Empty))
+                    () => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance, "Foo"))
                 .Message.ShouldBe("The model: 'ModelWithNoIdOrPrimaryKey' does not have a default 'Id' property specified or any of its members marked as 'Identity'.");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_generic_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(GenericSQLDialect.Instance, string.Empty);
+            var table = Table.MakeOrGet<SampleModel>(GenericSQLDialect.Instance, "Foo");
 
             table.ShouldNotBeNull();
             table.Dialect.ShouldBe(GenericSQLDialect.Instance);
             table.Dialect.Type.ShouldBe(DialectType.Generic);
             table.ModelType.ShouldBe(typeof(SampleModel));
-            table.Name.ShouldBe("[SampleModel]");
+            table.Name.ShouldBe("[Foo]");
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
                 .Message.ShouldBe("The given key was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
-                    + "    [SampleModel].[Id] AS 'Id',\r\n"
-                    + "    [SampleModel].[Text] AS 'Text',\r\n"
-                    + "    [SampleModel].[Int] AS 'Int',\r\n"
-                    + "    [SampleModel].[Decimal] AS 'Decimal',\r\n"
-                    + "    [SampleModel].[Double] AS 'Double',\r\n"
-                    + "    [SampleModel].[Float] AS 'Float',\r\n"
-                    + "    [SampleModel].[Flag] AS 'Flag',\r\n"
-                    + "    [SampleModel].[Binary] AS 'Binary',\r\n"
-                    + "    [SampleModel].[Key] AS 'Guid',\r\n"
-                    + "    [SampleModel].[DateTime] AS 'DateTime',\r\n"
-                    + "    [SampleModel].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
-                    + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+                    + "    [Foo].[Id] AS 'Id',\r\n"
+                    + "    [Foo].[Text] AS 'Text',\r\n"
+                    + "    [Foo].[Int] AS 'Int',\r\n"
+                    + "    [Foo].[Decimal] AS 'Decimal',\r\n"
+                    + "    [Foo].[Double] AS 'Double',\r\n"
+                    + "    [Foo].[Float] AS 'Float',\r\n"
+                    + "    [Foo].[Flag] AS 'Flag',\r\n"
+                    + "    [Foo].[Binary] AS 'Binary',\r\n"
+                    + "    [Foo].[Key] AS 'Guid',\r\n"
+                    + "    [Foo].[DateTime] AS 'DateTime',\r\n"
+                    + "    [Foo].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
+                    + "FROM [Foo]\r\nWHERE\r\n    1 = 1;");
 
-            table.InsertIdentity.ShouldBe("INSERT INTO [SampleModel]\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO [Foo]\r\n"
                     + "(\r\n"
                     + "    [Text],\r\n"
                     + "    [Int],\r\n"
@@ -115,7 +115,7 @@
                     + "    @DateTimeOffset\r\n"
                     + ");");
 
-            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [Foo] SET\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
                     + "    [Decimal] = @Decimal,\r\n"
@@ -128,7 +128,7 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateAll.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateAll.ShouldBe("UPDATE [Foo] SET\r\n"
                     + "    [Id] = @Id,\r\n"
                     + "    [Text] = @Text,\r\n"
                     + "    [Int] = @Int,\r\n"
@@ -142,36 +142,36 @@
                     + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                     + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [Foo]\r\nWHERE\r\n    1 = 1;");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_sqlite_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(SQLiteDialect.Instance, string.Empty);
+            var table = Table.MakeOrGet<SampleModel>(SQLiteDialect.Instance, "Foo");
 
             table.ShouldNotBeNull();
-            table.Name.ShouldBe("[SampleModel]");
+            table.Name.ShouldBe("[Foo]");
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
                 .Message.ShouldBe("The given key was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
-                                  + "    [SampleModel].[Id] AS 'Id',\r\n"
-                                  + "    [SampleModel].[Text] AS 'Text',\r\n"
-                                  + "    [SampleModel].[Int] AS 'Int',\r\n"
-                                  + "    [SampleModel].[Decimal] AS 'Decimal',\r\n"
-                                  + "    [SampleModel].[Double] AS 'Double',\r\n"
-                                  + "    [SampleModel].[Float] AS 'Float',\r\n"
-                                  + "    [SampleModel].[Flag] AS 'Flag',\r\n"
-                                  + "    [SampleModel].[Binary] AS 'Binary',\r\n"
-                                  + "    [SampleModel].[Key] AS 'Guid',\r\n"
-                                  + "    [SampleModel].[DateTime] AS 'DateTime',\r\n"
-                                  + "    [SampleModel].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
-                                  + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+                                  + "    [Foo].[Id] AS 'Id',\r\n"
+                                  + "    [Foo].[Text] AS 'Text',\r\n"
+                                  + "    [Foo].[Int] AS 'Int',\r\n"
+                                  + "    [Foo].[Decimal] AS 'Decimal',\r\n"
+                                  + "    [Foo].[Double] AS 'Double',\r\n"
+                                  + "    [Foo].[Float] AS 'Float',\r\n"
+                                  + "    [Foo].[Flag] AS 'Flag',\r\n"
+                                  + "    [Foo].[Binary] AS 'Binary',\r\n"
+                                  + "    [Foo].[Key] AS 'Guid',\r\n"
+                                  + "    [Foo].[DateTime] AS 'DateTime',\r\n"
+                                  + "    [Foo].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
+                                  + "FROM [Foo]\r\nWHERE\r\n    1 = 1;");
 
-            table.InsertIdentity.ShouldBe("INSERT INTO [SampleModel]\r\n"
+            table.InsertIdentity.ShouldBe("INSERT INTO [Foo]\r\n"
                                           + "(\r\n"
                                           + "    [Text],\r\n"
                                           + "    [Int],\r\n"
@@ -199,7 +199,7 @@
                                           + ");\r\n"
                                           +"SELECT last_insert_rowid() AS Id;");
 
-            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [Foo] SET\r\n"
                                          + "    [Text] = @Text,\r\n"
                                          + "    [Int] = @Int,\r\n"
                                          + "    [Decimal] = @Decimal,\r\n"
@@ -212,7 +212,7 @@
                                          + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                                          + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateAll.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateAll.ShouldBe("UPDATE [Foo] SET\r\n"
                                      + "    [Id] = @Id,\r\n"
                                      + "    [Text] = @Text,\r\n"
                                      + "    [Int] = @Int,\r\n"
@@ -226,37 +226,37 @@
                                      + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                                      + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [Foo]\r\nWHERE\r\n    1 = 1;");
         }
 
         [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_sqlserver_dialect()
         {
-            var table = Table.MakeOrGet<SampleModel>(SQLServerDialect.Instance, string.Empty);
+            var table = Table.MakeOrGet<SampleModel>(SQLServerDialect.Instance, "Foo");
 
             table.ShouldNotBeNull();
-            table.Name.ShouldBe("[SampleModel]");
+            table.Name.ShouldBe("[Foo]");
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
                 .Message.ShouldBe("The given key was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
-                                  + "    [SampleModel].[Id] AS 'Id',\r\n"
-                                  + "    [SampleModel].[Text] AS 'Text',\r\n"
-                                  + "    [SampleModel].[Int] AS 'Int',\r\n"
-                                  + "    [SampleModel].[Decimal] AS 'Decimal',\r\n"
-                                  + "    [SampleModel].[Double] AS 'Double',\r\n"
-                                  + "    [SampleModel].[Float] AS 'Float',\r\n"
-                                  + "    [SampleModel].[Flag] AS 'Flag',\r\n"
-                                  + "    [SampleModel].[Binary] AS 'Binary',\r\n"
-                                  + "    [SampleModel].[Key] AS 'Guid',\r\n"
-                                  + "    [SampleModel].[DateTime] AS 'DateTime',\r\n"
-                                  + "    [SampleModel].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
-                                  + "FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+                                  + "    [Foo].[Id] AS 'Id',\r\n"
+                                  + "    [Foo].[Text] AS 'Text',\r\n"
+                                  + "    [Foo].[Int] AS 'Int',\r\n"
+                                  + "    [Foo].[Decimal] AS 'Decimal',\r\n"
+                                  + "    [Foo].[Double] AS 'Double',\r\n"
+                                  + "    [Foo].[Float] AS 'Float',\r\n"
+                                  + "    [Foo].[Flag] AS 'Flag',\r\n"
+                                  + "    [Foo].[Binary] AS 'Binary',\r\n"
+                                  + "    [Foo].[Key] AS 'Guid',\r\n"
+                                  + "    [Foo].[DateTime] AS 'DateTime',\r\n"
+                                  + "    [Foo].[DateTimeOffset] AS 'DateTimeOffset'\r\n"
+                                  + "FROM [Foo]\r\nWHERE\r\n    1 = 1;");
 
             table.InsertIdentity.ShouldBe("DECLARE @InsertedRows AS TABLE (Id BIGINT);\r\n"
-                                          + "INSERT INTO [SampleModel]\r\n"
+                                          + "INSERT INTO [Foo]\r\n"
                                           + "(\r\n"
                                           + "    [Text],\r\n"
                                           + "    [Int],\r\n"
@@ -284,7 +284,7 @@
                                           + ");\r\n"
                                           + "SELECT Id FROM @InsertedRows;");
 
-            table.UpdateIdentity.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateIdentity.ShouldBe("UPDATE [Foo] SET\r\n"
                                          + "    [Text] = @Text,\r\n"
                                          + "    [Int] = @Int,\r\n"
                                          + "    [Decimal] = @Decimal,\r\n"
@@ -297,7 +297,7 @@
                                          + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                                          + "WHERE\r\n    [Id] = @Id;");
 
-            table.UpdateAll.ShouldBe("UPDATE [SampleModel] SET\r\n"
+            table.UpdateAll.ShouldBe("UPDATE [Foo] SET\r\n"
                                      + "    [Id] = @Id,\r\n"
                                      + "    [Text] = @Text,\r\n"
                                      + "    [Int] = @Int,\r\n"
@@ -311,7 +311,7 @@
                                      + "    [DateTimeOffset] = @DateTimeOffset\r\n"
                                      + "WHERE\r\n    1 = 1;");
 
-            table.Delete.ShouldBe("DELETE FROM [SampleModel]\r\nWHERE\r\n    1 = 1;");
+            table.Delete.ShouldBe("DELETE FROM [Foo]\r\nWHERE\r\n    1 = 1;");
         }
     }
 }

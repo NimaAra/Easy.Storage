@@ -26,7 +26,7 @@
         public void When_getting_partial_update_query()
         {
             var dialect = GenericSQLDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
             var filter = Query<Person>.Filter.And(x => x.Id, Operator.Equal, 1);
 
             var person = new Person { Age = 10, Name = "Joe" };
@@ -48,7 +48,7 @@ WHERE 1=1
 AND
     ([Id]=@Id1);");
 
-            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect, string.Empty);
             var lonelyFilter = Query<Lonely>.Filter.And(x => x.Id, Operator.Equal, 1);
             var lonely = new Lonely { Id = 1 };
             dialect.GetPartialUpdateQuery(lonelyTable, lonely, lonelyFilter)
@@ -63,7 +63,7 @@ AND
         public void When_getting_insert_query()
         {
             var dialect = GenericSQLDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
 
             dialect.GetInsertQuery(table, true)
                 .ShouldBe(@"INSERT INTO [Person]
@@ -91,7 +91,7 @@ VALUES
     @Age
 );");
 
-            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect, string.Empty);
             dialect.GetInsertQuery(lonelyTable, true)
                 .ShouldBe(@"INSERT INTO [Lonely]
 (
@@ -117,7 +117,7 @@ VALUES
         public void When_getting_partial_insert_query()
         {
             var dialect = GenericSQLDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
 
             var itemWithAllProperties = new {Id = 1, Name = "Foo", Age = 123};
             Should.Throw<NotImplementedException>(() => dialect.GetPartialInsertQuery<Person>(table, itemWithAllProperties))

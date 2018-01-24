@@ -28,7 +28,7 @@
         public void When_getting_partial_update_query()
         {
             var dialect = SQLiteDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
             var filter = Query<Person>.Filter.And(x => x.Id, Operator.Equal, 1);
 
             var person = new Person { Age = 10, Name = "Joe" };
@@ -50,7 +50,7 @@ WHERE 1=1
 AND
     ([Id]=@Id1);");
 
-            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect, string.Empty);
             var lonelyFilter = Query<Lonely>.Filter.And(x => x.Id, Operator.Equal, 1);
             var lonely = new Lonely { Id = 1 };
             dialect.GetPartialUpdateQuery(lonelyTable, lonely, lonelyFilter)
@@ -65,7 +65,7 @@ AND
         public void When_getting_insert_query()
         {
             var dialect = SQLiteDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
 
             dialect.GetInsertQuery(table, true)
                 .ShouldBe(@"INSERT INTO [Person]
@@ -95,7 +95,7 @@ VALUES
 );
 SELECT last_insert_rowid() AS Id;");
 
-            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect, string.Empty);
             dialect.GetInsertQuery(lonelyTable, true)
                 .ShouldBe(@"INSERT INTO [Lonely]
 (
@@ -123,7 +123,7 @@ SELECT last_insert_rowid() AS Id;");
         public void When_getting_partial_insert_query()
         {
             var dialect = SQLiteDialect.Instance;
-            var table = Table.MakeOrGet<Person>(dialect);
+            var table = Table.MakeOrGet<Person>(dialect, string.Empty);
 
             var itemWithAllProperties = new { Id = 1, Name = "Foo", Age = 123 };
             dialect.GetPartialInsertQuery<Person>(table, itemWithAllProperties)
@@ -153,7 +153,7 @@ SELECT last_insert_rowid() AS Id;");
             Should.Throw<InvalidDataException>(() => dialect.GetPartialInsertQuery<Person>(table, itemWithNoProperties))
                 .Message.ShouldBe("Unable to find any properties in: item");
 
-            var lonelyTable = Table.MakeOrGet<Lonely>(dialect);
+            var lonelyTable = Table.MakeOrGet<Lonely>(dialect, string.Empty);
             var lonely = new Lonely { Id = 1 };
             dialect.GetPartialInsertQuery<Lonely>(lonelyTable, lonely)
                 .ShouldBe(@"INSERT INTO [Lonely]
