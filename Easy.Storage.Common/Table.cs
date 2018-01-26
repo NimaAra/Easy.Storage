@@ -15,7 +15,9 @@
     /// </summary>
     public sealed class Table
     {
-        private static readonly ConcurrentDictionary<TableKey, Table> Cache = new ConcurrentDictionary<TableKey, Table>();
+        private static Type IdentityType = typeof(IdentityAttribute);
+        private static readonly ConcurrentDictionary<TableKey, Table> Cache = 
+            new ConcurrentDictionary<TableKey, Table>();
         
         internal static Table MakeOrGet<TItem>(Dialect dialect, string name)
         {
@@ -108,7 +110,7 @@
         private static PropertyInfo GetIdentityColumn(Type modelType, PropertyInfo[] props)
         {
             var possibleIdentityColumns = props
-                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == typeof(IdentityAttribute)))
+                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == IdentityType))
                 .ToArray();
 
             Ensure.That<InvalidOperationException>(possibleIdentityColumns.Length <= 1,
@@ -121,7 +123,7 @@
 
             if (defaultIdProp != null) { return defaultIdProp; }
 
-            throw new InvalidOperationException($"The model: '{modelType.Name}' does not have a default 'Id' property specified or any of its members marked as 'Identity'.");
+            throw new InvalidOperationException($"The model: '{modelType.Name}' does not have a default 'Id' property specified or any of its members marked as '{IdentityType.FullName}'.");
         }
 
         private static string GetModelName(Type type)
