@@ -15,24 +15,16 @@
     /// </summary>
     public sealed class Table
     {
-        private static Type IdentityType = typeof(IdentityAttribute);
+        private static readonly Type IdentityType = typeof(IdentityAttribute);
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = 
             new ConcurrentDictionary<TableKey, Table>();
         
-        internal static Table MakeOrGet<TItem>(Dialect dialect, string name)
+        internal static Table MakeOrGet<T>(Dialect dialect, string name)
         {
             Ensure.NotNull(dialect, nameof(dialect));
 
-            var tableName = name;
-            var modelType = typeof(TItem);
-            
-            if (tableName.IsNullOrEmptyOrWhiteSpace())
-            {
-                tableName = GetModelName(modelType);
-            }
-
-            var key = new TableKey(modelType, dialect, tableName.GetAsEscapedSQLName());
-            return Cache.GetOrAdd(key, theKey => new Table(theKey));
+            var key = new TableKey(typeof(T), dialect, name.GetHashCode());
+            return Cache.GetOrAdd(key, k => new Table(k, name));
         }
 
         internal readonly HashSet<string> IgnoredProperties;
@@ -40,11 +32,17 @@
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
         internal readonly PropertyInfo IdentityColumn;
         
-        private Table(TableKey key)
+        private Table(TableKey key, string tableName)
         {
             Dialect = key.Dialect;
             ModelType = key.Type;
-            Name = key.Name;
+
+            if (tableName.IsNullOrEmpty())
+            {
+                tableName = GetModelName(ModelType);
+            }
+
+            Name = tableName.GetAsEscapedSQLName();
 
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             IdentityColumn = GetIdentityColumn(ModelType, props);
@@ -163,23 +161,22 @@
 
         private struct TableKey : IEquatable<TableKey>
         {
-            public TableKey(Type type, Dialect dialect, string name)
+            private readonly int _tableHash;
+            
+            public TableKey(Type type, Dialect dialect, int tableHash)
             {
                 Type = type;
                 Dialect = dialect;
-                Name = name;
+                _tableHash = tableHash;
             }
+
 
             internal Type Type { get; }
             internal Dialect Dialect { get; }
-            internal string Name { get; }
-
+            
             #region Equality
 
-            public bool Equals(TableKey other)
-            {
-                return GetHashCode() == other.GetHashCode();
-            }
+            public bool Equals(TableKey other) => GetHashCode() == other.GetHashCode();
 
             public static bool operator ==(TableKey left, TableKey right) => left.Equals(right);
 
@@ -191,7 +188,7 @@
                 return obj is TableKey key && Equals(key);
             }
 
-            public override int GetHashCode() => HashHelper.GetHashCode(Type, Dialect, Name);
+            public override int GetHashCode() => HashHelper.GetHashCode(Type, Dialect, _tableHash);
 
             #endregion
         }

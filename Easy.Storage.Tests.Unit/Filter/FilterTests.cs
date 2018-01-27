@@ -9,10 +9,13 @@
     [TestFixture]
     internal sealed class FilterTests
     {
+        private static readonly Table _table = 
+            Table.MakeOrGet<Person>(GenericSQLDialect.Instance, string.Empty);
+
         [Test]
         public void When_creating_a_simple_equality_filter()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Id, Operator.Equal, 1);
 
             filter.Parameters.ShouldNotBeNull();
@@ -33,7 +36,7 @@ AND
         [Test]
         public void When_creating_a_simple_inequality_filter()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Name, Operator.NotEqual, "Bar");
 
             filter.Parameters.ShouldNotBeNull();
@@ -54,7 +57,7 @@ AND
         [Test]
         public void When_creating_an_in_filter_as_and()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .AndIn(p => p.Id, new long[] { 1, 2, 3 });
 
             filter.Parameters.ShouldNotBeNull();
@@ -75,7 +78,7 @@ AND
         [Test]
         public void When_creating_a_notin_filter_as_and()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .AndNotIn(p => p.Id, new long[] { 1, 2, 3 });
 
             filter.Parameters.ShouldNotBeNull();
@@ -96,7 +99,7 @@ AND
         [Test]
         public void When_creating_an_and_filter()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Id, Operator.Equal, 1)
                 .And(p => p.Name, Operator.Equal, "Foo");
 
@@ -121,7 +124,7 @@ AND
         [Test]
         public void When_creating_an_or_filter()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Id, Operator.Equal, 1)
                 .Or(p => p.Name, Operator.Equal, "Foo");
 
@@ -146,7 +149,7 @@ OR
         [Test]
         public void When_creating_an_in_filter_as_or()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Id, Operator.Equal, 1)
                 .OrIn(p => p.Name, new[] { "Foo", "Bar" });
 
@@ -171,7 +174,7 @@ OR
         [Test]
         public void When_creating_a_notin_filter_as_or()
         {
-            var filter = Query<Person>.Filter
+            var filter = Query<Person>.Make(_table).Filter
                 .And(p => p.Id, Operator.Equal, 1)
                 .OrNotIn(p => p.Name, new[] { "Foo", "Bar" });
 

@@ -24,6 +24,11 @@
         Table Table { get; }
 
         /// <summary>
+        /// Gets a <see cref="Query{T}"/> instance for building queries.
+        /// </summary>
+        Query<T> Query { get; }
+
+        /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// </summary>
         Task<IEnumerable<T>> Get(IDbTransaction transaction = null);

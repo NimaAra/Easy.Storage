@@ -618,13 +618,13 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -636,13 +636,13 @@
                     new Person { Name = "P5", Age = 50 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(6);
+                (await ctx.Insert(people)).ShouldBe(6);
 
-                var filter1 = Query<Person>.Filter
+                var filter1 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThan, 30)
                     .Or(p => p.Name, Operator.Equal, "P1");
 
-                var filter1Result = (await repo.GetWhere(filter1)).ToArray();
+                var filter1Result = (await ctx.GetWhere(filter1)).ToArray();
                 filter1Result.Length.ShouldBe(3);
 
                 filter1Result[0].Id.ShouldBe(1);
@@ -657,11 +657,11 @@
                 filter1Result[2].Name.ShouldBe("P5");
                 filter1Result[2].Age.ShouldBe(50);
 
-                var filter2 = Query<Person>.Filter
+                var filter2 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
                     .Or(p => p.Age, Operator.Equal, 20);
 
-                var filter2Result = (await repo.GetWhere(filter2)).ToArray();
+                var filter2Result = (await ctx.GetWhere(filter2)).ToArray();
                 filter2Result.Length.ShouldBe(2);
 
                 filter2Result[0].Id.ShouldBe(2);
@@ -672,11 +672,11 @@
                 filter2Result[1].Name.ShouldBe("P5");
                 filter2Result[1].Age.ShouldBe(50);
 
-                var filter3 = Query<Person>.Filter
+                var filter3 = ctx.Query.Filter
                     .And(p => p.Age, Operator.Equal, 50)
                     .OrIn(p => p.Name, new[] { "P2", "P3", "P4" });
 
-                var filter3Result = (await repo.GetWhere(filter3))
+                var filter3Result = (await ctx.GetWhere(filter3))
                     .OrderBy(x => x.Name)
                     .ToArray();
                 filter3Result.Length.ShouldBe(4);
@@ -703,13 +703,13 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -721,13 +721,13 @@
                     new MyPerson { SomeName = "P5", Age = 50 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(6);
+                (await ctx.Insert(people)).ShouldBe(6);
 
-                var filter1 = Query<MyPerson>.Filter
+                var filter1 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThan, 30)
                     .Or(p => p.SomeName, Operator.Equal, "P1");
 
-                var filter1Result = (await repo.GetWhere(filter1)).ToArray();
+                var filter1Result = (await ctx.GetWhere(filter1)).ToArray();
                 filter1Result.Length.ShouldBe(3);
 
                 filter1Result[0].SomeId.ShouldBe(1);
@@ -742,11 +742,11 @@
                 filter1Result[2].SomeName.ShouldBe("P5");
                 filter1Result[2].Age.ShouldBe(50);
 
-                var filter2 = Query<MyPerson>.Filter
+                var filter2 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
                     .Or(p => p.Age, Operator.Equal, 20);
 
-                var filter2Result = (await repo.GetWhere(filter2)).ToArray();
+                var filter2Result = (await ctx.GetWhere(filter2)).ToArray();
                 filter2Result.Length.ShouldBe(2);
 
                 filter2Result[0].SomeId.ShouldBe(2);
@@ -757,11 +757,11 @@
                 filter2Result[1].SomeName.ShouldBe("P5");
                 filter2Result[1].Age.ShouldBe(50);
 
-                var filter3 = Query<MyPerson>.Filter
+                var filter3 = ctx.Query.Filter
                     .And(p => p.Age, Operator.Equal, 50)
                     .OrIn(p => p.SomeName, new[] { "P2", "P3", "P4" });
 
-                var filter3Result = (await repo.GetWhere(filter3))
+                var filter3Result = (await ctx.GetWhere(filter3))
                     .OrderBy(x => x.SomeName)
                     .ToArray();
                 filter3Result.Length.ShouldBe(4);
@@ -1511,13 +1511,13 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1526,9 +1526,9 @@
                     new Person{ Age = 30, Name = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].Id.ShouldBe(1);
@@ -1539,18 +1539,18 @@
                     Age = 100
                 };
 
-                var filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 0);
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 0);
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, peopleInserted[0].Id);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, peopleInserted[0].Id);
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
                 personToUpdate.Name = peopleInserted[0].Name;
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
                 var anotherPersonToUpdate = new Person
@@ -1560,13 +1560,13 @@
                     Name = "P3 - Updated"
                 };
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(anotherPersonToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(anotherPersonToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
-                (await repo.Count(p => p.Id, Query<Person>.Filter.And(p => p.Id, Operator.Equal, 3))).ShouldBe((ulong)1);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.Id, ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3))).ShouldBe((ulong)1);
             }
         }
 
@@ -1578,13 +1578,13 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1593,9 +1593,9 @@
                     new MyPerson{ Age = 30, SomeName = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].SomeId.ShouldBe(1);
@@ -1606,21 +1606,21 @@
                     Age = 100
                 };
 
-                var filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 0);
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 0);
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, peopleInserted[0].SomeId);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, peopleInserted[0].SomeId);
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
                 personToUpdate.SomeName = peopleInserted[0].SomeName;
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(personToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new { }, filter))
+                Should.Throw<InvalidDataException>(async () => await ctx.UpdatePartialWhere(new { }, filter))
                     .Message.ShouldBe("Unable to find any properties in: item");
 
                 var anotherPersonToUpdate = new MyPerson
@@ -1630,13 +1630,13 @@
                     SomeName = "P3 - Updated"
                 };
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
 
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(anotherPersonToUpdate, filter))
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(anotherPersonToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
-                (await repo.Count(p => p.SomeId, Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 3))).ShouldBe((ulong)1);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.SomeId, ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3))).ShouldBe((ulong)1);
             }
         }
 
@@ -1648,13 +1648,13 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1663,9 +1663,9 @@
                     new Person{ Age = 30, Name = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].Id.ShouldBe(1);
@@ -1675,16 +1675,16 @@
                     Age = 100
                 };
 
-                var filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 0);
 
-                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
+                (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 1);
-                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 1);
+                (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
 
-                (await repo.GetWhere(filter)).Single().Id.ShouldBe(1);
-                (await repo.GetWhere(filter)).Single().Age.ShouldBe(100);
-                (await repo.GetWhere(filter)).Single().Name.ShouldBe("P1");
+                (await ctx.GetWhere(filter)).Single().Id.ShouldBe(1);
+                (await ctx.GetWhere(filter)).Single().Age.ShouldBe(100);
+                (await ctx.GetWhere(filter)).Single().Name.ShouldBe("P1");
 
                 var anotherPersonToUpdate = new Person
                 {
@@ -1692,27 +1692,27 @@
                     Name = "P3 - Updated"
                 };
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 3);
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(anotherPersonToUpdate, filter))
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(anotherPersonToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
-                Should.Throw<InvalidDataException>(async () => await repo.UpdatePartialWhere(new { }, filter))
+                Should.Throw<InvalidDataException>(async () => await ctx.UpdatePartialWhere(new { }, filter))
                     .Message.ShouldBe("Unable to find any properties in: item");
 
                 dynamic yetAnotherPersonToUpdate = new ExpandoObject();
                 yetAnotherPersonToUpdate.Age = 555;
                 yetAnotherPersonToUpdate.Name = "P2 - Updated";
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 2);
-                ((int)await repo.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 2);
+                ((int)await ctx.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
 
-                (await repo.GetWhere(p => p.Id, 2)).Single().Id.ShouldBe(2);
-                (await repo.GetWhere(p => p.Id, 2)).Single().Age.ShouldBe(555);
-                (await repo.GetWhere(p => p.Id, 2)).Single().Name.ShouldBe("P2 - Updated");
+                (await ctx.GetWhere(p => p.Id, 2)).Single().Id.ShouldBe(2);
+                (await ctx.GetWhere(p => p.Id, 2)).Single().Age.ShouldBe(555);
+                (await ctx.GetWhere(p => p.Id, 2)).Single().Name.ShouldBe("P2 - Updated");
 
-                filter = Query<Person>.Filter.And(p => p.Id, Operator.Equal, 3);
-                (await repo.Count(p => p.Id, filter)).ShouldBe((ulong)1);
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
+                (await ctx.Count(p => p.Id, filter)).ShouldBe((ulong)1);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)3);
             }
         }
 
@@ -1724,13 +1724,13 @@
              */
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1739,9 +1739,9 @@
                     new MyPerson{ Age = 30, SomeName = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].SomeId.ShouldBe(1);
@@ -1751,16 +1751,16 @@
                     Age = 100
                 };
 
-                var filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 0);
 
-                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
+                (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 1);
-                (await repo.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 1);
+                (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
 
-                (await repo.GetWhere(filter)).Single().SomeId.ShouldBe(1);
-                (await repo.GetWhere(filter)).Single().Age.ShouldBe(100);
-                (await repo.GetWhere(filter)).Single().SomeName.ShouldBe("P1");
+                (await ctx.GetWhere(filter)).Single().SomeId.ShouldBe(1);
+                (await ctx.GetWhere(filter)).Single().Age.ShouldBe(100);
+                (await ctx.GetWhere(filter)).Single().SomeName.ShouldBe("P1");
 
                 var anotherPersonToUpdate = new MyPerson
                 {
@@ -1768,24 +1768,24 @@
                     SomeName = "P3 - Updated"
                 };
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 3);
-                Should.Throw<SqlException>(async () => await repo.UpdateWhere(anotherPersonToUpdate, filter))
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                Should.Throw<SqlException>(async () => await ctx.UpdateWhere(anotherPersonToUpdate, filter))
                     .Message.ShouldBe("Cannot update identity column 'Id'.");
 
                 dynamic yetAnotherPersonToUpdate = new ExpandoObject();
                 yetAnotherPersonToUpdate.Age = 555;
                 yetAnotherPersonToUpdate.SomeName = "P2 - Updated";
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 2);
-                ((int)await repo.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 2);
+                ((int)await ctx.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
 
-                (await repo.GetWhere(p => p.SomeId, 2)).Single().SomeId.ShouldBe(2);
-                (await repo.GetWhere(p => p.SomeId, 2)).Single().Age.ShouldBe(555);
-                (await repo.GetWhere(p => p.SomeId, 2)).Single().SomeName.ShouldBe("P2 - Updated");
+                (await ctx.GetWhere(p => p.SomeId, 2)).Single().SomeId.ShouldBe(2);
+                (await ctx.GetWhere(p => p.SomeId, 2)).Single().Age.ShouldBe(555);
+                (await ctx.GetWhere(p => p.SomeId, 2)).Single().SomeName.ShouldBe("P2 - Updated");
 
-                filter = Query<MyPerson>.Filter.And(p => p.SomeId, Operator.Equal, 3);
-                (await repo.Count(p => p.SomeId, filter)).ShouldBe((ulong)1);
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                (await ctx.Count(p => p.SomeId, filter)).ShouldBe((ulong)1);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)3);
             }
         }
 
@@ -1899,13 +1899,13 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<Person>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1918,15 +1918,15 @@
                     new Person { Name = "P5", Age = 70 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(7);
+                (await ctx.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 var template1 = new { Name = "P0", Age = 0 };
-                var filter = Query<Person>.Filter.And(p => p.Age, Operator.Equal, 10);
-                (await repo.UpdatePartialWhere(template1, filter)).ShouldBe(1);
+                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Equal, 10);
+                (await ctx.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
-                var snapshot1 = (await repo.Get()).ToArray();
+                var snapshot1 = (await ctx.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot1[0].Id.ShouldBe(1);
@@ -1941,10 +1941,10 @@
                 }
 
                 var template2 = new { Name = "P100", Age = 100 };
-                filter = Query<Person>.Filter.And(p => p.Name, Operator.Equal, "P5");
-                (await repo.UpdatePartialWhere(template2, filter)).ShouldBe(3);
+                filter = ctx.Query.Filter.And(p => p.Name, Operator.Equal, "P5");
+                (await ctx.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
-                var snapshot2 = (await repo.Get()).ToArray();
+                var snapshot2 = (await ctx.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
 
                 for (var i = snapshot1.Length - 4; i >= 0; i--)
@@ -1967,10 +1967,10 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { Name = "P200", Age = 200 };
-                filter = Query<Person>.Filter.AndIn(p => p.Id, new long[] { 1, 2, 3 });
-                (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
+                filter = ctx.Query.Filter.AndIn(p => p.Id, new long[] { 1, 2, 3 });
+                (await ctx.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
-                var snapshot3 = (await repo.Get()).ToArray();
+                var snapshot3 = (await ctx.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot3[0].Id.ShouldBe(1);
@@ -1998,13 +1998,13 @@
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLServerDialect.Instance);
 
                 await conn.ExecuteAsync(DefaultTableQuery);
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
                 await conn.ExecuteAsync("DBCC CHECKIDENT (Person, RESEED, 0)");
 
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2017,15 +2017,15 @@
                     new MyPerson { SomeName = "P5", Age = 70 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(7);
+                (await ctx.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 var template1 = new { SomeName = "P0", Age = 0 };
-                var filter = Query<MyPerson>.Filter.And(p => p.Age, Operator.Equal, 10);
-                (await repo.UpdatePartialWhere(template1, filter)).ShouldBe(1);
+                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Equal, 10);
+                (await ctx.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
-                var snapshot1 = (await repo.Get()).ToArray();
+                var snapshot1 = (await ctx.Get()).ToArray();
                 snapshot1.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot1[0].SomeId.ShouldBe(1);
@@ -2040,10 +2040,10 @@
                 }
 
                 var template2 = new { SomeName = "P100", Age = 100 };
-                filter = Query<MyPerson>.Filter.And(p => p.SomeName, Operator.Equal, "P5");
-                (await repo.UpdatePartialWhere(template2, filter)).ShouldBe(3);
+                filter = ctx.Query.Filter.And(p => p.SomeName, Operator.Equal, "P5");
+                (await ctx.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
-                var snapshot2 = (await repo.Get()).ToArray();
+                var snapshot2 = (await ctx.Get()).ToArray();
                 snapshot2.Length.ShouldBe(insertedPeople.Length);
 
                 for (var i = snapshot1.Length - 4; i >= 0; i--)
@@ -2066,10 +2066,10 @@
                 snapshot2[6].Age.ShouldBe(100);
 
                 var template3 = new { SomeName = "P200", Age = 200 };
-                filter = Query<MyPerson>.Filter.AndIn(p => p.SomeId, new long[] { 1, 2, 3 });
-                (await repo.UpdatePartialWhere(template3, filter)).ShouldBe(3);
+                filter = ctx.Query.Filter.AndIn(p => p.SomeId, new long[] { 1, 2, 3 });
+                (await ctx.UpdatePartialWhere(template3, filter)).ShouldBe(3);
 
-                var snapshot3 = (await repo.Get()).ToArray();
+                var snapshot3 = (await ctx.Get()).ToArray();
                 snapshot3.Length.ShouldBe(insertedPeople.Length);
 
                 snapshot3[0].SomeId.ShouldBe(1);

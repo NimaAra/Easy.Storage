@@ -25,8 +25,7 @@ namespace Easy.Storage.Common.Filter
 
         internal IDictionary<string, object> Parameters { get; }
         
-        internal static FilteredQuery Make<T>() => 
-            new FilteredQuery(Table.MakeOrGet<T>(GenericSQLDialect.Instance, string.Empty));
+        internal static FilteredQuery Make(Table table) => new FilteredQuery(table);
 
         /// <summary>
         /// Compiles and gets the <c>SQL</c> of the <see cref="FilteredQuery"/>.
@@ -86,7 +85,6 @@ namespace Easy.Storage.Common.Filter
             var paramName = AddAndReturnParameter(propertyName, value);
             var columnName = _table.PropertyNamesToColumns[propertyName];
 
-            //_builder.Remove(_builder.Length - 1, 1); // remove the ';'
             _builder.AppendFormat("{0}({1}{2}@{3})", clause, columnName, operation, paramName);
         }
 

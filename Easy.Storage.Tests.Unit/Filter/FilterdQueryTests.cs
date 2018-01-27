@@ -9,10 +9,13 @@
     [TestFixture]
     internal sealed class FilterdQueryTests
     {
+        private static readonly Table _table = 
+            Table.MakeOrGet<Person>(GenericSQLDialect.Instance, string.Empty);
+
         [Test]
         public void When_creating_a_filtered_query()
         {
-            var queryOne = FilteredQuery.Make<Person>();
+            var queryOne = FilteredQuery.Make(_table);
             queryOne.ShouldNotBeNull();
             queryOne.Parameters.ShouldBeEmpty();
 
@@ -29,7 +32,7 @@ WHERE
         [Test]
         public void When_adding_equality_clause()
         {
-            var query = FilteredQuery.Make<Person>();
+            var query = FilteredQuery.Make(_table);
             query.AddClause<Person, long>(p => p.Id, Operator.Equal, 1, Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Id1"].ShouldBe(1);
@@ -49,7 +52,7 @@ AND
         [Test]
         public void When_adding_in_clause()
         {
-            var query = FilteredQuery.Make<Person>();
+            var query = FilteredQuery.Make(_table);
             query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, true, new [] { "Foo", "Bar" });
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe(new [] { "Foo", "Bar"});
@@ -69,7 +72,7 @@ AND
         [Test]
         public void When_adding_not_in_clause()
         {
-            var query = FilteredQuery.Make<Person>();
+            var query = FilteredQuery.Make(_table);
             query.AddInClause<Person, string>(p => p.Name, Formatter.AndClauseSeparator, false, new[] { "Foo", "Bar" });
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe(new[] { "Foo", "Bar" });
@@ -89,7 +92,7 @@ AND
         [Test]
         public void When_adding_filter_to_a_delete_statement()
         {
-            var query = FilteredQuery.Make<Person>();
+            var query = FilteredQuery.Make(_table);
             query.AddClause<Person, string>(p => p.Name, Operator.Equal, "Foo", Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
@@ -106,7 +109,7 @@ AND
         [Test]
         public void When_adding_filter_to_a_update_statement()
         {
-            var query = FilteredQuery.Make<Person>();
+            var query = FilteredQuery.Make(_table);
             query.AddClause<Person, string>(p => p.Name, Operator.Equal, "Foo", Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");

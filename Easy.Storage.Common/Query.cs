@@ -10,14 +10,22 @@
 
     /// <summary>
     /// Represents a helper class to be used for creating queries 
-    /// and filters for the given model of type <typeparam name="T"></typeparam>.
+    /// and filters for the given model of type <typeparamref name="T"/>.
     /// </summary>
-    public static class Query<T>
+    public class Query<T>
     {
+        private readonly Table _table;
+
+        private Query(Table table) => _table = table;
+        
+        internal static Query<T> Make(Table table) => new Query<T>(table);
+
         /// <summary>
         /// Gets an instance of the <see cref="Filter{T}"/> for creating query filters.
         /// </summary>
-        public static Filter<T> Filter => new Filter<T>();
+        public Filter<T> Filter => new Filter<T>(_table);
+
+        // [ToDo] - Add OrderBy etc
     }
 
     // [ToDo] - CoMPLETE make public?
@@ -54,7 +62,8 @@
             var builder = new StringBuilder("ORDER BY");
             foreach (var pair in _clauses)
             {
-                builder.AppendFormat("{0}  {1} {2},", Environment.NewLine, pair.Key, pair.Value ? "ASC" : "DESC");
+                builder.AppendFormat("{0}  {1} {2},", 
+                    Environment.NewLine, pair.Key, pair.Value ? "ASC" : "DESC");
             }
 
             return builder.ToString();

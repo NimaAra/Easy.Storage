@@ -43,6 +43,11 @@ namespace Easy.Storage.Common
         public Table Table { get; }
 
         /// <summary>
+        /// Gets a <see cref="Query{T}"/> instance for building queries.
+        /// </summary>
+        public Query<T> Query => Query<T>.Make(Table);
+
+        /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
         /// <remarks>This method returns a buffered result.</remarks>
         /// </summary>
@@ -63,11 +68,12 @@ namespace Easy.Storage.Common
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="value">The value associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
-        public Task<IEnumerable<T>> GetWhere<TProperty>(Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
+        public Task<IEnumerable<T>> GetWhere<TProperty>(
+            Expression<Func<T, TProperty>> selector, TProperty value, IDbTransaction transaction = null)
         {
             Ensure.NotNull(selector, nameof(selector));
-
-            var filter = Query<T>.Filter.And(selector, Operator.Equal, value);
+            
+            var filter = Query.Filter.And(selector, Operator.Equal, value);
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
             return Connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
@@ -80,12 +86,13 @@ namespace Easy.Storage.Common
         /// <param name="selector">The selector used to identify the column by which the query should be filtered.</param>
         /// <param name="transaction">The transaction</param>
         /// <param name="values">The values associated to the column specified by the <paramref name="selector"/> by which the query should be filtered.</param>
-        public Task<IEnumerable<T>> GetWhere<TProperty>(Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
+        public Task<IEnumerable<T>> GetWhere<TProperty>(
+            Expression<Func<T, TProperty>> selector, IDbTransaction transaction = null, params TProperty[] values)
         {
             Ensure.NotNull(selector, nameof(selector));
             Ensure.NotNull(values, nameof(values));
 
-            var filter = Query<T>.Filter.AndIn(selector, values);
+            var filter = Query.Filter.AndIn(selector, values);
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
             return Connection.QueryAsync<T>(sql, parameters, transaction: transaction, buffered: true);
@@ -242,7 +249,7 @@ namespace Easy.Storage.Common
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var filter = Query<T>.Filter.And(selector, Operator.Equal, value);
+            var filter = Query.Filter.And(selector, Operator.Equal, value);
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
             return Connection.ExecuteAsync(sql, parameters, transaction: transaction);
@@ -260,7 +267,7 @@ namespace Easy.Storage.Common
             Ensure.NotNull(selector, nameof(selector));
             Ensure.NotNull(values, nameof(values));
 
-            var filter = Query<T>.Filter.AndIn(selector, values);
+            var filter = Query.Filter.AndIn(selector, values);
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
             return Connection.ExecuteAsync(sql, parameters, transaction: transaction);
