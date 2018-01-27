@@ -95,6 +95,9 @@
             CommandType? commandType = null,
             bool buffered = true,
             CancellationToken cToken = default(CancellationToken)) 
-                => new Reader(await connection.QueryMultipleAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)));
+                => new Reader(
+                    await connection.QueryMultipleAsync(
+                        new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)
+                    ).ConfigureAwait(false));
     }
 }

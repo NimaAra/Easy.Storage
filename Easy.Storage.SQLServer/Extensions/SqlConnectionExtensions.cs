@@ -35,9 +35,10 @@
         /// <summary>
         /// Returns the <c>SQL Server</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLServerObject>> GetDatabaseObjects(
+        public static async Task<IList<SQLServerObject>> GetDatabaseObjects(
             this SqlConnection connection) 
-                => connection.QueryAsync<SQLServerObject>(SQLServerSQL.AllObjects);
+                => (await connection.QueryAsync<SQLServerObject>(SQLServerSQL.AllObjects)
+                        .ConfigureAwait(false)).SpeculativeToList();
 
         /// <summary>
         /// Returns the information relating to the table represented by the <typeparamref name="T"/> in the <c>SQL Server</c> database.

@@ -4,7 +4,7 @@
 
     internal sealed class AnotherPerson
     {
-        [Identity]
+        [Key]
         [Alias("Id")]
         public long SomeId { get; set; }
 

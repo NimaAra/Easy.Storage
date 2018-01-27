@@ -15,7 +15,7 @@
     /// </summary>
     public sealed class Table
     {
-        private static readonly Type IdentityType = typeof(IdentityAttribute);
+        private static readonly Type IdentityType = typeof(KeyAttribute);
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = 
             new ConcurrentDictionary<TableKey, Table>();
         

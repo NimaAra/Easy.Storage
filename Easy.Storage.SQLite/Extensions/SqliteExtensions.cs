@@ -38,9 +38,10 @@
         /// <summary>
         /// Returns the <c>SQLite</c> objects in the database.
         /// </summary>
-        public static Task<IEnumerable<SQLiteObject>> GetDatabaseObjects(
+        public static async Task<IList<SQLiteObject>> GetDatabaseObjects(
             this SQLiteConnectionBase connection) 
-                => connection.QueryAsync<SQLiteObject>(SQLiteSQL.Master);
+                => (await connection.QueryAsync<SQLiteObject>(SQLiteSQL.Master)
+                        .ConfigureAwait(false)).SpeculativeToList();
 
         /// <summary>
         /// Returns <c>True</c> if a table representing <typeparamref name="T"/> exists on the storage.

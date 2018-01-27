@@ -56,7 +56,7 @@
         {
             Should.Throw<InvalidOperationException>(
                     () => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance, "Foo"))
-                .Message.ShouldBe("The model: 'ModelWithNoIdOrPrimaryKey' does not have a default 'Id' property specified or any of its members marked as 'Easy.Storage.Common.Attributes.IdentityAttribute'.");
+                .Message.ShouldBe("The model: 'ModelWithNoIdOrPrimaryKey' does not have a default 'Id' property specified or any of its members marked as 'Easy.Storage.Common.Attributes.KeyAttribute'.");
         }
 
         [Test]

@@ -2953,7 +2953,7 @@ CREATE TABLE Child (
         [Alias("PersonTemp")]
         private class PersonTemp
         {
-            [Identity]
+            [Key]
             [Alias("Key")]
             public long Id { get; set; }
 
