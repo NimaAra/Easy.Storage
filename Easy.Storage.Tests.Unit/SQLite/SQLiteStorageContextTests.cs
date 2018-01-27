@@ -865,7 +865,6 @@
 
                 var emptyCollection = Enumerable.Empty<Person>();
                 (await repo.Insert(emptyCollection)).ShouldBe(0);
-                (await repo.Insert(emptyCollection, false)).ShouldBe(0);
             }
         }
 
@@ -914,7 +913,6 @@
 
                 var emptyCollection = Enumerable.Empty<MyPerson>();
                 (await repo.Insert(emptyCollection)).ShouldBe(0);
-                (await repo.Insert(emptyCollection, false)).ShouldBe(0);
             }
         }
 
@@ -923,19 +921,19 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var repo = conn.GetDBContext<ModelWithKeyButNoIdentity>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQueryWithNoIdentity);
                 (await repo.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
-                    new Person { Id = 1, Name = "P1", Age = 10 },
-                    new Person { Id = 2, Name = "P2", Age = 20 },
-                    new Person { Id = 3, Name = "P3", Age = 30 },
-                    new Person { Id = 7, Name = "P4", Age = 40 }
+                    new ModelWithKeyButNoIdentity { Id = 1, Name = "P1", Age = 10 },
+                    new ModelWithKeyButNoIdentity { Id = 2, Name = "P2", Age = 20 },
+                    new ModelWithKeyButNoIdentity { Id = 3, Name = "P3", Age = 30 },
+                    new ModelWithKeyButNoIdentity { Id = 7, Name = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people, false)).ShouldBe(4);
+                (await repo.Insert(people)).ShouldBe(4);
 
                 var insertedPeople = (await repo.Get()).ToArray();
 

@@ -1,6 +1,5 @@
 ﻿namespace Easy.Storage.Tests.Unit
 {
-    using System;
     using System.Collections.Generic;
     using Easy.Storage.Common;
     using Easy.Storage.SQLite;
@@ -16,10 +15,12 @@
         public void When_creating_table()
         {
             var table = Table.MakeOrGet<Person>(GenericSQLDialect.Instance, "Foo");
+            
             table.Dialect.ShouldBe(GenericSQLDialect.Instance);
             table.Dialect.Type.ShouldBe(DialectType.Generic);
             table.ModelType.ShouldBe(typeof(Person));
             table.Name.ShouldBe("[Foo]");
+            table.HasIdentityColumn.ShouldBeTrue();
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [Foo].[Id] AS 'Id',\r\n"
                     + "    [Foo].[Name] AS 'Name',\r\n"
@@ -52,14 +53,6 @@
         }
 
         [Test]
-        public void When_creating_table_for_model_with_no_id_or_identity_attribute()
-        {
-            Should.Throw<InvalidOperationException>(
-                    () => Table.MakeOrGet<ModelWithNoIdOrPrimaryKey>(GenericSQLDialect.Instance, "Foo"))
-                .Message.ShouldBe("The model: 'ModelWithNoIdOrPrimaryKey' does not have a default 'Id' property specified or any of its members marked as 'Easy.Storage.Common.Attributes.KeyAttribute'.");
-        }
-
-        [Test]
         public void When_creating_a_table_for_model_with_a_default_id_property_generic_dialect()
         {
             var table = Table.MakeOrGet<SampleModel>(GenericSQLDialect.Instance, "Foo");
@@ -69,6 +62,7 @@
             table.Dialect.Type.ShouldBe(DialectType.Generic);
             table.ModelType.ShouldBe(typeof(SampleModel));
             table.Name.ShouldBe("[Foo]");
+            table.HasIdentityColumn.ShouldBeTrue();
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
@@ -152,6 +146,7 @@
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("[Foo]");
+            table.HasIdentityColumn.ShouldBeTrue();
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
@@ -236,6 +231,7 @@
 
             table.ShouldNotBeNull();
             table.Name.ShouldBe("[Foo]");
+            table.HasIdentityColumn.ShouldBeTrue();
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))

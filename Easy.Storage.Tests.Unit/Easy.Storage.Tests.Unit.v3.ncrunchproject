@@ -16,6 +16,9 @@
       <NamedTestSelector>
         <TestName>Easy.Storage.Tests.Unit.SQLite.SQLiteConnections.SQLiteAttachedConnectionTests.When_querying_attached_files</TestName>
       </NamedTestSelector>
+      <NamedTestSelector>
+        <TestName>Easy.Storage.Tests.Unit.SQLServer.SQLServerStorageContextTests.Run</TestName>
+      </NamedTestSelector>
     </IgnoredTests>
     <PreviouslyBuiltSuccessfully>True</PreviouslyBuiltSuccessfully>
   </Settings>

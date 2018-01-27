@@ -45,6 +45,7 @@ CREATE TABLE [dbo].[TableWithGuidId] (
     [Alias("[dbo].[TableWithStringId]")]
     internal sealed class TableWithStringIdQuery
     {
+        [Key(false)]
         public string Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
@@ -53,6 +54,7 @@ CREATE TABLE [dbo].[TableWithGuidId] (
     [Alias("[dbo].[TableWithGuidId]")]
     internal sealed class TableWithGuidIdQuery
     {
+        [Key(false)]
         public Guid Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }

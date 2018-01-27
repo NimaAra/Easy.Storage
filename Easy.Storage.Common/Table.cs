@@ -15,7 +15,7 @@
     /// </summary>
     public sealed class Table
     {
-        private static readonly Type IdentityType = typeof(KeyAttribute);
+        private static readonly Type KeyAttributeType = typeof(KeyAttribute);
         private static readonly ConcurrentDictionary<TableKey, Table> Cache = 
             new ConcurrentDictionary<TableKey, Table>();
         
@@ -30,8 +30,9 @@
         internal readonly HashSet<string> IgnoredProperties;
         internal readonly Dictionary<PropertyInfo, string> PropertyToColumns;
         internal readonly Dictionary<string, string> PropertyNamesToColumns;
+        internal readonly bool HasIdentityColumn;
         internal readonly PropertyInfo IdentityColumn;
-        
+
         private Table(TableKey key, string tableName)
         {
             Dialect = key.Dialect;
@@ -45,19 +46,24 @@
             Name = tableName.GetAsEscapedSQLName();
 
             var props = key.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            IdentityColumn = GetIdentityColumn(ModelType, props);
 
             PropertyToColumns = GetPropertiesToColumnsMappings(props, out HashSet<string> ignoredProperties);
             PropertyNamesToColumns = PropertyToColumns.ToDictionary(kv => kv.Key.Name, kv => kv.Value);
-
             IgnoredProperties = ignoredProperties;
 
             Select = Dialect.GetSelectQuery(this);
             Delete = Dialect.GetDeleteQuery(this);
+            
+            GetKeyProperty(props, out IdentityColumn, out HasIdentityColumn);
+            
             UpdateAll = Dialect.GetUpdateQuery(this, true);
-            UpdateIdentity = Dialect.GetUpdateQuery(this, false);
             InsertAll = Dialect.GetInsertQuery(this, true);
-            InsertIdentity = Dialect.GetInsertQuery(this, false);
+            
+            if (HasIdentityColumn)
+            {
+                UpdateIdentity = Dialect.GetUpdateQuery(this, false);
+                InsertIdentity = Dialect.GetInsertQuery(this, false);
+            }
         }
 
         /// <summary>
@@ -105,23 +111,34 @@
         /// </summary>
         public string Delete { get; }
 
-        private static PropertyInfo GetIdentityColumn(Type modelType, PropertyInfo[] props)
+        private static void GetKeyProperty(
+            PropertyInfo[] props, out PropertyInfo result, out bool isIdentity)
         {
             var possibleIdentityColumns = props
-                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == IdentityType))
+                .Where(p => p.CustomAttributes.Any(at => at.AttributeType == KeyAttributeType))
                 .ToArray();
 
             Ensure.That<InvalidOperationException>(possibleIdentityColumns.Length <= 1,
                 "The model can only have one property specified as the Identity.");
 
             // A marked Identity property has precedence over default Id property
-            if (possibleIdentityColumns.Length == 1) { return possibleIdentityColumns[0]; }
+            if (possibleIdentityColumns.Length == 1)
+            {
+                result = possibleIdentityColumns[0];
+                isIdentity = result.GetCustomAttribute<KeyAttribute>().IsIdentity;
+                return;
+            }
 
             var defaultIdProp = props.SingleOrDefault(p => p.Name.Equals("Id", StringComparison.Ordinal));
+            if (defaultIdProp != null)
+            {
+                result = defaultIdProp;
+                isIdentity = true;
+                return;
+            }
 
-            if (defaultIdProp != null) { return defaultIdProp; }
-
-            throw new InvalidOperationException($"The model: '{modelType.Name}' does not have a default 'Id' property specified or any of its members marked as '{IdentityType.FullName}'.");
+            result = null;
+            isIdentity = false;
         }
 
         private static string GetModelName(Type type)

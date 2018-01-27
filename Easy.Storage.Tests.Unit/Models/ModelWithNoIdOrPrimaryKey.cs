@@ -1,7 +1,17 @@
 ﻿namespace Easy.Storage.Tests.Unit.Models
 {
-    internal sealed class ModelWithNoIdOrPrimaryKey
+    using Easy.Storage.Common.Attributes;
+
+    [Alias("Person")]
+    internal sealed class ModelWithKeyButNoIdentity
     {
-        public string Text { get; set; }
+        [Key(false)]
+        public long Id { get; set; }
+
+        public string Name { get; set; }
+        public int Age { get; set; }
+
+        [Ignore]
+        public string Foo { get; set; }
     }
 }

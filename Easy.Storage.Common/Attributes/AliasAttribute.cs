@@ -12,7 +12,6 @@
         /// <summary>
         /// Creates an instance of the <see cref="AliasAttribute"/>.
         /// </summary>
-        /// <param name="name"></param>
         public AliasAttribute(string name)
         {
             Name = Ensure.NotNullOrEmptyOrWhiteSpace(name, "Alias cannot be null or empty or whitespace");
