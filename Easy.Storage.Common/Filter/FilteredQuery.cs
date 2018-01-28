@@ -23,7 +23,7 @@ namespace Easy.Storage.Common.Filter
             Parameters = new Dictionary<string, object>();
         }
 
-        internal IDictionary<string, object> Parameters { get; }
+        internal Dictionary<string, object> Parameters { get; }
         
         internal static FilteredQuery Make(Table table) => new FilteredQuery(table);
 

@@ -15,7 +15,7 @@
         /// <param name="template">Can be an anonymous type or a <see cref="DynamicParameters"/> bag.</param>
         /// </summary>
         public static DynamicParameters ToDynamicParameters(
-            this IDictionary<string, object> parameters, object template = null)
+            this IReadOnlyDictionary<string, object> parameters, object template = null)
         {
             var result = template == null ? new DynamicParameters() : new DynamicParameters(template);
             foreach (var pair in parameters)
@@ -25,9 +25,7 @@
             return result;
         }
 
-        internal static IList<T> SpeculativeToList<T>(this IEnumerable<T> source)
-        {
-            return source as IList<T> ?? source.ToList();
-        }
+        internal static IList<T> SpeculativeToList<T>(this IEnumerable<T> source) 
+            => source as IList<T> ?? source.ToList();
     }
 }
