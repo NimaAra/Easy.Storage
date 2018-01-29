@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Easy.Common;
+    using Easy.Common.Extensions;
     using Easy.Storage.Common;
     using Easy.Storage.Common.Extensions;
     using Easy.Storage.SQLite.Connections;

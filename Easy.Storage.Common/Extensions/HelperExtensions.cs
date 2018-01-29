@@ -1,7 +1,6 @@
 ﻿namespace Easy.Storage.Common.Extensions
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Dapper;
 
     /// <summary>
@@ -24,8 +23,5 @@
             }
             return result;
         }
-
-        internal static IList<T> SpeculativeToList<T>(this IEnumerable<T> source) 
-            => source as IList<T> ?? source.ToList();
     }
 }

@@ -24,7 +24,7 @@
   </ItemGroup>
 	
 	<ItemGroup>    
-    <PackageReference Include="Easy.Common" Version="2.8.0" />
+    <PackageReference Include="Easy.Common" Version="2.8.6" />
   </ItemGroup>
 	
 	<ItemGroup>
