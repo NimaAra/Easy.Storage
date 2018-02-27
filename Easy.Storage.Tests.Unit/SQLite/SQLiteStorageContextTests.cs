@@ -722,7 +722,7 @@
                 var p1 = new Person { Name = "P1", Age = 10 };
                 ((long)await repo.Insert(p1)).ShouldBe(1);
 
-                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.Get()).Count.ShouldBe(1);
 
                 var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
@@ -733,7 +733,7 @@
                 var p2 = new Person { Name = "P2", Age = 20 };
                 ((long)await repo.Insert(p2)).ShouldBe(2);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -744,7 +744,7 @@
                 var p3 = new Person { Id = 1, Name = "P3", Age = 30 };
                 ((long)await repo.Insert(p3)).ShouldBe(3);
 
-                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.Get()).Count.ShouldBe(3);
 
                 var insertedP3 = (await repo.GetWhere(p => p.Id, 3)).Single();
                 insertedP3.ShouldNotBeNull();
@@ -755,7 +755,7 @@
                 var p4 = new Person { Id = 4, Name = "P4", Age = 40 };
                 ((long)await repo.Insert(p4)).ShouldBe(4);
 
-                (await repo.Get()).Count().ShouldBe(4);
+                (await repo.Get()).Count.ShouldBe(4);
 
                 var insertedP4 = (await repo.GetWhere(p => p.Id, 4)).Single();
                 insertedP4.ShouldNotBeNull();
@@ -777,7 +777,7 @@
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
                 ((long)await repo.Insert(p1)).ShouldBe(1);
 
-                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.Get()).Count.ShouldBe(1);
 
                 var insertedP1 = (await repo.Get()).Single();
                 insertedP1.ShouldNotBeNull();
@@ -788,7 +788,7 @@
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
                 ((long)await repo.Insert(p2)).ShouldBe(2);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
@@ -799,7 +799,7 @@
                 var p3 = new MyPerson { SomeId = 1, SomeName = "P3", Age = 30 };
                 ((long)await repo.Insert(p3)).ShouldBe(3);
 
-                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.Get()).Count.ShouldBe(3);
 
                 var insertedP3 = (await repo.GetWhere(p => p.SomeId, 3)).Single();
                 insertedP3.ShouldNotBeNull();
@@ -810,7 +810,7 @@
                 var p4 = new MyPerson { SomeId = 4, SomeName = "P4", Age = 40 };
                 ((long)await repo.Insert(p4)).ShouldBe(4);
 
-                (await repo.Get()).Count().ShouldBe(4);
+                (await repo.Get()).Count.ShouldBe(4);
 
                 var insertedP4 = (await repo.GetWhere(p => p.SomeId, 4)).Single();
                 insertedP4.ShouldNotBeNull();
@@ -1661,7 +1661,7 @@
                 insertedP2.Name.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.Name = "P1-updated";
@@ -1669,7 +1669,7 @@
 
                 (await repo.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var updatedP1 = (await repo.GetWhere(p => p.Id, updateToP1.Id)).Single();
                 updatedP1.ShouldNotBeNull();
@@ -1680,7 +1680,7 @@
                 var nonExistingPerson = new Person { Id = 1234, Name = "Santa", Age = 96 };
                 (await repo.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
             }
         }
 
@@ -1711,7 +1711,7 @@
                 insertedP2.SomeName.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.SomeName = "P1-updated";
@@ -1719,7 +1719,7 @@
 
                 (await repo.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
 
                 var updatedP1 = (await repo.GetWhere(p => p.SomeId, updateToP1.SomeId)).Single();
                 updatedP1.ShouldNotBeNull();
@@ -1730,7 +1730,7 @@
                 var nonExistingPerson = new MyPerson { SomeId = 1234, SomeName = "Santa", Age = 96 };
                 (await repo.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.Get()).Count().ShouldBe(2);
+                (await repo.Get()).Count.ShouldBe(2);
             }
         }
 
@@ -2092,12 +2092,12 @@
 
                 (await repo.GetWhere(p => p.Id, 1)).ShouldNotBeEmpty();
                 (await repo.DeleteWhere(p => p.Id, 1)).ShouldBe(1);
-                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.Get()).Count.ShouldBe(3);
                 (await repo.GetWhere(p => p.Id, 1)).ShouldBeEmpty();
 
-                (await repo.GetWhere(p => p.Age, 30)).Count().ShouldBe(2);
+                (await repo.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
                 (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
-                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.Get()).Count.ShouldBe(1);
                 (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
                 var remainingPeople = (await repo.Get()).Single();
@@ -2125,7 +2125,7 @@
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
                 (await repo.DeleteWhere(p => p.Id, null, remainingPeople.Id, allPeople[1].Id)).ShouldBe(2);
 
-                (await repo.Get()).Count().ShouldBe(morePeople.Length + 1 - 2);
+                (await repo.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
 
                 (await repo.DeleteWhere(p => p.Name, null, "MP4", "MP5")).ShouldBe(3);
 
@@ -2166,12 +2166,12 @@
 
                 (await repo.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
                 (await repo.DeleteWhere(p => p.SomeId, 1)).ShouldBe(1);
-                (await repo.Get()).Count().ShouldBe(3);
+                (await repo.Get()).Count.ShouldBe(3);
                 (await repo.GetWhere(p => p.SomeId, 1)).ShouldBeEmpty();
 
-                (await repo.GetWhere(p => p.Age, 30)).Count().ShouldBe(2);
+                (await repo.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
                 (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
-                (await repo.Get()).Count().ShouldBe(1);
+                (await repo.Get()).Count.ShouldBe(1);
                 (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
                 var remainingPeople = (await repo.Get()).Single();
@@ -2199,7 +2199,7 @@
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
                 (await repo.DeleteWhere(p => p.SomeId, null, remainingPeople.SomeId, allPeople[1].SomeId)).ShouldBe(2);
 
-                (await repo.Get()).Count().ShouldBe(morePeople.Length + 1 - 2);
+                (await repo.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
 
                 (await repo.DeleteWhere(p => p.SomeName, null, "MP4", "MP5")).ShouldBe(3);
 
@@ -2244,7 +2244,7 @@
                     .And(p => p.Age, Operator.Equal, 30);
 
                 (await ctx.DeleteWhere(filter)).ShouldBe(2);
-                (await ctx.Get()).Count().ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
                 (await ctx.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
                 (await ctx.GetWhere(p => p.SomeId, 2)).ShouldNotBeEmpty();
