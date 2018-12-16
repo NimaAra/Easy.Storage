@@ -6,7 +6,7 @@
     <Copyright>2018 Nima Ara</Copyright>
     <PackageTags>Easy Storage Database Micro ORM Dapper</PackageTags>
     <PackageProjectUrl>https://github.com/NimaAra/Easy.Storage</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/NimaAra/Easy.Storage/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>-</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/NimaAra/Easy.Storage</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
