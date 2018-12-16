@@ -20,8 +20,6 @@ namespace Easy.Storage.Common
     // ReSharper disable once InconsistentNaming
     public sealed class DBContext<T> : IDBContext<T>
     {
-        private readonly Task<int> _cachedZeroTask = Task.FromResult(0);
-
         /// <summary>
         /// Creates an instance of the <see cref="DBContext{T}"/>.
         /// </summary>
@@ -135,12 +133,9 @@ namespace Easy.Storage.Common
         /// <param name="items">The items to be inserted.</param>
         /// <param name="transaction">The transaction</param>
         /// <returns>The number of inserted records.</returns>
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
         public Task<int> Insert(IEnumerable<T> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
-
-            if (!items.Any()) { return _cachedZeroTask; }
 
             var insertSql = Table.HasIdentityColumn ? Table.InsertIdentity : Table.InsertAll;
             return Connection.ExecuteAsync(insertSql, items, transaction);
@@ -168,14 +163,24 @@ namespace Easy.Storage.Common
         /// <param name="transaction">The transaction</param>
         /// <returns>Number of inserted rows</returns>
         [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-        public Task<int> InsertPartial(IEnumerable<object> items, IDbTransaction transaction = null)
+        public async Task<int> InsertPartial(IEnumerable<object> items, IDbTransaction transaction = null)
         {
             Ensure.NotNull(items, nameof(items));
 
-            if (!items.Any()) { return _cachedZeroTask; }
+            string sql = null;
 
-            var sql = Table.Dialect.GetPartialInsertQuery<T>(Table, items.First());
-            return Connection.ExecuteAsync(sql, items, transaction);
+            var counter = 0;
+            foreach (var item in items)
+            {
+                if (sql is null)
+                {
+                    sql = Table.Dialect.GetPartialInsertQuery<T>(Table, item);
+                }
+                
+                counter += await Connection.ExecuteAsync(sql, item, transaction);
+            }
+
+            return counter;
         }
 
         /// <summary>
