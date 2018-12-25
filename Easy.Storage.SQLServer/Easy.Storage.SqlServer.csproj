@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Easy.Storage.SQLServer</PackageId>
-    <Description> fast and easy to use library for managing data with a SQL Server database based on Dapper.</Description>
+    <Description>A fast and easy to use library for managing data with a SQL Server database based on Dapper.</Description>
     <Authors>Nima Ara</Authors>
     <Copyright>2018 Nima Ara</Copyright>
     <PackageTags>Easy Storage Database Micro ORM Dapper SQL Server MSSQL</PackageTags>
     <PackageProjectUrl>https://github.com/NimaAra/Easy.Storage</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/NimaAra/Easy.Storage/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReleaseNotes>-</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/NimaAra/Easy.Storage</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,7 +24,7 @@
   </ItemGroup>
 	
 	<ItemGroup>    
-    <PackageReference Include="Easy.Common" Version="2.8.6" />
+    <PackageReference Include="Easy.Common" Version="2.9.9" />
   </ItemGroup>
 	
 	<ItemGroup>
