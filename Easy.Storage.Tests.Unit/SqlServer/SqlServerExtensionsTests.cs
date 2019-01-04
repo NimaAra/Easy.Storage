@@ -12,7 +12,6 @@
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
     internal sealed class SQLServerExtensionsTests : Context
     {
         [OneTimeSetUp]

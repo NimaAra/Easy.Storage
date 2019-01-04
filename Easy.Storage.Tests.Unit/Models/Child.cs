@@ -2,7 +2,6 @@
 {
     using Easy.Storage.Common.Attributes;
 
-    // ReSharper disable once ClassNeverInstantiated.Global
     internal sealed class Child : Parent
     {
         public string Toy { get; set; }

@@ -2,7 +2,6 @@
 {
     using System;
 
-    // ReSharper disable once InconsistentNaming
     internal class FTSContext
     {
         internal sealed class Log

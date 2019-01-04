@@ -2,8 +2,8 @@
   
   <PropertyGroup>
     <Authors>Nima Ara</Authors>
-    <Copyright>2017 Nima Ara</Copyright>    
-		<TargetFramework>net452</TargetFramework>
+    <Copyright>2019 Nima Ara</Copyright>    
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyTitle>Easy Storage Tests.Unit</AssemblyTitle>
     <AssemblyName>Easy.Storage.Tests.Unit</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -20,7 +20,9 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.2" />
   </ItemGroup>

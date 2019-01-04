@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Easy.Storage.SQLServer</PackageId>
-    <Description>A fast and easy to use library for managing data with a SQL Server database based on Dapper.</Description>
+    <Description>A fast and easy to use cross platform library for managing data with a SQL Server database based on Dapper.</Description>
     <Authors>Nima Ara</Authors>
-    <Copyright>2018 Nima Ara</Copyright>
+    <Copyright>2019 Nima Ara</Copyright>
     <PackageTags>Easy Storage Database Micro ORM Dapper SQL Server MSSQL</PackageTags>
     <PackageProjectUrl>https://github.com/NimaAra/Easy.Storage</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyTitle>Easy Storage SQL Server</AssemblyTitle>
     <AssemblyName>Easy.Storage.SQLServer</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -29,10 +29,6 @@
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <Reference Include="Microsoft.CSharp" />
 	</ItemGroup>
 	
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

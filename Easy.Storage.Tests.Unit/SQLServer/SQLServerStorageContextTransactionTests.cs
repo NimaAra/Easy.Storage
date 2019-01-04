@@ -11,8 +11,7 @@
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
-    internal sealed class SQLServerStorageContextTranscationTests : Context
+    internal sealed class SQLServerStorageContextTransactionTests : Context
     {
         internal static async Task Run()
         {

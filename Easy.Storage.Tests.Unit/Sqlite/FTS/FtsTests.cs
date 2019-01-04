@@ -14,7 +14,6 @@
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
     internal sealed class FTSTests
     {
         [Test]
@@ -33,7 +32,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var selectAllTerm = Term<FTSContext.Log>.All;
                 var result = await conn.Search(selectAllTerm);
@@ -46,7 +45,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -80,7 +79,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -113,7 +112,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -140,7 +139,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -174,7 +173,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -208,7 +207,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -237,7 +236,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -307,7 +306,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -354,7 +353,7 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                await Given_a_logTtable_and_an_ftsTable(conn);
+                await Given_a_logTable_and_an_ftsTable(conn);
 
                 var logs = new[]
                 {
@@ -393,7 +392,7 @@
             }
         }
 
-        private static async Task Given_a_logTtable_and_an_ftsTable(IDbConnection connection)
+        private static async Task Given_a_logTable_and_an_ftsTable(IDbConnection connection)
         {
             var tableSql = SQLiteSQLGenerator.Table<FTSContext.Log>();
             await connection.ExecuteAsync(tableSql);

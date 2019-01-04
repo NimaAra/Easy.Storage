@@ -1,5 +1,4 @@
-﻿// ReSharper disable ObjectCreationAsStatement
-namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
+﻿namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +13,6 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
     internal sealed class SQLiteAttachedConnectionTests
     {
         [Test]
@@ -46,7 +44,7 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
                 attachedDbs = await conn.GetAttachedDatabases();
                 attachedDbs.Count.ShouldBe(4);
 
-                conn.DataSource.ShouldBe("");
+                conn.DataSource.ShouldBe(":memory:");
             }
         }
 
@@ -132,13 +130,12 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
         {
             var dbsDirectory = Path.Combine(Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath), "Sqlite\\SampleDbs");
 
-            var sampleDbs = new Dictionary<string, FileInfo>
+            return new Dictionary<string, FileInfo>
             {
                 {"a", new FileInfo(Path.Combine(dbsDirectory, "1.db"))},
                 {"b", new FileInfo(Path.Combine(dbsDirectory, "2.db"))},
                 {"c", new FileInfo(Path.Combine(dbsDirectory, "3.db"))}
             };
-            return sampleDbs;
         }
     }
 }

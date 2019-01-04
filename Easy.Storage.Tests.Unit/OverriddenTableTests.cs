@@ -9,7 +9,7 @@
     using Shouldly;
 
     [TestFixture]
-    internal sealed class OverrriddenTableTests
+    internal sealed class OverriddenTableTests
     {
         [Test]
         public void When_creating_table()
@@ -66,7 +66,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [Foo].[Id] AS 'Id',\r\n"
@@ -150,7 +150,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                                   + "    [Foo].[Id] AS 'Id',\r\n"
@@ -235,7 +235,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                                   + "    [Foo].[Id] AS 'Id',\r\n"

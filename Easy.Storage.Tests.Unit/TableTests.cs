@@ -65,7 +65,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                     + "    [SampleModel].[Id] AS 'Id',\r\n"
@@ -149,7 +149,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                                   + "    [SampleModel].[Id] AS 'Id',\r\n"
@@ -234,7 +234,7 @@
             table.PropertyNamesToColumns["Text"].ShouldBe("[Text]");
             table.PropertyNamesToColumns["Guid"].ShouldBe("[Key]");
             Should.Throw<KeyNotFoundException>(() => table.PropertyNamesToColumns["Composite"].ShouldBe("[Text]"))
-                .Message.ShouldBe("The given key was not present in the dictionary.");
+                .Message.ShouldBe("The given key 'Composite' was not present in the dictionary.");
 
             table.Select.ShouldBe("SELECT\r\n"
                                   + "    [SampleModel].[Id] AS 'Id',\r\n"

@@ -7,7 +7,7 @@
     using Shouldly;
 
     [TestFixture]
-    internal sealed class FilterdQueryTests
+    internal sealed class FilteredQueryTests
     {
         private static readonly Table _table = 
             Table.MakeOrGet<Person>(GenericSQLDialect.Instance, string.Empty);

@@ -1,5 +1,4 @@
-﻿// ReSharper disable ObjectCreationAsStatement
-namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
+﻿namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
 {
     using System;
     using System.Data;
@@ -10,7 +9,6 @@ namespace Easy.Storage.Tests.Unit.SQLite.SQLiteConnections
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
     internal sealed class SQLiteInMemoryConnectionTests
     {
         [Test]

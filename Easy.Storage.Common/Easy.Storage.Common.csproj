@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Easy.Storage.Common</PackageId>
-    <Description>A fast and easy to use library for managing data with different databases based on Dapper.</Description>
+    <Description>A fast and easy to use cross platform library for managing data with different databases based on Dapper.</Description>
     <Authors>Nima Ara</Authors>
-    <Copyright>2018 Nima Ara</Copyright>
+    <Copyright>2019 Nima Ara</Copyright>
     <PackageTags>Easy Storage Database Micro ORM Dapper</PackageTags>
     <PackageProjectUrl>https://github.com/NimaAra/Easy.Storage</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <AssemblyTitle>Easy Storage Common</AssemblyTitle>
     <AssemblyName>Easy.Storage.Common</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -24,13 +24,10 @@
   </ItemGroup>
 	
 	<ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0"/>
     <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="Easy.Common" Version="2.9.9" />
   </ItemGroup>
-	
-	<ItemGroup>
-	  <Reference Include="Microsoft.CSharp" />
-	</ItemGroup>
 	
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

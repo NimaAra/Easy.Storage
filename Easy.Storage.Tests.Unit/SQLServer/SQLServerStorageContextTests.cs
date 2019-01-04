@@ -18,7 +18,6 @@
     using Shouldly;
 
     [TestFixture]
-    // ReSharper disable once InconsistentNaming
     internal sealed class SQLServerStorageContextTests : Context
     {
         [OneTimeSetUp]
@@ -81,7 +80,7 @@
             await When_doing_multiple_operations_with_sample_model();
             await When_working_with_inheritted_model();
 
-            await SQLServerStorageContextTranscationTests.Run();
+            await SQLServerStorageContextTransactionTests.Run();
         }
 
         private static void When_checking_table_non_aliased_model()
