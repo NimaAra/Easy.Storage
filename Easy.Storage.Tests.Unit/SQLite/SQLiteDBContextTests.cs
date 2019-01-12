@@ -18,7 +18,7 @@
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SQLiteStorageContextTests : Context
+    internal sealed class SQLiteDBContextTests : Context
     {
         [Test]
         public void When_checking_table_non_aliased_model()
@@ -2865,6 +2865,7 @@
                 insertedSample1.DateTimeOffset.TimeOfDay.Minutes.ShouldBe(sample1.DateTimeOffset.TimeOfDay.Minutes);
                 insertedSample1.DateTimeOffset.TimeOfDay.Seconds.ShouldBe(sample1.DateTimeOffset.TimeOfDay.Seconds);
                 // [ToDo] - Make sure the bug is fixed in dapper - you can 
+                // https://github.com/StackExchange/Dapper/issues/253
                 // then use SetValue of the DateTimeOffsetHandler to store as file time or otherwise.
                 // insertedSample1.DateTimeOffset.TimeOfDay.Milliseconds.ShouldBe(sample1.DateTimeOffset.TimeOfDay.Milliseconds);
 
@@ -2946,6 +2947,42 @@
                 retrievedChild2.Pet.ShouldBe("Pet-2");
                 retrievedChild2.Toy.ShouldBe("Toy-2");
             }
+        }
+
+        [Test]
+        public async Task When_working_with_columns_marked_as_object()
+        {
+            using (var conn = new SQLiteInMemoryConnection())
+            {
+                (await conn.Exists<SomeModel>()).ShouldBeFalse();
+                await conn.ExecuteAsync(SQLiteSQLGenerator.Table<SomeModel>());
+                (await conn.Exists<SomeModel>()).ShouldBeTrue();
+
+                var repo = conn.GetDBContext<SomeModel>(SQLiteDialect.Instance);
+
+                var modelToStore = new SomeModel
+                {
+                    Age = 1,
+                    SomeText = "bla-bla",
+                    SomeObject = new object [] {1, "foo", null}
+                };
+
+                long insertedId = await repo.Insert(modelToStore);
+                insertedId.ShouldBe(1);
+
+                var storedModel = (await repo.Get()).First();
+
+                storedModel.Age.ShouldBe(1);
+                storedModel.SomeText.ShouldBe("bla-bla");
+                storedModel.SomeObject.ShouldBe("System.Object[]");
+            }
+        }
+
+        private sealed class SomeModel
+        {
+            public int Age { get; set; }
+            public object SomeText { get; set; }
+            public object SomeObject { get; set; }
         }
     }
 }

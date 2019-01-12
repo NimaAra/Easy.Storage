@@ -133,6 +133,7 @@ namespace Easy.Storage.SQLite
         {
             if (type.IsEnum) { return SQLiteDataType.TEXT; }
 
+            if (type == ClrTypes.Object) { return SQLiteDataType.TEXT; }
             if (type == ClrTypes.Bool || type == ClrTypes.BoolNull) { return SQLiteDataType.INTEGER; }
             if (type == ClrTypes.Byte || type == ClrTypes.ByteNull) { return SQLiteDataType.INTEGER; }
             if (type == ClrTypes.Short || type == ClrTypes.ShortNull) { return SQLiteDataType.INTEGER; }
@@ -155,6 +156,7 @@ namespace Easy.Storage.SQLite
 
         private static class ClrTypes
         {
+            internal static readonly Type Object = typeof(object);
             internal static readonly Type Bool = typeof(bool);
             internal static readonly Type BoolNull = typeof(bool?);
             internal static readonly Type Byte = typeof(byte);

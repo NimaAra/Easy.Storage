@@ -12,7 +12,7 @@
     using Shouldly;
 
     [TestFixture]
-    internal sealed class SQLiteStorageContextTranscationTests : Context
+    internal sealed class SQLiteDBContextTransactionTests : Context
     {
         [Test]
         public async Task When_querying_with_transaction()
