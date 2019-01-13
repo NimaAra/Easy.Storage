@@ -1,5 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite
+﻿namespace Easy.Storage.SQLite
 {
     using System;
     using System.Collections.Generic;
@@ -17,9 +16,6 @@ namespace Easy.Storage.SQLite
     /// </summary>
     public static class SQLiteSQLGenerator
     {
-        private const string PrimaryKey = " PRIMARY KEY";
-        private const string NotNull = " NOT NULL";
-
         /// <summary>
         /// Returns a <c>CREATE TABLE</c> script for the given <typeparamref name="T"/>.
         /// </summary>
@@ -112,15 +108,27 @@ namespace Easy.Storage.SQLite
         private static string TableImpl(Table table, string tableName)
         {
             var builder = StringBuilderCache.Acquire();
-            builder.AppendLine($"CREATE TABLE IF NOT EXISTS {tableName} (");
-            builder.AppendLine($"{Formatter.Spacer}[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
-
+            builder.Append("CREATE TABLE IF NOT EXISTS ")
+                .Append(tableName)
+                .AppendLine(" (")
+                .Append(Formatter.Spacer)
+                .AppendLine("[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
+                    
             foreach (var pair in table.PropertyToColumns)
             {
-                var sqliteType = GetSQLiteType(pair.Key.PropertyType).ToString();
-                var isIdColumn = table.IdentityColumn == pair.Key;
+                var prop = pair.Key;
 
-                builder.AppendLine($"{Formatter.Spacer}{pair.Value} {sqliteType}{(isIdColumn? PrimaryKey : "")}{NotNull},");
+                var sqliteType = GetSQLiteType(prop.PropertyType).ToString();
+                var isIdColumn = table.IdentityColumn == prop;
+                var nullable = prop.CustomAttributes.Any(a => a.AttributeType == typeof(NullableAttribute));
+
+                builder.Append(Formatter.Spacer)
+                    .Append(pair.Value)
+                    .Append(" ")
+                    .Append(sqliteType)
+                    .Append(isIdColumn ? " PRIMARY KEY" : string.Empty)
+                    .Append(!nullable ? " NOT NULL" : string.Empty)
+                    .AppendLine(",");
             }
 
             builder.Remove(builder.Length - 3, 1);
