@@ -25,8 +25,8 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
-                var table = repo.Table;
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var table = ctx.Table;
                 table.Dialect.ShouldBe(SQLiteDialect.Instance);
                 table.Dialect.Type.ShouldBe(DialectType.SQLite);
                 table.Name.ShouldBe("[Person]");
@@ -68,8 +68,8 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
-                var table = repo.Table;
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var table = ctx.Table;
                 table.Dialect.ShouldBe(SQLiteDialect.Instance);
                 table.Dialect.Type.ShouldBe(DialectType.SQLite);
                 table.Name.ShouldBe("[Person]");
@@ -111,9 +111,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetLazy()).ShouldBeEmpty();
+                (await ctx.GetLazy()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -123,10 +123,10 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetLazy()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetLazy()).ToArray();
+                var insertedPeopleBuffered = (await ctx.GetLazy()).ToArray();
+                var insertedPeopleUnBuffered = (await ctx.GetLazy()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -170,9 +170,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>();
+                var ctx = conn.GetDBContext<MyPerson>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetLazy()).ShouldBeEmpty();
+                (await ctx.GetLazy()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -182,10 +182,10 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetLazy()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetLazy()).ToArray();
+                var insertedPeopleBuffered = (await ctx.GetLazy()).ToArray();
+                var insertedPeopleUnBuffered = (await ctx.GetLazy()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -229,9 +229,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<AnotherPerson>("Person");
+                var ctx = conn.GetDBContext<AnotherPerson>("Person");
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.GetLazy()).ShouldBeEmpty();
+                (await ctx.GetLazy()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -241,10 +241,10 @@
                     new AnotherPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.GetLazy()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.GetLazy()).ToArray();
+                var insertedPeopleBuffered = (await ctx.GetLazy()).ToArray();
+                var insertedPeopleUnBuffered = (await ctx.GetLazy()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -288,9 +288,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>();
+                var ctx = conn.GetDBContext<Person>();
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -300,10 +300,10 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.Get()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.Get()).ToArray();
+                var insertedPeopleBuffered = (await ctx.Get()).ToArray();
+                var insertedPeopleUnBuffered = (await ctx.Get()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -347,9 +347,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -359,10 +359,10 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeopleBuffered = (await repo.Get()).ToArray();
-                var insertedPeopleUnBuffered = (await repo.Get()).ToArray();
+                var insertedPeopleBuffered = (await ctx.Get()).ToArray();
+                var insertedPeopleUnBuffered = (await ctx.Get()).ToArray();
 
                 insertedPeopleBuffered.Length.ShouldBe(people.Length);
                 insertedPeopleUnBuffered.Length.ShouldBe(people.Length);
@@ -406,9 +406,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -420,16 +420,16 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(6);
+                (await ctx.Insert(people)).ShouldBe(6);
 
-                var onePerson = (await repo.GetWhere(p => p.Id, 1)).ToArray();
+                var onePerson = (await ctx.GetWhere(p => p.Id, 1)).ToArray();
 
                 onePerson.Length.ShouldBe(1);
                 onePerson[0].Id.ShouldBe(1);
                 onePerson[0].Name.ShouldBe("P1");
                 onePerson[0].Age.ShouldBe(10);
 
-                var peopleWithSameName = (await repo.GetWhere(p => p.Name, "P5")).ToArray();
+                var peopleWithSameName = (await ctx.GetWhere(p => p.Name, "P5")).ToArray();
 
                 peopleWithSameName.Length.ShouldBe(2);
                 peopleWithSameName[0].Id.ShouldBe(5);
@@ -440,7 +440,7 @@
                 peopleWithSameName[1].Name.ShouldBe("P5");
                 peopleWithSameName[1].Age.ShouldBe(10);
 
-                var peopleWithSameAge = (await repo.GetWhere(p => p.Age, 10)).ToArray();
+                var peopleWithSameAge = (await ctx.GetWhere(p => p.Age, 10)).ToArray();
 
                 peopleWithSameAge.Length.ShouldBe(3);
                 peopleWithSameAge[0].Id.ShouldBe(1);
@@ -455,7 +455,7 @@
                 peopleWithSameAge[2].Name.ShouldBe("P5");
                 peopleWithSameAge[2].Age.ShouldBe(10);
 
-                var peopleWithDifferentNames = (await repo.GetWhere(p => p.Name, null, "P1", "P2")).ToArray();
+                var peopleWithDifferentNames = (await ctx.GetWhere(p => p.Name, null, "P1", "P2")).ToArray();
 
                 peopleWithDifferentNames.Length.ShouldBe(2);
 
@@ -467,7 +467,7 @@
                 peopleWithDifferentNames[1].Name.ShouldBe("P2");
                 peopleWithDifferentNames[1].Age.ShouldBe(20);
 
-                var nonExistingPeople = (await repo.GetWhere(p => p.Age, 60)).ToArray();
+                var nonExistingPeople = (await ctx.GetWhere(p => p.Age, 60)).ToArray();
 
                 nonExistingPeople.ShouldBeEmpty();
             }
@@ -478,9 +478,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -492,16 +492,16 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(6);
+                (await ctx.Insert(people)).ShouldBe(6);
 
-                var onePerson = (await repo.GetWhere(p => p.SomeId, 1)).ToArray();
+                var onePerson = (await ctx.GetWhere(p => p.SomeId, 1)).ToArray();
 
                 onePerson.Length.ShouldBe(1);
                 onePerson[0].SomeId.ShouldBe(1);
                 onePerson[0].SomeName.ShouldBe("P1");
                 onePerson[0].Age.ShouldBe(10);
 
-                var peopleWithSameName = (await repo.GetWhere(p => p.SomeName, "P5")).ToArray();
+                var peopleWithSameName = (await ctx.GetWhere(p => p.SomeName, "P5")).ToArray();
 
                 peopleWithSameName.Length.ShouldBe(2);
                 peopleWithSameName[0].SomeId.ShouldBe(5);
@@ -512,7 +512,7 @@
                 peopleWithSameName[1].SomeName.ShouldBe("P5");
                 peopleWithSameName[1].Age.ShouldBe(10);
 
-                var peopleWithSameAge = (await repo.GetWhere(p => p.Age, 10)).ToArray();
+                var peopleWithSameAge = (await ctx.GetWhere(p => p.Age, 10)).ToArray();
 
                 peopleWithSameAge.Length.ShouldBe(3);
                 peopleWithSameAge[0].SomeId.ShouldBe(1);
@@ -527,7 +527,7 @@
                 peopleWithSameAge[2].SomeName.ShouldBe("P5");
                 peopleWithSameAge[2].Age.ShouldBe(10);
 
-                var peopleWithDifferentNames = (await repo.GetWhere(p => p.SomeName, null, "P1", "P2")).ToArray();
+                var peopleWithDifferentNames = (await ctx.GetWhere(p => p.SomeName, null, "P1", "P2")).ToArray();
 
                 peopleWithDifferentNames.Length.ShouldBe(2);
 
@@ -539,7 +539,7 @@
                 peopleWithDifferentNames[1].SomeName.ShouldBe("P2");
                 peopleWithDifferentNames[1].Age.ShouldBe(20);
 
-                var nonExistingPeople = (await repo.GetWhere(p => p.Age, 60)).ToArray();
+                var nonExistingPeople = (await ctx.GetWhere(p => p.Age, 60)).ToArray();
 
                 nonExistingPeople.ShouldBeEmpty();
             }
@@ -714,49 +714,49 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                ((long)await repo.Insert(p1)).ShouldBe(1);
+                ((long)await ctx.Insert(p1)).ShouldBe(1);
 
-                (await repo.Get()).Count.ShouldBe(1);
+                (await ctx.Get()).Count.ShouldBe(1);
 
-                var insertedP1 = (await repo.Get()).Single();
+                var insertedP1 = (await ctx.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.Id.ShouldBe(1);
                 insertedP1.Name.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                ((long)await repo.Insert(p2)).ShouldBe(2);
+                ((long)await ctx.Insert(p2)).ShouldBe(2);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
-                var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
+                var insertedP2 = (await ctx.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.Id.ShouldBe(2);
                 insertedP2.Name.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new Person { Id = 1, Name = "P3", Age = 30 };
-                ((long)await repo.Insert(p3)).ShouldBe(3);
+                ((long)await ctx.Insert(p3)).ShouldBe(3);
 
-                (await repo.Get()).Count.ShouldBe(3);
+                (await ctx.Get()).Count.ShouldBe(3);
 
-                var insertedP3 = (await repo.GetWhere(p => p.Id, 3)).Single();
+                var insertedP3 = (await ctx.GetWhere(p => p.Id, 3)).Single();
                 insertedP3.ShouldNotBeNull();
                 insertedP3.Id.ShouldBe(3);
                 insertedP3.Name.ShouldBe("P3");
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new Person { Id = 4, Name = "P4", Age = 40 };
-                ((long)await repo.Insert(p4)).ShouldBe(4);
+                ((long)await ctx.Insert(p4)).ShouldBe(4);
 
-                (await repo.Get()).Count.ShouldBe(4);
+                (await ctx.Get()).Count.ShouldBe(4);
 
-                var insertedP4 = (await repo.GetWhere(p => p.Id, 4)).Single();
+                var insertedP4 = (await ctx.GetWhere(p => p.Id, 4)).Single();
                 insertedP4.ShouldNotBeNull();
                 insertedP4.Id.ShouldBe(4);
                 insertedP4.Name.ShouldBe("P4");
@@ -769,49 +769,49 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                ((long)await repo.Insert(p1)).ShouldBe(1);
+                ((long)await ctx.Insert(p1)).ShouldBe(1);
 
-                (await repo.Get()).Count.ShouldBe(1);
+                (await ctx.Get()).Count.ShouldBe(1);
 
-                var insertedP1 = (await repo.Get()).Single();
+                var insertedP1 = (await ctx.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.SomeId.ShouldBe(1);
                 insertedP1.SomeName.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                ((long)await repo.Insert(p2)).ShouldBe(2);
+                ((long)await ctx.Insert(p2)).ShouldBe(2);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
-                var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
+                var insertedP2 = (await ctx.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.SomeId.ShouldBe(2);
                 insertedP2.SomeName.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
                 var p3 = new MyPerson { SomeId = 1, SomeName = "P3", Age = 30 };
-                ((long)await repo.Insert(p3)).ShouldBe(3);
+                ((long)await ctx.Insert(p3)).ShouldBe(3);
 
-                (await repo.Get()).Count.ShouldBe(3);
+                (await ctx.Get()).Count.ShouldBe(3);
 
-                var insertedP3 = (await repo.GetWhere(p => p.SomeId, 3)).Single();
+                var insertedP3 = (await ctx.GetWhere(p => p.SomeId, 3)).Single();
                 insertedP3.ShouldNotBeNull();
                 insertedP3.SomeId.ShouldBe(3);
                 insertedP3.SomeName.ShouldBe("P3");
                 insertedP3.Age.ShouldBe(30);
 
                 var p4 = new MyPerson { SomeId = 4, SomeName = "P4", Age = 40 };
-                ((long)await repo.Insert(p4)).ShouldBe(4);
+                ((long)await ctx.Insert(p4)).ShouldBe(4);
 
-                (await repo.Get()).Count.ShouldBe(4);
+                (await ctx.Get()).Count.ShouldBe(4);
 
-                var insertedP4 = (await repo.GetWhere(p => p.SomeId, 4)).Single();
+                var insertedP4 = (await ctx.GetWhere(p => p.SomeId, 4)).Single();
                 insertedP4.ShouldNotBeNull();
                 insertedP4.SomeId.ShouldBe(4);
                 insertedP4.SomeName.ShouldBe("P4");
@@ -824,9 +824,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -836,9 +836,9 @@
                     new Person { Name = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -863,7 +863,7 @@
                 p4.Age.ShouldBe(40);
 
                 var emptyCollection = Enumerable.Empty<Person>();
-                (await repo.Insert(emptyCollection)).ShouldBe(0);
+                (await ctx.Insert(emptyCollection)).ShouldBe(0);
             }
         }
 
@@ -872,9 +872,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -884,9 +884,9 @@
                     new MyPerson { SomeName = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -911,7 +911,7 @@
                 p4.Age.ShouldBe(40);
 
                 var emptyCollection = Enumerable.Empty<MyPerson>();
-                (await repo.Insert(emptyCollection)).ShouldBe(0);
+                (await ctx.Insert(emptyCollection)).ShouldBe(0);
             }
         }
 
@@ -920,9 +920,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<ModelWithKeyButNoIdentity>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<ModelWithKeyButNoIdentity>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQueryWithNoIdentity);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -932,9 +932,9 @@
                     new ModelWithKeyButNoIdentity { Id = 7, Name = "P4", Age = 40 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(4);
 
@@ -965,9 +965,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.Id)).ShouldBe((ulong) 0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong) 0);
 
                 var newItemWithIdentity = new
                 {
@@ -976,7 +976,7 @@
                     Name = "P1"
                 };
 
-                var insertedIdWithIdentity = (long)await repo.InsertPartial(newItemWithIdentity);
+                var insertedIdWithIdentity = (long)await ctx.InsertPartial(newItemWithIdentity);
                 insertedIdWithIdentity.ShouldBe(1);
 
                 var newItemWithNoIdentity = new
@@ -985,15 +985,15 @@
                     Name = "P2"
                 };
 
-                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                var insertedIdWithNoIdentity = (long)await ctx.InsertPartial(newItemWithNoIdentity);
                 insertedIdWithNoIdentity.ShouldBe(2);
 
                 var person = new Person { Name = "P3" };
 
-                var insertedPerson = (long) await repo.Insert(person);
+                var insertedPerson = (long) await ctx.Insert(person);
                 insertedPerson.ShouldBe(3);
 
-                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                var allItems = (await ctx.Get()).OrderBy(x => x.Id).ToArray();
                 allItems.Length.ShouldBe(3);
 
                 allItems[0].Id.ShouldBe(1);
@@ -1015,9 +1015,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
                 var newItemWithIdentity = new
                 {
@@ -1026,7 +1026,7 @@
                     SomeName = "P1"
                 };
 
-                var insertedIdWithIdentity = (long)await repo.InsertPartial(newItemWithIdentity);
+                var insertedIdWithIdentity = (long)await ctx.InsertPartial(newItemWithIdentity);
                 insertedIdWithIdentity.ShouldBe(1);
 
                 var newItemWithNoIdentity = new
@@ -1035,15 +1035,15 @@
                     SomeName = "P2"
                 };
 
-                var insertedIdWithNoIdentity = (long)await repo.InsertPartial(newItemWithNoIdentity);
+                var insertedIdWithNoIdentity = (long)await ctx.InsertPartial(newItemWithNoIdentity);
                 insertedIdWithNoIdentity.ShouldBe(2);
 
                 var person = new MyPerson { SomeName = "P3" };
 
-                var insertedPerson = (long)await repo.Insert(person);
+                var insertedPerson = (long)await ctx.Insert(person);
                 insertedPerson.ShouldBe(3);
 
-                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                var allItems = (await ctx.Get()).OrderBy(x => x.SomeId).ToArray();
                 allItems.Length.ShouldBe(3);
 
                 allItems[0].SomeId.ShouldBe(1);
@@ -1065,9 +1065,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
 
                 var batch1 = new[]
                 {
@@ -1101,13 +1101,13 @@
                     }
                 };
 
-                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                var batch1InsertedCount = await ctx.InsertPartial(batch1);
                 batch1InsertedCount.ShouldBe(2);
 
-                var batch2InsertedCount = await repo.InsertPartial(batch2);
+                var batch2InsertedCount = await ctx.InsertPartial(batch2);
                 batch2InsertedCount.ShouldBe(2);
 
-                var allItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                var allItems = (await ctx.Get()).OrderBy(x => x.Id).ToArray();
                 allItems.Length.ShouldBe(4);
 
                 allItems[0].Id.ShouldBe(1);
@@ -1127,7 +1127,7 @@
                 allItems[3].Name.ShouldBe("P4");
 
                 var emptyCollection = Enumerable.Empty<object>();
-                (await repo.InsertPartial(emptyCollection)).ShouldBe(0);
+                (await ctx.InsertPartial(emptyCollection)).ShouldBe(0);
             }
         }
 
@@ -1136,9 +1136,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
                 var batch1 = new[]
                 {
@@ -1172,13 +1172,13 @@
                     }
                 };
 
-                var batch1InsertedCount = await repo.InsertPartial(batch1);
+                var batch1InsertedCount = await ctx.InsertPartial(batch1);
                 batch1InsertedCount.ShouldBe(2);
 
-                var batch2InsertedCount = await repo.InsertPartial(batch2);
+                var batch2InsertedCount = await ctx.InsertPartial(batch2);
                 batch2InsertedCount.ShouldBe(2);
 
-                var allItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                var allItems = (await ctx.Get()).OrderBy(x => x.SomeId).ToArray();
                 allItems.Length.ShouldBe(4);
 
                 allItems[0].SomeId.ShouldBe(1);
@@ -1198,7 +1198,7 @@
                 allItems[3].SomeName.ShouldBe("P4");
 
                 var emptyCollection = Enumerable.Empty<object>();
-                (await repo.InsertPartial(emptyCollection)).ShouldBe(0);
+                (await ctx.InsertPartial(emptyCollection)).ShouldBe(0);
             }
         }
 
@@ -1211,9 +1211,9 @@
              */
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1222,9 +1222,9 @@
                     new Person{ Age = 30, Name = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].Id.ShouldBe(1);
@@ -1235,17 +1235,17 @@
                     Age = 100
                 };
 
-                (await repo.Update(personToUpdate)).ShouldBe(0);
+                (await ctx.Update(personToUpdate)).ShouldBe(0);
 
                 personToUpdate.Id = peopleInserted[0].Id;
-                Should.Throw<SQLiteException>(async () => await repo.Update(personToUpdate))
+                Should.Throw<SQLiteException>(async () => await ctx.Update(personToUpdate))
                     .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
 
                 personToUpdate.Name = peopleInserted[0].Name;
-                (await repo.Update(personToUpdate)).ShouldBe(1);
-                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Id.ShouldBe(1);
-                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Age.ShouldBe(100);
-                (await repo.GetWhere(p => p.Id, personToUpdate.Id)).Single().Name.ShouldBe("P1");
+                (await ctx.Update(personToUpdate)).ShouldBe(1);
+                (await ctx.GetWhere(p => p.Id, personToUpdate.Id)).Single().Id.ShouldBe(1);
+                (await ctx.GetWhere(p => p.Id, personToUpdate.Id)).Single().Age.ShouldBe(100);
+                (await ctx.GetWhere(p => p.Id, personToUpdate.Id)).Single().Name.ShouldBe("P1");
 
                 var anotherPersonToUpdate = new Person
                 {
@@ -1254,12 +1254,12 @@
                     Name = "P3 - Updated"
                 };
 
-                (await repo.Update(anotherPersonToUpdate)).ShouldBe(1);
-                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(3);
-                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Age.ShouldBe(66);
-                (await repo.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
+                (await ctx.Update(anotherPersonToUpdate)).ShouldBe(1);
+                (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(3);
+                (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Age.ShouldBe(66);
+                (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)3);
             }
         }
 
@@ -1273,9 +1273,9 @@
 
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
 
                 var peopleToInsert = new[]
                 {
@@ -1284,9 +1284,9 @@
                     new MyPerson{ Age = 30, SomeName = "P3"}
                 };
 
-                (await repo.Insert(peopleToInsert)).ShouldBe(3);
+                (await ctx.Insert(peopleToInsert)).ShouldBe(3);
 
-                var peopleInserted = (await repo.Get()).ToArray();
+                var peopleInserted = (await ctx.Get()).ToArray();
                 peopleInserted.Length.ShouldBe(3);
 
                 peopleInserted[0].SomeId.ShouldBe(1);
@@ -1297,17 +1297,17 @@
                     Age = 100
                 };
 
-                (await repo.Update(personToUpdate)).ShouldBe(0);
+                (await ctx.Update(personToUpdate)).ShouldBe(0);
 
                 personToUpdate.SomeId = peopleInserted[0].SomeId;
-                Should.Throw<SQLiteException>(async () => await repo.Update(personToUpdate))
+                Should.Throw<SQLiteException>(async () => await ctx.Update(personToUpdate))
                     .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
 
                 personToUpdate.SomeName = peopleInserted[0].SomeName;
-                (await repo.Update(personToUpdate)).ShouldBe(1);
-                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeId.ShouldBe(1);
-                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().Age.ShouldBe(100);
-                (await repo.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeName.ShouldBe("P1");
+                (await ctx.Update(personToUpdate)).ShouldBe(1);
+                (await ctx.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeId.ShouldBe(1);
+                (await ctx.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().Age.ShouldBe(100);
+                (await ctx.GetWhere(p => p.SomeId, personToUpdate.SomeId)).Single().SomeName.ShouldBe("P1");
 
                 var anotherPersonToUpdate = new MyPerson
                 {
@@ -1316,12 +1316,12 @@
                     SomeName = "P3 - Updated"
                 };
 
-                (await repo.Update(anotherPersonToUpdate)).ShouldBe(1);
-                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(3);
-                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().Age.ShouldBe(66);
-                (await repo.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
+                (await ctx.Update(anotherPersonToUpdate)).ShouldBe(1);
+                (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(3);
+                (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().Age.ShouldBe(66);
+                (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)3);
             }
         }
 
@@ -1638,48 +1638,48 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var p1 = new Person { Name = "P1", Age = 10 };
-                ((long)await repo.Insert(p1)).ShouldBe(1);
+                ((long)await ctx.Insert(p1)).ShouldBe(1);
 
-                var insertedP1 = (await repo.Get()).Single();
+                var insertedP1 = (await ctx.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.Id.ShouldBe(1);
                 insertedP1.Name.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new Person { Name = "P2", Age = 20 };
-                ((long)await repo.Insert(p2)).ShouldBe(2);
+                ((long)await ctx.Insert(p2)).ShouldBe(2);
 
-                var insertedP2 = (await repo.GetWhere(p => p.Id, 2)).Single();
+                var insertedP2 = (await ctx.GetWhere(p => p.Id, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.Id.ShouldBe(2);
                 insertedP2.Name.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.Name = "P1-updated";
                 updateToP1.Age = 60;
 
-                (await repo.Update(updateToP1)).ShouldBe(1);
+                (await ctx.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
-                var updatedP1 = (await repo.GetWhere(p => p.Id, updateToP1.Id)).Single();
+                var updatedP1 = (await ctx.GetWhere(p => p.Id, updateToP1.Id)).Single();
                 updatedP1.ShouldNotBeNull();
                 updatedP1.Id.ShouldBe(updateToP1.Id);
                 updatedP1.Name.ShouldBe("P1-updated");
                 updatedP1.Age.ShouldBe(60);
 
                 var nonExistingPerson = new Person { Id = 1234, Name = "Santa", Age = 96 };
-                (await repo.Update(nonExistingPerson)).ShouldBe(0);
+                (await ctx.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
             }
         }
 
@@ -1688,48 +1688,48 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var p1 = new MyPerson { SomeName = "P1", Age = 10 };
-                ((long)await repo.Insert(p1)).ShouldBe(1);
+                ((long)await ctx.Insert(p1)).ShouldBe(1);
 
-                var insertedP1 = (await repo.Get()).Single();
+                var insertedP1 = (await ctx.Get()).Single();
                 insertedP1.ShouldNotBeNull();
                 insertedP1.SomeId.ShouldBe(1);
                 insertedP1.SomeName.ShouldBe("P1");
                 insertedP1.Age.ShouldBe(10);
 
                 var p2 = new MyPerson { SomeName = "P2", Age = 20 };
-                ((long)await repo.Insert(p2)).ShouldBe(2);
+                ((long)await ctx.Insert(p2)).ShouldBe(2);
 
-                var insertedP2 = (await repo.GetWhere(p => p.SomeId, 2)).Single();
+                var insertedP2 = (await ctx.GetWhere(p => p.SomeId, 2)).Single();
                 insertedP2.ShouldNotBeNull();
                 insertedP2.SomeId.ShouldBe(2);
                 insertedP2.SomeName.ShouldBe("P2");
                 insertedP2.Age.ShouldBe(20);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
                 var updateToP1 = insertedP1;
                 updateToP1.SomeName = "P1-updated";
                 updateToP1.Age = 60;
 
-                (await repo.Update(updateToP1)).ShouldBe(1);
+                (await ctx.Update(updateToP1)).ShouldBe(1);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
 
-                var updatedP1 = (await repo.GetWhere(p => p.SomeId, updateToP1.SomeId)).Single();
+                var updatedP1 = (await ctx.GetWhere(p => p.SomeId, updateToP1.SomeId)).Single();
                 updatedP1.ShouldNotBeNull();
                 updatedP1.SomeId.ShouldBe(updateToP1.SomeId);
                 updatedP1.SomeName.ShouldBe("P1-updated");
                 updatedP1.Age.ShouldBe(60);
 
                 var nonExistingPerson = new MyPerson { SomeId = 1234, SomeName = "Santa", Age = 96 };
-                (await repo.Update(nonExistingPerson)).ShouldBe(0);
+                (await ctx.Update(nonExistingPerson)).ShouldBe(0);
 
-                (await repo.Get()).Count.ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(2);
             }
         }
 
@@ -1972,9 +1972,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -1983,9 +1983,9 @@
                     new Person {Name = "P3", Age = 20}
                 };
 
-                (await repo.Insert(people)).ShouldBe(3);
+                (await ctx.Insert(people)).ShouldBe(3);
 
-                var existing = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                var existing = (await ctx.Get()).OrderBy(x => x.Id).ToArray();
                 existing.Length.ShouldBe(3);
 
                 var toUpdate = new[]
@@ -1997,9 +1997,9 @@
                 toUpdate[0].Id = existing[0].Id;
                 toUpdate[1].Id = existing[1].Id;
 
-                (await repo.Update(toUpdate)).ShouldBe(2);
+                (await ctx.Update(toUpdate)).ShouldBe(2);
 
-                var finalItems = (await repo.Get()).OrderBy(x => x.Id).ToArray();
+                var finalItems = (await ctx.Get()).OrderBy(x => x.Id).ToArray();
 
                 finalItems.Length.ShouldBe(3);
 
@@ -2022,9 +2022,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2033,9 +2033,9 @@
                     new MyPerson {SomeName = "P3", Age = 20}
                 };
 
-                (await repo.Insert(people)).ShouldBe(3);
+                (await ctx.Insert(people)).ShouldBe(3);
 
-                var existing = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                var existing = (await ctx.Get()).OrderBy(x => x.SomeId).ToArray();
                 existing.Length.ShouldBe(3);
 
                 var toUpdate = new[]
@@ -2047,9 +2047,9 @@
                 toUpdate[0].SomeId = existing[0].SomeId;
                 toUpdate[1].SomeId = existing[1].SomeId;
 
-                (await repo.Update(toUpdate)).ShouldBe(2);
+                (await ctx.Update(toUpdate)).ShouldBe(2);
 
-                var finalItems = (await repo.Get()).OrderBy(x => x.SomeId).ToArray();
+                var finalItems = (await ctx.Get()).OrderBy(x => x.SomeId).ToArray();
 
                 finalItems.Length.ShouldBe(3);
 
@@ -2072,9 +2072,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2084,22 +2084,22 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.GetWhere(p => p.Id, 1)).ShouldNotBeEmpty();
-                (await repo.DeleteWhere(p => p.Id, 1)).ShouldBe(1);
-                (await repo.Get()).Count.ShouldBe(3);
-                (await repo.GetWhere(p => p.Id, 1)).ShouldBeEmpty();
+                (await ctx.GetWhere(p => p.Id, 1)).ShouldNotBeEmpty();
+                (await ctx.DeleteWhere(p => p.Id, 1)).ShouldBe(1);
+                (await ctx.Get()).Count.ShouldBe(3);
+                (await ctx.GetWhere(p => p.Id, 1)).ShouldBeEmpty();
 
-                (await repo.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
-                (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
-                (await repo.Get()).Count.ShouldBe(1);
-                (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
+                (await ctx.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
+                (await ctx.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(1);
+                (await ctx.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
-                var remainingPeople = (await repo.Get()).Single();
+                var remainingPeople = (await ctx.Get()).Single();
                 remainingPeople.Id.ShouldBe(2);
                 remainingPeople.Name.ShouldBe("P2");
                 remainingPeople.Age.ShouldBe(20);
@@ -2114,21 +2114,21 @@
                     new Person { Name = "MP5", Age = 100 }
                 };
 
-                (await repo.Insert(morePeople)).ShouldBe(6);
+                (await ctx.Insert(morePeople)).ShouldBe(6);
 
-                var allPeople = (await repo.Get()).ToArray();
+                var allPeople = (await ctx.Get()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
 
                 allPeople[0].Id.ShouldBe(remainingPeople.Id);
                 allPeople[0].Name.ShouldBe(remainingPeople.Name);
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
-                (await repo.DeleteWhere(p => p.Id, null, remainingPeople.Id, allPeople[1].Id)).ShouldBe(2);
+                (await ctx.DeleteWhere(p => p.Id, null, remainingPeople.Id, allPeople[1].Id)).ShouldBe(2);
 
-                (await repo.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
+                (await ctx.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
 
-                (await repo.DeleteWhere(p => p.Name, null, "MP4", "MP5")).ShouldBe(3);
+                (await ctx.DeleteWhere(p => p.Name, null, "MP4", "MP5")).ShouldBe(3);
 
-                var totalPeopleRemaining = (await repo.Get()).ToArray();
+                var totalPeopleRemaining = (await ctx.Get()).ToArray();
                 totalPeopleRemaining.Length.ShouldBe(2);
 
                 totalPeopleRemaining[0].Id.ShouldBe(allPeople[2].Id);
@@ -2146,9 +2146,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2158,22 +2158,22 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
-                (await repo.DeleteWhere(p => p.SomeId, 1)).ShouldBe(1);
-                (await repo.Get()).Count.ShouldBe(3);
-                (await repo.GetWhere(p => p.SomeId, 1)).ShouldBeEmpty();
+                (await ctx.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
+                (await ctx.DeleteWhere(p => p.SomeId, 1)).ShouldBe(1);
+                (await ctx.Get()).Count.ShouldBe(3);
+                (await ctx.GetWhere(p => p.SomeId, 1)).ShouldBeEmpty();
 
-                (await repo.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
-                (await repo.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
-                (await repo.Get()).Count.ShouldBe(1);
-                (await repo.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
+                (await ctx.GetWhere(p => p.Age, 30)).Count.ShouldBe(2);
+                (await ctx.DeleteWhere(p => p.Age, 30)).ShouldBe(2);
+                (await ctx.Get()).Count.ShouldBe(1);
+                (await ctx.GetWhere(p => p.Age, 30)).ShouldBeEmpty();
 
-                var remainingPeople = (await repo.Get()).Single();
+                var remainingPeople = (await ctx.Get()).Single();
                 remainingPeople.SomeId.ShouldBe(2);
                 remainingPeople.SomeName.ShouldBe("P2");
                 remainingPeople.Age.ShouldBe(20);
@@ -2188,21 +2188,21 @@
                     new MyPerson { SomeName = "MP5", Age = 100 }
                 };
 
-                (await repo.Insert(morePeople)).ShouldBe(6);
+                (await ctx.Insert(morePeople)).ShouldBe(6);
 
-                var allPeople = (await repo.Get()).ToArray();
+                var allPeople = (await ctx.Get()).ToArray();
                 allPeople.Length.ShouldBe(morePeople.Length + 1);
 
                 allPeople[0].SomeId.ShouldBe(remainingPeople.SomeId);
                 allPeople[0].SomeName.ShouldBe(remainingPeople.SomeName);
                 allPeople[0].Age.ShouldBe(remainingPeople.Age);
-                (await repo.DeleteWhere(p => p.SomeId, null, remainingPeople.SomeId, allPeople[1].SomeId)).ShouldBe(2);
+                (await ctx.DeleteWhere(p => p.SomeId, null, remainingPeople.SomeId, allPeople[1].SomeId)).ShouldBe(2);
 
-                (await repo.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
+                (await ctx.Get()).Count.ShouldBe(morePeople.Length + 1 - 2);
 
-                (await repo.DeleteWhere(p => p.SomeName, null, "MP4", "MP5")).ShouldBe(3);
+                (await ctx.DeleteWhere(p => p.SomeName, null, "MP4", "MP5")).ShouldBe(3);
 
-                var totalPeopleRemaining = (await repo.Get()).ToArray();
+                var totalPeopleRemaining = (await ctx.Get()).ToArray();
                 totalPeopleRemaining.Length.ShouldBe(2);
 
                 totalPeopleRemaining[0].SomeId.ShouldBe(allPeople[2].SomeId);
@@ -2257,11 +2257,11 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
-                (await repo.DeleteAll()).ShouldBe(0);
+                (await ctx.DeleteAll()).ShouldBe(0);
 
                 var people = new[]
                 {
@@ -2271,13 +2271,13 @@
                     new Person { Name = "P4", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.DeleteAll()).ShouldBe(insertedPeople.Length);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.DeleteAll()).ShouldBe(insertedPeople.Length);
+                (await ctx.Get()).ShouldBeEmpty();
             }
         }
 
@@ -2286,11 +2286,11 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
-                (await repo.DeleteAll()).ShouldBe(0);
+                (await ctx.DeleteAll()).ShouldBe(0);
 
                 var people = new[]
                 {
@@ -2300,13 +2300,13 @@
                     new MyPerson { SomeName = "P4", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
                 insertedPeople.Length.ShouldBe(people.Length);
 
-                (await repo.DeleteAll()).ShouldBe(insertedPeople.Length);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.DeleteAll()).ShouldBe(insertedPeople.Length);
+                (await ctx.Get()).ShouldBeEmpty();
             }
         }
 
@@ -2315,16 +2315,16 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Name)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Name)).ShouldBe((ulong)0);
 
-                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Name, true)).ShouldBe((ulong)0);
 
                 var people = new[]
                 {
@@ -2334,25 +2334,25 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.Name)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Name)).ShouldBe((ulong)people.Length);
 
-                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)2);
-                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.Id, true)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)2);
+                (await ctx.Count(p => p.Name, true)).ShouldBe((ulong)3);
 
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
 
-                (await repo.Count(p => p.Id)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Name)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Name)).ShouldBe((ulong)0);
 
-                (await repo.Count(p => p.Id, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Name, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Name, true)).ShouldBe((ulong)0);
             }
         }
 
@@ -2361,16 +2361,16 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeName)).ShouldBe((ulong)0);
 
-                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
 
                 var people = new[]
                 {
@@ -2380,25 +2380,25 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.SomeName)).ShouldBe((ulong)people.Length);
 
-                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)people.Length);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)2);
-                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)3);
+                (await ctx.Count(p => p.SomeId, true)).ShouldBe((ulong)people.Length);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)2);
+                (await ctx.Count(p => p.SomeName, true)).ShouldBe((ulong)3);
 
-                await repo.DeleteAll();
+                await ctx.DeleteAll();
 
-                (await repo.Count(p => p.SomeId)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.SomeName)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeName)).ShouldBe((ulong)0);
 
-                (await repo.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.Age, true)).ShouldBe((ulong)0);
-                (await repo.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Age, true)).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeName, true)).ShouldBe((ulong)0);
             }
         }
 
@@ -2442,10 +2442,10 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2456,19 +2456,19 @@
                     new Person { Name = "P5", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(5);
+                (await ctx.Insert(people)).ShouldBe(5);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(5);
 
-                (await repo.Sum(p => p.Id)).ShouldBe(15);
-                (await repo.Sum(p => p.Name)).ShouldBe(0);
-                (await repo.Sum(p => p.Age)).ShouldBe(110);
+                (await ctx.Sum(p => p.Id)).ShouldBe(15);
+                (await ctx.Sum(p => p.Name)).ShouldBe(0);
+                (await ctx.Sum(p => p.Age)).ShouldBe(110);
 
-                (await repo.Sum(p => p.Id, true)).ShouldBe(15);
-                (await repo.Sum(p => p.Name, true)).ShouldBe(0);
-                (await repo.Sum(p => p.Age, true)).ShouldBe(100);
+                (await ctx.Sum(p => p.Id, true)).ShouldBe(15);
+                (await ctx.Sum(p => p.Name, true)).ShouldBe(0);
+                (await ctx.Sum(p => p.Age, true)).ShouldBe(100);
             }
         }
 
@@ -2477,9 +2477,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2490,19 +2490,19 @@
                     new MyPerson { SomeName = "P5", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(5);
+                (await ctx.Insert(people)).ShouldBe(5);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(5);
 
-                (await repo.Sum(p => p.SomeId)).ShouldBe(15);
-                (await repo.Sum(p => p.SomeName)).ShouldBe(0);
-                (await repo.Sum(p => p.Age)).ShouldBe(110);
+                (await ctx.Sum(p => p.SomeId)).ShouldBe(15);
+                (await ctx.Sum(p => p.SomeName)).ShouldBe(0);
+                (await ctx.Sum(p => p.Age)).ShouldBe(110);
 
-                (await repo.Sum(p => p.SomeId, true)).ShouldBe(15);
-                (await repo.Sum(p => p.SomeName, true)).ShouldBe(0);
-                (await repo.Sum(p => p.Age, true)).ShouldBe(100);
+                (await ctx.Sum(p => p.SomeId, true)).ShouldBe(15);
+                (await ctx.Sum(p => p.SomeName, true)).ShouldBe(0);
+                (await ctx.Sum(p => p.Age, true)).ShouldBe(100);
             }
         }
 
@@ -2544,9 +2544,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2559,19 +2559,19 @@
                     new Person { Name = "P7", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(7);
+                (await ctx.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(7);
 
-                (await repo.Avg(p => p.Id)).ShouldBe(4m);
-                (await repo.Avg(p => p.Name)).ShouldBe(0);
-                (await repo.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
+                (await ctx.Avg(p => p.Id)).ShouldBe(4m);
+                (await ctx.Avg(p => p.Name)).ShouldBe(0);
+                (await ctx.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
 
-                (await repo.Avg(p => p.Id, true)).ShouldBe(4m);
-                (await repo.Avg(p => p.Name, true)).ShouldBe(0);
-                (await repo.Avg(p => p.Age, true)).ShouldBe(35m);
+                (await ctx.Avg(p => p.Id, true)).ShouldBe(4m);
+                (await ctx.Avg(p => p.Name, true)).ShouldBe(0);
+                (await ctx.Avg(p => p.Age, true)).ShouldBe(35m);
             }
         }
 
@@ -2580,9 +2580,9 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
-                (await repo.Get()).ShouldBeEmpty();
+                (await ctx.Get()).ShouldBeEmpty();
 
                 var people = new[]
                 {
@@ -2595,19 +2595,19 @@
                     new MyPerson { SomeName = "P7", Age = 10 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(7);
+                (await ctx.Insert(people)).ShouldBe(7);
 
-                var insertedPeople = (await repo.Get()).ToArray();
+                var insertedPeople = (await ctx.Get()).ToArray();
 
                 insertedPeople.Length.ShouldBe(7);
 
-                (await repo.Avg(p => p.SomeId)).ShouldBe(4m);
-                (await repo.Avg(p => p.SomeName)).ShouldBe(0);
-                (await repo.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
+                (await ctx.Avg(p => p.SomeId)).ShouldBe(4m);
+                (await ctx.Avg(p => p.SomeName)).ShouldBe(0);
+                (await ctx.Avg(p => p.Age)).ShouldBe(31.42m, 0.01m);
 
-                (await repo.Avg(p => p.SomeId, true)).ShouldBe(4m);
-                (await repo.Avg(p => p.SomeName, true)).ShouldBe(0);
-                (await repo.Avg(p => p.Age, true)).ShouldBe(35m);
+                (await ctx.Avg(p => p.SomeId, true)).ShouldBe(4m);
+                (await ctx.Avg(p => p.SomeName, true)).ShouldBe(0);
+                (await ctx.Avg(p => p.Age, true)).ShouldBe(35m);
             }
         }
 
@@ -2650,12 +2650,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Min(p => p.Id)).ShouldBe(0);
-                (await repo.Min(p => p.Age)).ShouldBe(0);
-                (await repo.Min(p => p.Name)).ShouldBeNull();
+                (await ctx.Min(p => p.Id)).ShouldBe(0);
+                (await ctx.Min(p => p.Age)).ShouldBe(0);
+                (await ctx.Min(p => p.Name)).ShouldBeNull();
 
                 var people = new[]
                 {
@@ -2665,11 +2665,11 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Min(p => p.Id)).ShouldBe(1);
-                (await repo.Min(p => p.Age)).ShouldBe(10);
-                (await repo.Min(p => p.Name)).ShouldBe("P1");
+                (await ctx.Min(p => p.Id)).ShouldBe(1);
+                (await ctx.Min(p => p.Age)).ShouldBe(10);
+                (await ctx.Min(p => p.Name)).ShouldBe("P1");
             }
         }
 
@@ -2678,12 +2678,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Min(p => p.SomeId)).ShouldBe(0);
-                (await repo.Min(p => p.Age)).ShouldBe(0);
-                (await repo.Min(p => p.SomeName)).ShouldBeNull();
+                (await ctx.Min(p => p.SomeId)).ShouldBe(0);
+                (await ctx.Min(p => p.Age)).ShouldBe(0);
+                (await ctx.Min(p => p.SomeName)).ShouldBeNull();
 
                 var people = new[]
                 {
@@ -2693,11 +2693,11 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Min(p => p.SomeId)).ShouldBe(1);
-                (await repo.Min(p => p.Age)).ShouldBe(10);
-                (await repo.Min(p => p.SomeName)).ShouldBe("P1");
+                (await ctx.Min(p => p.SomeId)).ShouldBe(1);
+                (await ctx.Min(p => p.Age)).ShouldBe(10);
+                (await ctx.Min(p => p.SomeName)).ShouldBe("P1");
             }
         }
 
@@ -2736,12 +2736,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<Person>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Person>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Max(p => p.Id)).ShouldBe(0);
-                (await repo.Max(p => p.Age)).ShouldBe(0);
-                (await repo.Max(p => p.Name)).ShouldBeNull();
+                (await ctx.Max(p => p.Id)).ShouldBe(0);
+                (await ctx.Max(p => p.Age)).ShouldBe(0);
+                (await ctx.Max(p => p.Name)).ShouldBeNull();
 
                 var people = new[]
                 {
@@ -2751,11 +2751,11 @@
                     new Person { Name = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Max(p => p.Id)).ShouldBe(4);
-                (await repo.Max(p => p.Age)).ShouldBe(30);
-                (await repo.Max(p => p.Name)).ShouldBe("P3");
+                (await ctx.Max(p => p.Id)).ShouldBe(4);
+                (await ctx.Max(p => p.Age)).ShouldBe(30);
+                (await ctx.Max(p => p.Name)).ShouldBe("P3");
             }
         }
 
@@ -2764,12 +2764,12 @@
         {
             using (var conn = new SQLiteInMemoryConnection())
             {
-                var repo = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<MyPerson>(SQLiteDialect.Instance);
                 await conn.ExecuteAsync(TableQuery);
 
-                (await repo.Max(p => p.SomeId)).ShouldBe(0);
-                (await repo.Max(p => p.Age)).ShouldBe(0);
-                (await repo.Max(p => p.SomeName)).ShouldBeNull();
+                (await ctx.Max(p => p.SomeId)).ShouldBe(0);
+                (await ctx.Max(p => p.Age)).ShouldBe(0);
+                (await ctx.Max(p => p.SomeName)).ShouldBeNull();
 
                 var people = new[]
                 {
@@ -2779,11 +2779,11 @@
                     new MyPerson { SomeName = "P3", Age = 30 }
                 };
 
-                (await repo.Insert(people)).ShouldBe(4);
+                (await ctx.Insert(people)).ShouldBe(4);
 
-                (await repo.Max(p => p.SomeId)).ShouldBe(4);
-                (await repo.Max(p => p.Age)).ShouldBe(30);
-                (await repo.Max(p => p.SomeName)).ShouldBe("P3");
+                (await ctx.Max(p => p.SomeId)).ShouldBe(4);
+                (await ctx.Max(p => p.Age)).ShouldBe(30);
+                (await ctx.Max(p => p.SomeName)).ShouldBe("P3");
             }
         }
 
@@ -2843,11 +2843,11 @@
                     Composite = null
                 };
 
-                var repo = conn.GetDBContext<SampleModel>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<SampleModel>(SQLiteDialect.Instance);
 
-                ((long)await repo.Insert(sample1)).ShouldBe(1);
+                ((long)await ctx.Insert(sample1)).ShouldBe(1);
 
-                var insertedSample1 = (await repo.Get()).Single();
+                var insertedSample1 = (await ctx.Get()).Single();
                 insertedSample1.Id.ShouldBe(1);
                 insertedSample1.Int.ShouldBe(sample1.Int);
                 insertedSample1.Decimal.ShouldBe(sample1.Decimal);
@@ -2875,9 +2875,9 @@
                 insertedSample1.Double = 5.6;
                 insertedSample1.Text = "Updated";
 
-                (await repo.Update(insertedSample1)).ShouldBe(1);
-                (await repo.Count(p => p.Id)).ShouldBe((uint)1);
-                var updatedSample1 = (await repo.Get()).Single();
+                (await ctx.Update(insertedSample1)).ShouldBe(1);
+                (await ctx.Count(p => p.Id)).ShouldBe((uint)1);
+                var updatedSample1 = (await ctx.Get()).Single();
 
                 updatedSample1.Id.ShouldBe(insertedSample1.Id);
                 updatedSample1.Int.ShouldBe(insertedSample1.Int);
@@ -2907,7 +2907,7 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<Child>());
                 (await conn.Exists<Child>()).ShouldBeTrue();
 
-                var repo = conn.GetDBContext<Child>(SQLiteDialect.Instance);
+                var ctx = conn.GetDBContext<Child>(SQLiteDialect.Instance);
 
                 var child1 = new Child
                 {
@@ -2918,10 +2918,10 @@
                     Toy = "Toy-1"
                 };
 
-                long insertedId1 = await repo.Insert(child1);
+                long insertedId1 = await ctx.Insert(child1);
                 insertedId1.ShouldBe(1);
 
-                var retrievedChild1 = (await repo.GetWhere(c => c.Id, insertedId1)).First();
+                var retrievedChild1 = (await ctx.GetWhere(c => c.Id, insertedId1)).First();
                 retrievedChild1.Id.ShouldBe(1);
                 retrievedChild1.Name.ShouldBe("Child-1");
                 retrievedChild1.Age.ShouldBe(10);
@@ -2937,10 +2937,10 @@
                     Toy = "Toy-2"
                 };
 
-                long insertedId2 = await repo.Insert(child2);
+                long insertedId2 = await ctx.Insert(child2);
                 insertedId2.ShouldBe(2);
 
-                var retrievedChild2 = (await repo.GetWhere(c => c.Id, insertedId2)).First();
+                var retrievedChild2 = (await ctx.GetWhere(c => c.Id, insertedId2)).First();
                 retrievedChild2.Id.ShouldBe(2);
                 retrievedChild2.Name.ShouldBe("Child-2");
                 retrievedChild2.Age.ShouldBe(20);
@@ -2958,8 +2958,8 @@
                 await conn.ExecuteAsync(SQLiteSQLGenerator.Table<SomeModel>());
                 (await conn.Exists<SomeModel>()).ShouldBeTrue();
 
-                var repo = conn.GetDBContext<SomeModel>(SQLiteDialect.Instance);
-
+                var ctx = conn.GetDBContext<SomeModel>(SQLiteDialect.Instance);
+                
                 var modelToStore = new SomeModel
                 {
                     Age = 1,
@@ -2967,10 +2967,10 @@
                     SomeObject = new object [] {1, "foo", null}
                 };
 
-                long insertedId = await repo.Insert(modelToStore);
+                long insertedId = await ctx.Insert(modelToStore);
                 insertedId.ShouldBe(1);
 
-                var storedModel = (await repo.Get()).First();
+                var storedModel = (await ctx.Get()).First();
 
                 storedModel.Age.ShouldBe(1);
                 storedModel.SomeText.ShouldBe("bla-bla");

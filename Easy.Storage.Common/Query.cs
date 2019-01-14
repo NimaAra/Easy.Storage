@@ -2,10 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Easy.Storage.Common.Filter;
     using System.Linq.Expressions;
-    using System.Text;
+    using Easy.Common;
     using Easy.Common.Extensions;
 
     /// <summary>
@@ -54,19 +53,18 @@
 
         internal string GetSQL()
         {
-            if (!_clauses.Any())
-            {
-                return string.Empty;
-            }
+            if (_clauses.Count == 0) { return string.Empty; }
 
-            var builder = new StringBuilder("ORDER BY");
+            var builder = StringBuilderCache.Acquire();
+
+            builder.Append("ORDER BY");
+            
             foreach (var pair in _clauses)
             {
-                builder.AppendFormat("{0}  {1} {2},", 
-                    Environment.NewLine, pair.Key, pair.Value ? "ASC" : "DESC");
+                builder.AppendLine().Append("  ").Append(pair.Key).Append(" ").Append(pair.Value ? "ASC" : "DESC");
             }
 
-            return builder.ToString();
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
     }
 }

@@ -22,9 +22,6 @@
         /// <summary>
         /// Returns the string representation of the given <paramref name="operator"/>.
         /// </summary>
-        internal static string AsString(this Operator @operator)
-        {
-            return Operands[@operator];
-        }
+        internal static string AsString(this Operator @operator) => Operands[@operator];
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Easy.Storage.SQLite
 {
     using System.IO;
-    using System.Linq;
     using Easy.Common;
     using Easy.Common.Extensions;
     using Easy.Storage.Common;
@@ -25,29 +24,43 @@
         internal override string GetInsertQuery(Table table, bool includeIdentity)
         {
             var columnsAndProps = GetColumnsAndProperties(table, includeIdentity);
-            var insertSeg = $"INSERT INTO {table.Name}{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsAndProps.Key}{Formatter.NewLine})";
-            var valuesSeg = $"{Formatter.NewLine}VALUES{Formatter.NewLine}({Formatter.NewLine}{Formatter.Spacer}{columnsAndProps.Value}{Formatter.NewLine});";
 
-            return $"{insertSeg}{valuesSeg}{Formatter.NewLine}{InsertedRowId};";
+            var builder = StringBuilderCache.Acquire();
+
+            builder.Append("INSERT INTO ").AppendLine(table.Name)
+                .AppendLine("(")
+                .Append(Formatter.Spacer).AppendLine(columnsAndProps.Key).AppendLine(")");
+
+            builder.AppendLine("VALUES")
+                .AppendLine("(")
+                .Append(Formatter.Spacer).AppendLine(columnsAndProps.Value).AppendLine(");");
+
+            builder.Append(InsertedRowId).Append(';');
+
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 
         internal override string GetPartialInsertQuery<T>(Table table, object item)
         {
             var builder = StringBuilderCache.Acquire();
-            builder.Append("INSERT INTO ").Append(table.Name).AppendLine().Append('(').AppendLine();
+            builder.Append("INSERT INTO ").AppendLine(table.Name).AppendLine("(");
 
             var propNames = item.GetPropertyNames(true, false);
 
-            Ensure.That<InvalidDataException>(propNames.Any(), "Unable to find any properties in: " + nameof(item));
+            if (propNames.Length == 0)
+            {
+                throw new InvalidDataException("Unable to find any properties in: " + nameof(item));
+            }
 
             // 1st pass to compose columns
             foreach (var pName in propNames)
             {
                 if (table.IgnoredProperties.Contains(pName)) { continue; }
 
-                Ensure.That<InvalidDataException>(
-                    table.PropertyNamesToColumns.TryGetValue(pName, out string colName),
-                    $"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
+                if (!table.PropertyNamesToColumns.TryGetValue(pName, out string colName))
+                {
+                    throw new InvalidDataException($"Property: '{pName}' does not exist on the model: '{typeof(T).Name}'.");
+                }
 
                 builder.Append(Formatter.Spacer).Append(colName).Append(Formatter.ColumnSeparatorNoSpace);
             }
@@ -56,7 +69,7 @@
                 builder.Length - Formatter.ColumnSeparatorNoSpace.Length,
                 Formatter.ColumnSeparatorNoSpace.Length);
 
-            builder.AppendLine().Append(") VALUES (").AppendLine();
+            builder.AppendLine().AppendLine(") VALUES (");
 
             // 2nd pass to compose values
             foreach (var pName in propNames)
@@ -69,7 +82,7 @@
                 builder.Length - Formatter.ColumnSeparatorNoSpace.Length,
                 Formatter.ColumnSeparatorNoSpace.Length);
 
-            builder.AppendLine().Append(");").AppendLine().Append(InsertedRowId).Append(';');
+            builder.AppendLine().AppendLine(");").Append(InsertedRowId).Append(';');
             return StringBuilderCache.GetStringAndRelease(builder);
         }
     }

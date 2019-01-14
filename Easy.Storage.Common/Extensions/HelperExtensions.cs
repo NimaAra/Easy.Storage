@@ -16,7 +16,7 @@
         public static DynamicParameters ToDynamicParameters(
             this IReadOnlyDictionary<string, object> parameters, object template = null)
         {
-            var result = template == null ? new DynamicParameters() : new DynamicParameters(template);
+            var result = template is null ? new DynamicParameters() : new DynamicParameters(template);
             foreach (var pair in parameters)
             {
                 result.Add(pair.Key, pair.Value);

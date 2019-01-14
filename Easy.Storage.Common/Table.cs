@@ -118,9 +118,11 @@
                 .Where(p => p.CustomAttributes.Any(at => at.AttributeType == KeyAttributeType))
                 .ToArray();
 
-            Ensure.That<InvalidOperationException>(possibleIdentityColumns.Length <= 1,
-                "The model can only have one property specified as the Identity.");
-
+            if (possibleIdentityColumns.Length > 1)
+            {
+                throw new InvalidOperationException("The model can only have one property specified as the Identity.");
+            }
+            
             // A marked Identity property has precedence over default Id property
             if (possibleIdentityColumns.Length == 1)
             {
@@ -130,27 +132,24 @@
             }
 
             var defaultIdProp = props.SingleOrDefault(p => p.Name.Equals("Id", StringComparison.Ordinal));
-            if (defaultIdProp != null)
+            if (defaultIdProp is null)
+            {
+                result = null;
+                isIdentity = false;
+            } else
             {
                 result = defaultIdProp;
                 isIdentity = true;
-                return;
             }
-
-            result = null;
-            isIdentity = false;
         }
 
-        private static string GetModelName(Type type)
-        {
-            var aliasAttr = type
-                .GetCustomAttributes(typeof(AliasAttribute), false)
-                .FirstOrDefault() as AliasAttribute;
-            return aliasAttr != null ? aliasAttr.Name : type.Name;
-        }
+        private static string GetModelName(Type type) => 
+            type.GetCustomAttributes(typeof(AliasAttribute), false)
+                .FirstOrDefault() is AliasAttribute aliasAttr ? aliasAttr.Name : type.Name;
 
         // ReSharper disable once ParameterTypeCanBeEnumerable.Local
-        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(PropertyInfo[] properties, out HashSet<string> ignored)
+        private static Dictionary<PropertyInfo, string> GetPropertiesToColumnsMappings(
+            PropertyInfo[] properties, out HashSet<string> ignored)
         {
             var ignoredProperties = new HashSet<string>();
             var result = new Dictionary<PropertyInfo, string>();
