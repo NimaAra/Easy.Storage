@@ -19,28 +19,27 @@
         /// <summary>
         /// Returns a <c>CREATE TABLE</c> script for the given <typeparamref name="T"/>.
         /// </summary>
-        public static string Table<T>()
+        public static string Table<T>(bool withoutRowId = false)
         {
             var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty);
             var tableName = table.Name.GetNameFromEscapedSQLName();
-            return TableImpl(table, tableName);
+            return TableImpl(table, tableName, withoutRowId);
         }
 
         /// <summary>
         /// Returns a <c>CREATE TABLE</c> script for the given <paramref name="tableName"/>
         /// mapped to the given <typeparamref name="T"/> model.
         /// </summary>
-        public static string Table<T>(string tableName)
+        public static string Table<T>(string tableName, bool withoutRowId = false)
         {
             var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, tableName);
             var name = table.Name.GetNameFromEscapedSQLName();
-            return TableImpl(table, name);
+            return TableImpl(table, name, withoutRowId);
         }
 
         /// <summary>
         /// Returns a <c>CREATE TABLE</c> script for the given <typeparamref name="T"/>.
         /// </summary>
-        // ReSharper disable once InconsistentNaming
         public static string FTSTable<T>(FTSTableType type, params Expression<Func<T, object>>[] selector)
         {
             var table = Common.Table.MakeOrGet<T>(SQLiteDialect.Instance, string.Empty);
@@ -80,32 +79,46 @@
                     return $"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"\", {ftsColumns});";
                 case FTSTableType.ExternalContent:
                     var builder = StringBuilderCache.Acquire();
-                    builder.AppendLine($"CREATE VIRTUAL TABLE IF NOT EXISTS {ftsTableName} USING FTS4 (content=\"{tableName}\", {ftsColumns});");
-                    builder.AppendLine();
-
                     var ftsTriggerColumns = string.Join(", ", columns.Select(c => "new." + c));
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bu BEFORE UPDATE ON {tableName} BEGIN");
-                    builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
-                    builder.AppendLine("END;");
-                    builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_bd BEFORE DELETE ON {tableName} BEGIN");
-                    builder.AppendLine($"{Formatter.Spacer}DELETE FROM {ftsTableName} WHERE docId = old.rowId;");
-                    builder.AppendLine("END;");
-                    builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_au AFTER UPDATE ON {tableName} BEGIN");
-                    builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
-                    builder.AppendLine("END;");
-                    builder.AppendLine();
-                    builder.AppendLine($"CREATE TRIGGER IF NOT EXISTS {tableName}_ai AFTER INSERT ON {tableName} BEGIN");
-                    builder.AppendLine($"{Formatter.Spacer}INSERT INTO {ftsTableName} (docId, {ftsColumns}) VALUES (new.rowId, {ftsTriggerColumns});");
-                    builder.Append("END;");
+
+                    builder.Append("CREATE VIRTUAL TABLE IF NOT EXISTS ").Append(ftsTableName)
+                        .Append(" USING FTS4 (content=\"")
+                            .Append(tableName).Append("\", ").Append(ftsColumns).AppendLine(");")
+                        .AppendLine()
+                        .Append("CREATE TRIGGER IF NOT EXISTS ").Append(tableName).Append("_bu BEFORE UPDATE ON ")
+                            .Append(tableName)
+                            .AppendLine(" BEGIN")
+                                .Append(Formatter.Spacer).Append("DELETE FROM ").Append(ftsTableName)
+                                .AppendLine(" WHERE docId = old.rowId;")
+                            .AppendLine("END;")
+                        .AppendLine()
+                        .Append("CREATE TRIGGER IF NOT EXISTS ").Append(tableName).Append("_bd BEFORE DELETE ON ")
+                            .Append(tableName)
+                            .AppendLine(" BEGIN")
+                                .Append(Formatter.Spacer).Append("DELETE FROM ").Append(ftsTableName)
+                                .AppendLine(" WHERE docId = old.rowId;")
+                            .AppendLine("END;")
+                        .AppendLine()
+                        .Append("CREATE TRIGGER IF NOT EXISTS ").Append(tableName).Append("_au AFTER UPDATE ON ")
+                            .Append(tableName)
+                            .AppendLine(" BEGIN")
+                                .Append(Formatter.Spacer).Append("INSERT INTO ").Append(ftsTableName)
+                                .Append(" (docId, ").Append(ftsColumns).Append(") VALUES (new.rowId, ").Append(ftsTriggerColumns).AppendLine(");")
+                            .AppendLine("END;")
+                        .AppendLine()
+                        .Append("CREATE TRIGGER IF NOT EXISTS ").Append(tableName).Append("_ai AFTER INSERT ON ")
+                            .Append(tableName)
+                            .AppendLine(" BEGIN")
+                                .Append(Formatter.Spacer).Append("INSERT INTO ").Append(ftsTableName)
+                                .Append(" (docId, ").Append(ftsColumns).Append(") VALUES (new.rowId, ").Append(ftsTriggerColumns).AppendLine(");")
+                                .Append("END;");
                     return StringBuilderCache.GetStringAndRelease(builder);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
-        private static string TableImpl(Table table, string tableName)
+        private static string TableImpl(Table table, string tableName, bool withoutRowId)
         {
             var builder = StringBuilderCache.Acquire();
             builder.Append("CREATE TABLE IF NOT EXISTS ")
@@ -113,26 +126,33 @@
                 .AppendLine(" (")
                 .Append(Formatter.Spacer)
                 .AppendLine("[_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),");
-                    
+
+            if (withoutRowId && table.IdentityColumn is null)
+            {
+                throw new ArgumentException(
+                    "Every WITHOUT ROWID table must have a PRIMARY KEY specified. Check you model.", 
+                    nameof(withoutRowId));
+            }        
+
             foreach (var pair in table.PropertyToColumns)
             {
                 var prop = pair.Key;
 
                 var sqliteType = GetSQLiteType(prop.PropertyType).ToString();
-                var isIdColumn = table.IdentityColumn == prop;
+                var isPrimary = table.IdentityColumn == prop;
                 var nullable = prop.CustomAttributes.Any(a => a.AttributeType == typeof(NullableAttribute));
 
                 builder.Append(Formatter.Spacer)
                     .Append(pair.Value)
                     .Append(" ")
                     .Append(sqliteType)
-                    .Append(isIdColumn ? " PRIMARY KEY" : string.Empty)
+                    .Append(isPrimary ? " PRIMARY KEY" : string.Empty)
                     .Append(!nullable ? " NOT NULL" : string.Empty)
                     .AppendLine(",");
             }
 
             builder.Remove(builder.Length - 3, 1);
-            builder.Append(");");
+            builder.Append(withoutRowId ? ") WITHOUT ROWID;" : ");");
 
             return StringBuilderCache.GetStringAndRelease(builder);
         }

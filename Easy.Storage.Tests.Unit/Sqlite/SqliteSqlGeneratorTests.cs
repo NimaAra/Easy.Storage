@@ -58,6 +58,29 @@
         }
 
         [Test]
+        public void When_generating_table_sql_for_model_with_no_id_and_without_rowid()
+        {
+            var e = Should.Throw<ArgumentException>(() => 
+                SQLiteSQLGenerator.Table<SomeModelWithNoId>(withoutRowId:true));
+
+            e.Message.ShouldBe("Every WITHOUT ROWID table must have a PRIMARY KEY specified. Check you model.\r\nParameter name: withoutRowId");
+            e.ParamName.ShouldBe("withoutRowId");
+        }
+
+        [Test]
+        public void When_generating_table_sql_for_model_with_no_id_and_with_rowid()
+        {
+            var tableSql = SQLiteSQLGenerator.Table<SomeModelWithNoId>(withoutRowId: false);
+            
+            tableSql.ShouldNotBeNullOrWhiteSpace();
+            tableSql.ShouldBe("CREATE TABLE IF NOT EXISTS SomeModelWithNoId (\r\n"
+                              + "    [_Entry_TimeStamp_Epoch_ms_] INTEGER DEFAULT (CAST((julianday('now') - 2440587.5)*86400000 AS INTEGER)),\r\n"
+                              + "    [Name] TEXT NOT NULL,\r\n"
+                              + "    [Age] INTEGER NOT NULL,\r\n"
+                              + "    [Alias] TEXT\r\n);");
+        }
+
+        [Test]
         public void When_generating_full_text_search_with_content_table_sql()
         {
             Should.Throw<KeyNotFoundException>(() => SQLiteSQLGenerator.FTSTable<SomeModel>(FTSTableType.Content, m => m.Composite))
@@ -148,6 +171,15 @@
 
             [Ignore]
             public IEnumerable<Person> Composite { get; set; }
+        }
+
+        private sealed class SomeModelWithNoId
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            
+            [Nullable]
+            public string Alias { get; set; }
         }
     }
 }
