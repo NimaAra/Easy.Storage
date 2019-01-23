@@ -39,6 +39,9 @@
             File = new FileInfo(match.Groups["file"].Value);
         }
 
+        /// <summary>
+        /// Gets the DB file.
+        /// </summary>
         public FileInfo File { get; }
 
         /// <summary>
