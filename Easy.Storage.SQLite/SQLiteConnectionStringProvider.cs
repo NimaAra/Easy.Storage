@@ -1,5 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite
+﻿namespace Easy.Storage.SQLite
 {
     using System;
     using System.Data.SQLite;
@@ -14,16 +13,13 @@ namespace Easy.Storage.SQLite
         /// <summary>
         /// Returns an in-memory <c>SQLite</c> connection-string.
         /// </summary>
-        public static string GetInMemoryConnectionString()
-        {
-            return "Data Source=:memory:";
-        }
+        public static string GetInMemoryConnectionString() => "Data Source=:memory:";
 
         /// <summary>
         /// Returns a file-based <c>SQLite</c> connection-string.
         /// </summary>
         public static string GetFileConnectionString(
-            FileSystemInfo file,
+            FileInfo file,
             bool binaryGuid = false,
             DateTimeKind dateTimeKind = DateTimeKind.Utc,
             SQLiteDateFormats dateTimeFormat = SQLiteDateFormats.UnixEpoch,
@@ -55,7 +51,7 @@ namespace Easy.Storage.SQLite
             int cacheSize)
         {
             Ensure.NotNullOrEmptyOrWhiteSpace(dataSource);
-            var connStr = new SQLiteConnectionStringBuilder
+            return new SQLiteConnectionStringBuilder
             {
                 DataSource = dataSource,
                 FailIfMissing = false,
@@ -72,7 +68,6 @@ namespace Easy.Storage.SQLite
                 // reverts back to default on conn.Close has to first be set when Mode is NOT WAL & before any table is created.
                 CacheSize = cacheSize // reverts back to default on conn.Close, has to first be set when Mode is NOT WAL
             }.ToString();
-            return connStr;
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite.Connections
+﻿namespace Easy.Storage.SQLite.Connections
 {
+    using System;
     using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
@@ -21,9 +21,13 @@ namespace Easy.Storage.SQLite.Connections
         public SQLiteAttachedConnection(IReadOnlyDictionary<string, FileInfo> dbFiles) 
             : base(SQLiteConnectionStringProvider.GetInMemoryConnectionString())
         {
-            FilesToAttach = Ensure.NotNull(dbFiles, nameof(dbFiles));
-            Ensure.That(dbFiles.Count != 0, "The dbFiles cannot be empty.");
+            FilesToAttach = dbFiles ?? throw new ArgumentNullException(nameof(dbFiles));
 
+            if (dbFiles.Count == 0)
+            {
+                throw new ArgumentException(nameof(dbFiles) + " cannot be empty.");
+            }
+            
             var cmdBuilder = StringBuilderCache.Acquire();
             foreach (var pair in dbFiles)
             {

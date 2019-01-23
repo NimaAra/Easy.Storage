@@ -1,8 +1,7 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite.Connections
+﻿namespace Easy.Storage.SQLite.Connections
 {
+    using System;
     using System.Data.SQLite;
-    using Easy.Common;
 
     /// <summary>
     /// A wrapper around the <see cref="SQLiteConnection"/> to allow reuse of in-memory connections.
@@ -20,24 +19,20 @@ namespace Easy.Storage.SQLite.Connections
         /// <param name="connectionString">A valid <c>SQLite</c> connection-string.</param>
         public SQLiteInMemoryConnection(string connectionString) : base(connectionString)
         {
-            Ensure.That(SQLiteHelper.IsInMemoryConnection(connectionString), 
-                "Not a valid SQLite memory connection-string.");
+            if (!SQLiteHelper.IsInMemoryConnection(connectionString))
+            {
+                throw new ArgumentException("Not a valid SQLite memory connection-string.");
+            }
         }
 
         /// <summary>
         /// Does not close the connection. Dispose the connection for the connection to close.
         /// </summary>
-        public override void Close()
-        {
-            // do nothing.
-        }
+        public override void Close() { /* do nothing. */ }
 
         /// <summary>
         /// Disposes and finalizes the connection, if applicable.
         /// </summary>
-        public override void Dispose()
-        {
-            Connection.Dispose();
-        }
+        public override void Dispose() => Connection.Dispose();
     }
 }

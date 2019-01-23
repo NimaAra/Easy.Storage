@@ -50,13 +50,13 @@
         public void When_creating_connection_with_null_empty_and_whitespace_connection_string()
         {
             Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(null))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
 
             Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(string.Empty))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
 
             Should.Throw<ArgumentException>(() => new SQLiteInMemoryConnection(" "))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
         }
 
         [Test]

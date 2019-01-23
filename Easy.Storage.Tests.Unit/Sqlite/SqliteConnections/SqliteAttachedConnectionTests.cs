@@ -59,7 +59,7 @@
         public void When_creating_connection_with_empty_files()
         {
             Should.Throw<ArgumentException>(() => new SQLiteAttachedConnection(new Dictionary<string, FileInfo>()))
-                .Message.ShouldBe("The dbFiles cannot be empty.");
+                .Message.ShouldBe("dbFiles cannot be empty.");
         }
 
         [Test]

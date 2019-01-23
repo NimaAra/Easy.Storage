@@ -44,9 +44,7 @@ namespace Easy.Storage.SQLite
         /// <summary>
         /// Gets the flag indicating whether the given <paramref name="sqliteConnectionString"/> is an in-memory connection.
         /// </summary>
-        internal static bool IsInMemoryConnection(string sqliteConnectionString)
-        {
-            return sqliteConnectionString.Contains(InMemoryToken, StringComparison.OrdinalIgnoreCase);
-        }
+        internal static bool IsInMemoryConnection(string sqliteConnectionString) 
+            => sqliteConnectionString.Contains(InMemoryToken, StringComparison.OrdinalIgnoreCase);
     }
 }

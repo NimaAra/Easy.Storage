@@ -1,17 +1,16 @@
-﻿// ReSharper disable InconsistentNaming
-namespace Easy.Storage.SQLite.Connections
+﻿namespace Easy.Storage.SQLite.Connections
 {
     using System;
     using System.Data;
     using System.Data.Common;
     using System.Data.SQLite;
     using Easy.Common;
+    using Easy.Common.Extensions;
     using Easy.Storage.SQLite.Functions;
 
     /// <summary>
     /// An abstraction over <see cref="SQLiteConnection"/>.
     /// </summary>
-    [System.ComponentModel.DesignerCategory("")]
     public abstract class SQLiteConnectionBase : DbConnection, IDisposable
     {
         /// <summary>
@@ -25,7 +24,10 @@ namespace Easy.Storage.SQLite.Connections
         /// <param name="connectionString">A valid <c>SQLite</c> connection-string.</param>
         protected SQLiteConnectionBase(string connectionString)
         {
-            Ensure.NotNullOrEmptyOrWhiteSpace(connectionString, "Connection string cannot be null, empty or whitespace.");
+            if (connectionString.IsNullOrEmptyOrWhiteSpace())
+            {
+                throw new ArgumentException("Connection-string cannot be null, empty or whitespace.");
+            }
             Connection = new SQLiteConnection(connectionString);
         }
 
@@ -34,7 +36,7 @@ namespace Easy.Storage.SQLite.Connections
         /// </summary>
         public sealed override string ConnectionString
         {
-            get { return Connection.ConnectionString; }
+            get => Connection.ConnectionString;
             set { /* ignored */ }
         }
 
@@ -80,42 +82,28 @@ namespace Easy.Storage.SQLite.Connections
         /// </remarks>
         /// </summary>
         /// <param name="isolationLevel">Supported isolation levels are Serializable, ReadCommitted and Unspecified.</param>
-        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
-        {
-            return Connection.BeginTransaction(isolationLevel);
-        }
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) 
+            => Connection.BeginTransaction(isolationLevel);
 
         /// <summary>
         /// When the database connection is closed, all commands linked to this connection are automatically reset.
         /// </summary>
-        public override void Close()
-        {
-            Connection.Close();
-        }
+        public override void Close() => Connection.Close();
 
         /// <summary>
         /// This method is not implemented; however, the <c>Changed</c> event will still be raised. 
         /// </summary>
-        public override void ChangeDatabase(string databaseName)
-        {
-            Connection.ChangeDatabase(databaseName);
-        }
+        public override void ChangeDatabase(string databaseName) => Connection.ChangeDatabase(databaseName);
 
         /// <summary>
         /// Create a new <see cref="SQLiteCommand"/> and associate it with this connection. 
         /// </summary>
-        protected override DbCommand CreateDbCommand()
-        {
-            return Connection.CreateCommand();
-        }
+        protected override DbCommand CreateDbCommand() => Connection.CreateCommand();
 
         /// <summary>
         /// Opens the connection using the parameters found in the <see cref="ConnectionString"/>. 
         /// </summary>
-        public override void Open()
-        {
-            Connection.Open();
-        }
+        public override void Open() => Connection.Open();
 
         /// <summary>
         /// Binds the given <paramref name="function"/> to the <paramref see="connection"/>.
@@ -123,7 +111,8 @@ namespace Easy.Storage.SQLite.Connections
         public void BindFunction(SQLiteFunctionBase function)
         {
             Ensure.NotNull(function, nameof(function));
-            Ensure.That<InvalidOperationException>(Connection.State == ConnectionState.Open, "Cannot bind a function to a closed.");
+            Ensure.That<InvalidOperationException>(
+                Connection.State == ConnectionState.Open, "Cannot bind a function to a closed.");
 
             var funcAttr = new SQLiteFunctionAttribute
             {
