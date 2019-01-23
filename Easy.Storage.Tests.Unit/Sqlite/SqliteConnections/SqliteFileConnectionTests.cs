@@ -16,8 +16,8 @@
         {
             using (var conn = new SQLiteFileConnection(new FileInfo("C:\\SomeFile.db")))
             {
-                conn.ConnectionString
-                    .ShouldBe(@"data source=C:\SomeFile.db;failifmissing=False;pooling=False;binaryguid=False;datetimekind=Utc;datetimeformat=UnixEpoch;journal mode=Wal;synchronous=Off;useutf16encoding=False;read only=False;legacy format=False;page size=4096;cache size=-2000");
+                conn.ConnectionString.ShouldBe(@"data source=C:\SomeFile.db;failifmissing=False;pooling=False;binaryguid=False;datetimekind=Utc;datetimeformat=UnixEpoch;journal mode=Wal;synchronous=Off;useutf16encoding=False;read only=False;legacy format=False;page size=4096;cache size=-2000");
+                conn.File.FullName.ShouldBe("C:\\SomeFile.db");
                 conn.ConnectionTimeout.ShouldBe(15);
                 conn.DataSource.ShouldBeNull();
                 conn.Database.ShouldBe("main");
@@ -29,10 +29,25 @@
         [Test]
         public void When_creating_connection_with_valid_connection_string()
         {
+            using (var conn = new SQLiteFileConnection("data source=C:\\SomeFile.db"))
+            {
+                conn.ConnectionString.ShouldBe(@"data source=C:\SomeFile.db");
+                conn.File.FullName.ShouldBe("C:\\SomeFile.db");
+                conn.ConnectionTimeout.ShouldBe(15);
+                conn.DataSource.ShouldBeNull();
+                conn.Database.ShouldBe("main");
+                conn.ServerVersion.ShouldBe("3.24.0");
+                conn.State.ShouldBe(ConnectionState.Closed);
+            }
+        }
+
+        [Test]
+        public void When_creating_connection_with_valid_connection_string_with_parameters()
+        {
             using (var conn = new SQLiteFileConnection(SQLiteConnectionStringProvider.GetFileConnectionString(new FileInfo("C:\\SomeFile.db"))))
             {
-                conn.ConnectionString
-                    .ShouldBe(@"data source=C:\SomeFile.db;failifmissing=False;pooling=False;binaryguid=False;datetimekind=Utc;datetimeformat=UnixEpoch;journal mode=Wal;synchronous=Off;useutf16encoding=False;read only=False;legacy format=False;page size=4096;cache size=-2000");
+                conn.ConnectionString.ShouldBe(@"data source=C:\SomeFile.db;failifmissing=False;pooling=False;binaryguid=False;datetimekind=Utc;datetimeformat=UnixEpoch;journal mode=Wal;synchronous=Off;useutf16encoding=False;read only=False;legacy format=False;page size=4096;cache size=-2000");
+                conn.File.FullName.ShouldBe("C:\\SomeFile.db");
                 conn.ConnectionTimeout.ShouldBe(15);
                 conn.DataSource.ShouldBeNull();
                 conn.Database.ShouldBe("main");
@@ -45,16 +60,16 @@
         public void When_creating_connection_with_null_empty_and_whitespace_connection_string()
         {
             Should.Throw<ArgumentException>(() => new SQLiteFileConnection((string) null))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
 
             Should.Throw<ArgumentException>(() => new SQLiteFileConnection((FileInfo) null))
                 .Message.ShouldBe("Value cannot be null.\r\nParameter name: file");
 
             Should.Throw<ArgumentException>(() => new SQLiteFileConnection(string.Empty))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
 
             Should.Throw<ArgumentException>(() => new SQLiteFileConnection(" "))
-                .Message.ShouldBe("Connection string cannot be null, empty or whitespace.");
+                .Message.ShouldBe("Connection-string cannot be null, empty or whitespace.");
         }
 
         [Test]
@@ -62,6 +77,13 @@
         {
             Should.Throw<ArgumentException>(() => new SQLiteFileConnection(":memory:"))
                 .Message.ShouldBe("Cannot be a SQLite memory connection-string.");
+        }
+
+        [Test]
+        public void When_creating_connection_with_invalid_connection_string()
+        {
+            Should.Throw<ArgumentException>(() => new SQLiteFileConnection(@"data-source=C:\SomeFile.db;"))
+                .Message.ShouldBe("Invalid SQLite connection-string.");
         }
 
         [Test]
