@@ -21,10 +21,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
-
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -46,16 +44,14 @@
         }
 
         [Test]
-        public async Task When_inserting_with_transaction_commited()
+        public async Task When_inserting_with_transaction_committed()
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
-
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -86,9 +82,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -119,9 +114,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -150,9 +144,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person1 = new Person {Name = "P1", Age = 10};
@@ -178,15 +171,14 @@
         }
 
         [Test]
-        public async Task When_inserting_multiple_with_transaction_commited_one_inside_the_other_outside()
+        public async Task When_inserting_multiple_with_transaction_committed_one_inside_the_other_outside()
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person1 = new Person {Name = "P1", Age = 10};
@@ -214,15 +206,14 @@
         }
 
         [Test]
-        public async Task When_inserting_and_updating_with_transaction_commited()
+        public async Task When_inserting_and_updating_with_transaction_committed()
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -269,9 +260,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -312,15 +302,14 @@
         }
 
         [Test]
-        public async Task When_inserting_and_updating_with_transaction_with_isolation_level_commited()
+        public async Task When_inserting_and_updating_with_transaction_with_isolation_level_committed()
         {
             var fileInfo = new FileInfo(Path.GetTempFileName());
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person {Name = "P1", Age = 10};
@@ -367,9 +356,8 @@
 
             try
             {
-                using (var conn = new SQLiteFileConnection(fileInfo))
+                using (var conn = new SQLiteFileConnection(fileInfo).OpenAndReturn())
                 {
-                    conn.Open();
                     await conn.ExecuteAsync(TableQuery);
 
                     var person = new Person { Name = "P1", Age = 10 };

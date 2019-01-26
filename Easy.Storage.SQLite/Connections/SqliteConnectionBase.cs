@@ -106,6 +106,15 @@
         public override void Open() => Connection.Open();
 
         /// <summary>
+        /// Opens and returns the connection using the parameters found in the <see cref="ConnectionString"/>. 
+        /// </summary>
+        public DbConnection OpenAndReturn()
+        {
+            Open();
+            return this;
+        }
+
+        /// <summary>
         /// Binds the given <paramref name="function"/> to the <paramref see="connection"/>.
         /// </summary>
         public void BindFunction(SQLiteFunctionBase function)
