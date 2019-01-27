@@ -88,7 +88,15 @@
         /// <summary>
         /// When the database connection is closed, all commands linked to this connection are automatically reset.
         /// </summary>
-        public override void Close() => Connection.Close();
+        public override void Close()
+        {
+            if (Connection.State == ConnectionState.Closed)
+            {
+                return;
+            }
+            
+            Connection.Close();
+        }
 
         /// <summary>
         /// This method is not implemented; however, the <c>Changed</c> event will still be raised. 
@@ -103,7 +111,12 @@
         /// <summary>
         /// Opens the connection using the parameters found in the <see cref="ConnectionString"/>. 
         /// </summary>
-        public override void Open() => Connection.Open();
+        public override void Open()
+        {
+            if (Connection.State == ConnectionState.Open) { return; }
+            
+            Connection.Open();
+        }
 
         /// <summary>
         /// Opens and returns the connection using the parameters found in the <see cref="ConnectionString"/>. 
