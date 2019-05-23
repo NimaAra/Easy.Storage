@@ -6,14 +6,14 @@ namespace Easy.Storage.Common.Filter
     public enum Operator
     {
         /// <summary>
-        /// Equal.
+        /// Is.
         /// </summary>
-        Equal = 0,
+        Is = 0,
 
         /// <summary>
         /// Not equal.
         /// </summary>
-        NotEqual,
+        IsNot,
 
         /// <summary>
         /// Greater than.
@@ -21,9 +21,9 @@ namespace Easy.Storage.Common.Filter
         GreaterThan,
 
         /// <summary>
-        /// Greater than or equal.
+        /// Greater than or is.
         /// </summary>
-        GreaterThanOrEqual,
+        GreaterThanOrIs,
 
         /// <summary>
         /// Less than.
@@ -31,8 +31,8 @@ namespace Easy.Storage.Common.Filter
         LessThan,
 
         /// <summary>
-        /// Less than or equal.
+        /// Less than or is.
         /// </summary>
-        LessThanOrEqual
+        LessThanOrIs
     }
 }

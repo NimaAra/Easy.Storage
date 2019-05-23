@@ -71,7 +71,7 @@ namespace Easy.Storage.Common
         {
             Ensure.NotNull(selector, nameof(selector));
             
-            var filter = Query.Filter.And(selector, Operator.Equal, value);
+            var filter = Query.Filter.And(selector, Operator.Is, value);
             var sql = filter.GetSQL();
             var parameters = filter.Parameters.ToDynamicParameters();
             return (await Connection.QueryAsync<T>(sql, parameters, transaction, buffered: true)
@@ -245,7 +245,7 @@ namespace Easy.Storage.Common
         {
             Ensure.NotNull(selector, nameof(selector));
 
-            var filter = Query.Filter.And(selector, Operator.Equal, value);
+            var filter = Query.Filter.And(selector, Operator.Is, value);
             var sql = filter.GetSQL(Table.Delete);
             var parameters = filter.Parameters.ToDynamicParameters();
             return Connection.ExecuteAsync(sql, parameters, transaction);

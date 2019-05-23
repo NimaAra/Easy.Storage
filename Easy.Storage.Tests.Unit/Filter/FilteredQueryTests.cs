@@ -33,7 +33,7 @@ WHERE
         public void When_adding_equality_clause()
         {
             var query = FilteredQuery.Make(_table);
-            query.AddClause<Person, long>(p => p.Id, Operator.Equal, 1, Formatter.AndClauseSeparator);
+            query.AddClause<Person, long>(p => p.Id, Operator.Is, 1, Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Id1"].ShouldBe(1);
 
@@ -93,7 +93,7 @@ AND
         public void When_adding_filter_to_a_delete_statement()
         {
             var query = FilteredQuery.Make(_table);
-            query.AddClause<Person, string>(p => p.Name, Operator.Equal, "Foo", Formatter.AndClauseSeparator);
+            query.AddClause<Person, string>(p => p.Name, Operator.Is, "Foo", Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 
@@ -110,7 +110,7 @@ AND
         public void When_adding_filter_to_a_update_statement()
         {
             var query = FilteredQuery.Make(_table);
-            query.AddClause<Person, string>(p => p.Name, Operator.Equal, "Foo", Formatter.AndClauseSeparator);
+            query.AddClause<Person, string>(p => p.Name, Operator.Is, "Foo", Formatter.AndClauseSeparator);
             query.Parameters.Count.ShouldBe(1);
             query.Parameters["Name1"].ShouldBe("Foo");
 

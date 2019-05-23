@@ -568,7 +568,7 @@
 
                 var filter1 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThan, 30)
-                    .Or(p => p.Name, Operator.Equal, "P1");
+                    .Or(p => p.Name, Operator.Is, "P1");
 
                 var filter1Result = (await ctx.GetWhere(filter1)).ToArray();
                 filter1Result.Length.ShouldBe(3);
@@ -586,8 +586,8 @@
                 filter1Result[2].Age.ShouldBe(50);
 
                 var filter2 = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
-                    .Or(p => p.Age, Operator.Equal, 20);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 50)
+                    .Or(p => p.Age, Operator.Is, 20);
 
                 var filter2Result = (await ctx.GetWhere(filter2)).ToArray();
                 filter2Result.Length.ShouldBe(2);
@@ -601,7 +601,7 @@
                 filter2Result[1].Age.ShouldBe(50);
 
                 var filter3 = ctx.Query.Filter
-                    .And(p => p.Age, Operator.Equal, 50)
+                    .And(p => p.Age, Operator.Is, 50)
                     .OrIn(p => p.Name, new[] { "P2", "P3", "P4" });
 
                 var filter3Result = (await ctx.GetWhere(filter3))
@@ -650,7 +650,7 @@
 
                 var filter1 = ctx.Query.Filter
                     .And(p => p.Age, Operator.GreaterThan, 30)
-                    .Or(p => p.SomeName, Operator.Equal, "P1");
+                    .Or(p => p.SomeName, Operator.Is, "P1");
 
                 var filter1Result = (await ctx.GetWhere(filter1)).ToArray();
                 filter1Result.Length.ShouldBe(3);
@@ -668,8 +668,8 @@
                 filter1Result[2].Age.ShouldBe(50);
 
                 var filter2 = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50)
-                    .Or(p => p.Age, Operator.Equal, 20);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 50)
+                    .Or(p => p.Age, Operator.Is, 20);
 
                 var filter2Result = (await ctx.GetWhere(filter2)).ToArray();
                 filter2Result.Length.ShouldBe(2);
@@ -683,7 +683,7 @@
                 filter2Result[1].Age.ShouldBe(50);
 
                 var filter3 = ctx.Query.Filter
-                    .And(p => p.Age, Operator.Equal, 50)
+                    .And(p => p.Age, Operator.Is, 50)
                     .OrIn(p => p.SomeName, new[] { "P2", "P3", "P4" });
 
                 var filter3Result = (await ctx.GetWhere(filter3))
@@ -1359,10 +1359,10 @@
                     Age = 100
                 };
 
-                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 0);
                 (await ctx.UpdateWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, peopleInserted[0].Id);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, peopleInserted[0].Id);
 
                 Should.Throw<SQLiteException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
@@ -1380,7 +1380,7 @@
                     Name = "P3 - Updated"
                 };
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 3);
 
                 (await ctx.UpdateWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
                 (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(666);
@@ -1388,7 +1388,7 @@
                 (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Name.ShouldBe("P3 - Updated");
 
                 (await ctx.Count(p => p.Id)).ShouldBe((ulong)3);
-                (await ctx.Count(p => p.Id, ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3))).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.Id, ctx.Query.Filter.And(p => p.Id, Operator.Is, 3))).ShouldBe((ulong)0);
             }
         }
 
@@ -1425,10 +1425,10 @@
                     Age = 100
                 };
 
-                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 0);
                 (await ctx.UpdateWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, peopleInserted[0].SomeId);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, peopleInserted[0].SomeId);
 
                 Should.Throw<SQLiteException>(async () => await ctx.UpdateWhere(personToUpdate, filter))
                     .Message.ShouldBe("constraint failed\r\nNOT NULL constraint failed: Person.Name");
@@ -1446,7 +1446,7 @@
                     SomeName = "P3 - Updated"
                 };
 
-                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 3);
 
                 (await ctx.UpdateWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
                 (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(666);
@@ -1454,7 +1454,7 @@
                 (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeName.ShouldBe("P3 - Updated");
 
                 (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)3);
-                (await ctx.Count(p => p.SomeId, ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3))).ShouldBe((ulong)0);
+                (await ctx.Count(p => p.SomeId, ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 3))).ShouldBe((ulong)0);
             }
         }
 
@@ -1490,11 +1490,11 @@
                     Age = 100
                 };
 
-                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 0);
 
                 (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 1);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 1);
                 (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
 
                 (await ctx.GetWhere(filter)).Single().Id.ShouldBe(1);
@@ -1508,7 +1508,7 @@
                     Name = "P3 - Updated"
                 };
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 3);
                 (await ctx.UpdatePartialWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
 
                 (await ctx.GetWhere(p => p.Id, anotherPersonToUpdate.Id)).Single().Id.ShouldBe(4);
@@ -1521,7 +1521,7 @@
                         invalidPartial.Age = 555;
                         invalidPartial.SomeName = "P2 - Updated";
 
-                        filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 2);
+                        filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 2);
                         await ctx.UpdatePartialWhere(invalidPartial, filter);
                     })
                     .Message.ShouldBe("Property: 'SomeName' does not exist on the model: 'Person'.");
@@ -1533,14 +1533,14 @@
                 yetAnotherPersonToUpdate.Age = 555;
                 yetAnotherPersonToUpdate.Name = "P2 - Updated";
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 2);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 2);
                 ((int)await ctx.UpdatePartialWhere(yetAnotherPersonToUpdate, filter)).ShouldBe(1);
 
                 (await ctx.GetWhere(p => p.Id, 2)).Single().Id.ShouldBe(2);
                 (await ctx.GetWhere(p => p.Id, 2)).Single().Age.ShouldBe(555);
                 (await ctx.GetWhere(p => p.Id, 2)).Single().Name.ShouldBe("P2 - Updated");
 
-                filter = ctx.Query.Filter.And(p => p.Id, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.Id, Operator.Is, 3);
                 (await ctx.Count(p => p.Id, filter)).ShouldBe((ulong)0);
                 (await ctx.Count(p => p.Id)).ShouldBe((ulong)3);
             }
@@ -1578,11 +1578,11 @@
                     Age = 100
                 };
 
-                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 0);
+                var filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 0);
 
                 (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(0);
 
-                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 1);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 1);
                 (await ctx.UpdatePartialWhere(personToUpdate, filter)).ShouldBe(1);
 
                 (await ctx.GetWhere(filter)).Single().SomeId.ShouldBe(1);
@@ -1596,7 +1596,7 @@
                     SomeName = "P3 - Updated"
                 };
 
-                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 3);
                 (await ctx.UpdatePartialWhere(anotherPersonToUpdate, filter)).ShouldBe(1);
 
                 (await ctx.GetWhere(p => p.SomeId, anotherPersonToUpdate.SomeId)).Single().SomeId.ShouldBe(4);
@@ -1609,7 +1609,7 @@
                     invalidPartial.Age = 555;
                     invalidPartial.Name = "P2 - Updated";
 
-                    filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 2);
+                    filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 2);
                     await ctx.UpdatePartialWhere(invalidPartial, filter);
                 })
                 .Message.ShouldBe("Property: 'Name' does not exist on the model: 'MyPerson'.");
@@ -1627,7 +1627,7 @@
                 (await ctx.GetWhere(p => p.SomeId, 2)).Single().Age.ShouldBe(555);
                 (await ctx.GetWhere(p => p.SomeId, 2)).Single().SomeName.ShouldBe("P2 - Updated");
 
-                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Equal, 3);
+                filter = ctx.Query.Filter.And(p => p.SomeId, Operator.Is, 3);
                 (await ctx.Count(p => p.SomeId, filter)).ShouldBe((ulong)0);
                 (await ctx.Count(p => p.SomeId)).ShouldBe((ulong)3);
             }
@@ -1758,7 +1758,7 @@
                 var insertedPeople = (await ctx.Get()).ToArray();
 
                 var template1 = new { Name = "P0", Age = 0 };
-                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Equal, 10);
+                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Is, 10);
                 (await ctx.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
                 var snapshot1 = (await ctx.Get()).ToArray();
@@ -1776,7 +1776,7 @@
                 }
 
                 var template2 = new { Name = "P100", Age = 100 };
-                filter = ctx.Query.Filter.And(p => p.Name, Operator.Equal, "P5");
+                filter = ctx.Query.Filter.And(p => p.Name, Operator.Is, "P5");
                 (await ctx.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
                 var snapshot2 = (await ctx.Get()).ToArray();
@@ -1854,7 +1854,7 @@
                 var insertedPeople = (await ctx.Get()).ToArray();
 
                 var template1 = new { SomeName = "P0", Age = 0 };
-                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Equal, 10);
+                var filter = ctx.Query.Filter.And(p => p.Age, Operator.Is, 10);
                 (await ctx.UpdatePartialWhere(template1, filter)).ShouldBe(1);
 
                 var snapshot1 = (await ctx.Get()).ToArray();
@@ -1872,7 +1872,7 @@
                 }
 
                 var template2 = new { SomeName = "P100", Age = 100 };
-                filter = ctx.Query.Filter.And(p => p.SomeName, Operator.Equal, "P5");
+                filter = ctx.Query.Filter.And(p => p.SomeName, Operator.Is, "P5");
 
                 (await ctx.UpdatePartialWhere(template2, filter)).ShouldBe(3);
 
@@ -1949,7 +1949,7 @@
                 (await ctx.Insert(people)).ShouldBe(7);
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 50);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 50);
                 Should.Throw<SQLiteException>(async () =>
                 {
                     var templateWithIdZero = new MyPerson { SomeName = "P0", Age = 0 };
@@ -2240,7 +2240,7 @@
                 (await ctx.GetWhere(p => p.SomeId, 1)).ShouldNotBeEmpty();
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.Equal, 30);
+                    .And(p => p.Age, Operator.Is, 30);
 
                 (await ctx.DeleteWhere(filter)).ShouldBe(2);
                 (await ctx.Get()).Count.ShouldBe(2);
@@ -2430,7 +2430,7 @@
 
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 30);
 
                 (await ctx.Count(p => p.SomeId, filter)).ShouldBe((ulong)3);
                 (await ctx.Count(p => p.Age, filter, true)).ShouldBe((ulong)1);
@@ -2532,7 +2532,7 @@
 
                 var filter = ctx.Query.Filter
                     .And(p => p.Age, Operator.LessThan, 30)
-                    .Or(p => p.Age, Operator.Equal, 40);
+                    .Or(p => p.Age, Operator.Is, 40);
 
                 (await ctx.Sum(p => p.Age, filter)).ShouldBe(80);
                 (await ctx.Sum(p => p.Age, filter, true)).ShouldBe(70);
@@ -2638,7 +2638,7 @@
                 insertedPeople.Length.ShouldBe(7);
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 40);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 40);
 
                 (await ctx.Avg(p => p.Age, filter)).ShouldBe(50);
                 (await ctx.Avg(p => p.Age, filter, true)).ShouldBe(50);
@@ -2725,7 +2725,7 @@
                 (await ctx.Insert(people)).ShouldBe(5);
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 30);
 
                 (await ctx.Min(p => p.Age, filter)).ShouldBe(30);
             }
@@ -2811,7 +2811,7 @@
                 (await ctx.Insert(people)).ShouldBe(5);
 
                 var filter = ctx.Query.Filter
-                    .And(p => p.Age, Operator.GreaterThanOrEqual, 30);
+                    .And(p => p.Age, Operator.GreaterThanOrIs, 30);
 
                 (await ctx.Max(p => p.Age, filter)).ShouldBe(50);
             }

@@ -11,12 +11,12 @@
     {
         private static readonly Dictionary<Operator, string> Operands = new Dictionary<Operator, string>
         {
-            {Operator.Equal, "="},
-            {Operator.NotEqual, "<>"},
+            {Operator.Is, "="},
+            {Operator.IsNot, "<>"},
             {Operator.GreaterThan, ">"},
-            {Operator.GreaterThanOrEqual, ">="},
+            {Operator.GreaterThanOrIs, ">="},
             {Operator.LessThan, "<"},
-            {Operator.LessThanOrEqual, "<="},
+            {Operator.LessThanOrIs, "<="},
         };
 
         /// <summary>
