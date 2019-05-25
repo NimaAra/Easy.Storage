@@ -24,9 +24,9 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Easy.Common" Version="2.9.9" />
+    <PackageReference Include="Easy.Common" Version="3.4.0" />
     <PackageReference Include="Easy.Storage.Common" Version="0.9.2" />
-    <PackageReference Include="System.Data.SQLite.Core.MSIL" Version="1.0.109" />
+    <PackageReference Include="System.Data.SQLite.Core.MSIL" Version="1.0.110" />
   </ItemGroup>
 		
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

@@ -28,7 +28,7 @@
                 conn.ConnectionTimeout.ShouldBe(15);
                 conn.DataSource.ShouldBeNull();
                 conn.Database.ShouldBe("main");
-                conn.ServerVersion.ShouldBe("3.24.0");
+                conn.ServerVersion.ShouldBe("3.27.2");
                 conn.State.ShouldBe(ConnectionState.Closed);
 
                 var attachedDbs = await conn.GetAttachedDatabases();
