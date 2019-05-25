@@ -1,22 +1,24 @@
 namespace Easy.Storage.Common.Filter
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
     using Easy.Common.Extensions;
     using Easy.Storage.Common.Extensions;
 
     /// <summary>
-    /// Represents a filtered query.
+    /// Represents an abstraction for building <see cref="Filter"/>.
     /// </summary>
-    internal sealed class FilteredQuery
+    internal sealed class FilterBuilder
     {
         private readonly Table _table;
         private readonly StringBuilder _builder;
         private uint _paramCounter;
 
-        private FilteredQuery(Table table)
+        private FilterBuilder(Table table)
         {
             _table = table;
             _builder = new StringBuilder();
@@ -24,11 +26,11 @@ namespace Easy.Storage.Common.Filter
         }
 
         internal Dictionary<string, object> Parameters { get; }
-        
-        internal static FilteredQuery Make(Table table) => new FilteredQuery(table);
+
+        internal static FilterBuilder For(Table table) => new FilterBuilder(table);
 
         /// <summary>
-        /// Compiles and gets the <c>SQL</c> of the <see cref="FilteredQuery"/>.
+        /// Compiles and gets the <c>SQL</c> of the <see cref="FilterBuilder"/>.
         /// </summary>
         /// <param name="sqlToPrefix">
         /// An optional <c>SQL</c> to prefix to the result.
@@ -72,14 +74,22 @@ namespace Easy.Storage.Common.Filter
             AppendSQL(clause, selector, value, @operator.AsString());
         }
 
-        internal void AddInClause<T, TProperty>(Expression<Func<T, TProperty>> selector, string clause, bool isIn, IEnumerable<TProperty> values)
+        internal void AddInClause<T, TProperty>(
+            Expression<Func<T, TProperty>> selector,
+            string clause,
+            bool isIn,
+            IEnumerable<TProperty> values)
         {
             var inClause = isIn ? Formatter.InClauseSeparator : Formatter.NotInClauseSeparator;
             AppendSQL(clause, selector, values, inClause);
         }
 
         // ReSharper disable once InconsistentNaming
-        private void AppendSQL<T, TProperty, TValue>(string clause, Expression<Func<T, TProperty>> selector, TValue value, string operation)
+        private void AppendSQL<T, TProperty, TValue>(
+            string clause,
+            Expression<Func<T, TProperty>> selector,
+            TValue value,
+            string operation)
         {
             var propertyName = selector.GetPropertyName();
             var paramName = AddAndReturnParameter(propertyName, value);
@@ -91,7 +101,26 @@ namespace Easy.Storage.Common.Filter
         private string AddAndReturnParameter<TValue>(string propertyName, TValue value)
         {
             var paramName = string.Concat(propertyName, (++_paramCounter).ToString());
-            Parameters.Add(paramName, value);
+
+            object valAsObject = value;
+
+            switch (value)
+            {
+                case Enum _:
+                    valAsObject = value.ToString();
+                    break;
+                case IEnumerable sequence:
+                    {
+                        var type = typeof(TValue);
+                        if (type.GenericTypeArguments.Length > 0 && type.GenericTypeArguments[0].IsEnum)
+                        {
+                            valAsObject = sequence.Cast<object>().Select(x => x.ToString());
+                        }
+                        break;
+                    }
+            }
+
+            Parameters.Add(paramName, valAsObject);
             return paramName;
         }
     }

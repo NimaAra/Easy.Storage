@@ -17,7 +17,7 @@
 
         private Query(Table table) => _table = table;
         
-        internal static Query<T> Make(Table table) => new Query<T>(table);
+        internal static Query<T> For(Table table) => new Query<T>(table);
 
         /// <summary>
         /// Gets an instance of the <see cref="Filter{T}"/> for creating query filters.

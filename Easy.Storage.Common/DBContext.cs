@@ -42,7 +42,7 @@ namespace Easy.Storage.Common
         /// <summary>
         /// Gets a <see cref="Query{T}"/> instance for building queries.
         /// </summary>
-        public Query<T> Query => Query<T>.Make(Table);
+        public Query<T> Query => Query<T>.For(Table);
 
         /// <summary>
         /// Gets the records represented by the <typeparamref name="T"/> from the storage.
