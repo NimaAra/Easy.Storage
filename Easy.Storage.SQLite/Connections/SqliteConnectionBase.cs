@@ -165,7 +165,17 @@
         /// The name of the exported function used to initialize the extension.
         /// If null, the default <c>sqlite3_extension_init</c> will be used.
         /// </param>
-        public void LoadExtension(string fileName, string procName) => Connection.LoadExtension(fileName, procName);
+        public void LoadExtension(string fileName, string procName)
+        {
+            try
+            {
+                Connection.Open();
+                Connection.LoadExtension(fileName, procName);
+            } finally
+            {
+                Connection.Close();
+            }
+        }
 
         /// <summary>
         /// Disposes and finalizes the connection, if applicable.
