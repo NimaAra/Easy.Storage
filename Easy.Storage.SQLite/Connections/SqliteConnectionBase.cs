@@ -146,6 +146,28 @@
         }
 
         /// <summary>
+        /// Enables <c>Full Text Search</c> support.
+        /// </summary>
+        public void EnableFTS5() => LoadExtension("SQLite.Interop.dll", "sqlite3_fts5_init");
+
+        /// <summary>
+        /// Enables <c>JSON</c> support.
+        /// </summary>
+        public void EnableJSON() => LoadExtension("SQLite.Interop.dll", "sqlite3_json_init");
+
+        /// <summary>
+        /// Loads a SQLite extension library from the named dynamic link library file.
+        /// </summary>
+        /// <param name="fileName">
+        /// The name of the dynamic link library file containing the extension.
+        /// </param>
+        /// <param name="procName">
+        /// The name of the exported function used to initialize the extension.
+        /// If null, the default <c>sqlite3_extension_init</c> will be used.
+        /// </param>
+        public void LoadExtension(string fileName, string procName) => Connection.LoadExtension(fileName, procName);
+
+        /// <summary>
         /// Disposes and finalizes the connection, if applicable.
         /// </summary>
         public new abstract void Dispose();
