@@ -18,6 +18,7 @@
     <AssemblyName>Easy.Storage.SQLite</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>7.3</LangVersion>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2PAssets</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   
   <ItemGroup>
@@ -25,12 +26,22 @@
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Easy.Common" Version="3.4.0" />
-    <PackageReference Include="Easy.Storage.Common" Version="0.9.5" />
+    <PackageReference Include="Easy.Common" Version="3.5.0" />
     <PackageReference Include="System.Data.SQLite.Core.MSIL" Version="1.0.111" />
   </ItemGroup>
-		
-	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	
+  <ItemGroup>
+    <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+  <Target Name="IncludeP2PAssets">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)Easy.Storage.Common.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)Easy.Storage.Common.xml" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
