@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data.SQLite;
     using System.IO;
+    using System.Threading.Tasks;
     using Easy.Common;
     using Easy.Storage.Common.Extensions;
 
@@ -46,10 +47,19 @@
         /// <summary>
         /// Opens the connection and runs the command to attach the <see cref="FilesToAttach"/>.
         /// </summary>
-        public override async void Open()
+        public override void Open()
         {
             Connection.Open();
-            await Connection.ExecuteAsync(_attachCommands);
+            Connection.Execute(_attachCommands);
+        }
+
+        /// <summary>
+        /// Opens the connection and runs the command to attach the <see cref="FilesToAttach"/>.
+        /// </summary>
+        public override Task OpenAsync()
+        {
+            Connection.Open();
+            return Connection.ExecuteAsync(_attachCommands);
         }
 
         /// <summary>

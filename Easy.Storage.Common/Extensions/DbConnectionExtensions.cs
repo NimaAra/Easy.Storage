@@ -43,6 +43,20 @@
         /// Executes the given <paramref name="sql"/>.
         /// </summary>
         /// <returns>The number of rows affected</returns>
+        public static int Execute(
+            this IDbConnection connection,
+            string sql,
+            object param = null,
+            IDbTransaction transaction = null,
+            int? commandTimeout = null,
+            CommandType? commandType = null,
+            CancellationToken cToken = default)
+                => connection.Execute(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
+
+        /// <summary>
+        /// Asynchronously Executes the given <paramref name="sql"/>.
+        /// </summary>
+        /// <returns>The number of rows affected</returns>
         public static Task<int> ExecuteAsync(
             this IDbConnection connection,
             string sql,
@@ -50,11 +64,27 @@
             IDbTransaction transaction = null,
             int? commandTimeout = null,
             CommandType? commandType = null,
-            CancellationToken cToken = default(CancellationToken)) 
-                => connection.ExecuteAsync(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
+            CancellationToken cToken = default) 
+                => connection.ExecuteAsync(
+                    new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
 
         /// <summary>
         /// Executes the given <paramref name="sql"/> and returns the result of the query.
+        /// </summary>
+        public static IEnumerable<TReturn> Query<TReturn>(
+            this IDbConnection connection,
+            string sql,
+            object param = null,
+            IDbTransaction transaction = null,
+            int? commandTimeout = null,
+            CommandType? commandType = null,
+            bool buffered = true,
+            CancellationToken cToken = default)
+                => connection.Query<TReturn>(
+                    new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken));
+
+        /// <summary>
+        /// Asynchronously Executes the given <paramref name="sql"/> and returns the result of the query.
         /// </summary>
         public static Task<IEnumerable<TReturn>> QueryAsync<TReturn>(
             this IDbConnection connection, 
@@ -64,11 +94,24 @@
             int? commandTimeout = null, 
             CommandType? commandType = null, 
             bool buffered = true, 
-            CancellationToken cToken = default(CancellationToken)) 
+            CancellationToken cToken = default) 
                 => connection.QueryAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken));
 
         /// <summary>
         /// Executes the given <paramref name="sql"/> that returns a single value.
+        /// </summary>
+        public static TReturn ExecuteScalar<TReturn>(
+            this IDbConnection connection,
+            string sql,
+            object param = null,
+            IDbTransaction transaction = null,
+            int? commandTimeout = null,
+            CommandType? commandType = null,
+            CancellationToken cToken = default)
+                => connection.ExecuteScalar<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
+
+        /// <summary>
+        /// Asynchronously Executes the given <paramref name="sql"/> that returns a single value.
         /// </summary>
         public static Task<TReturn> ExecuteScalarAsync<TReturn>(
             this IDbConnection connection,
@@ -77,11 +120,31 @@
             IDbTransaction transaction = null,
             int? commandTimeout = null,
             CommandType? commandType = null,
-            CancellationToken cToken = default(CancellationToken)) 
+            CancellationToken cToken = default) 
                 => connection.ExecuteScalarAsync<TReturn>(new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, cToken));
 
         /// <summary>
         /// Execute a command that returns multiple result sets, and access each in turn.
+        /// <remarks>
+        /// This method is not supported by <c>Oracle</c> as per: <see href="http://stackoverflow.com/a/6338193"/>.
+        /// </remarks>
+        /// </summary>
+        public static Reader QueryMultiple(
+            this IDbConnection connection,
+            string sql,
+            object param = null,
+            IDbTransaction transaction = null,
+            int? commandTimeout = null,
+            CommandType? commandType = null,
+            bool buffered = true,
+            CancellationToken cToken = default)
+            => new Reader(
+                connection.QueryMultiple(
+                    new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)
+                ));
+
+        /// <summary>
+        /// Asynchronously Execute a command that returns multiple result sets, and access each in turn.
         /// <remarks>
         /// This method is not supported by <c>Oracle</c> as per: <see href="http://stackoverflow.com/a/6338193"/>.
         /// </remarks>
@@ -94,7 +157,7 @@
             int? commandTimeout = null,
             CommandType? commandType = null,
             bool buffered = true,
-            CancellationToken cToken = default(CancellationToken)) 
+            CancellationToken cToken = default) 
                 => new Reader(
                     await connection.QueryMultipleAsync(
                         new CommandDefinition(sql, param, transaction, commandTimeout, commandType, buffered ? CommandFlags.Buffered : CommandFlags.None, cToken)

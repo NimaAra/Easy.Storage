@@ -4,6 +4,7 @@
     using System.Data;
     using System.Data.Common;
     using System.Data.SQLite;
+    using System.Threading.Tasks;
     using Easy.Common;
     using Easy.Common.Extensions;
     using Easy.Storage.SQLite.Functions;
@@ -13,6 +14,8 @@
     /// </summary>
     public abstract class SQLiteConnectionBase : DbConnection, IDisposable
     {
+        private const string INTEROP_DLL = "SQLite.Interop.dll";
+        
         /// <summary>
         /// The underlying <c>SQLite</c> connection.
         /// </summary>
@@ -116,6 +119,18 @@
             if (Connection.State == ConnectionState.Open) { return; }
             
             Connection.Open();
+            EnableDefaultExtensions();
+        }
+
+        /// <summary>
+        /// Asynchronously Opens the connection using the parameters found in the <see cref="ConnectionString"/>. 
+        /// </summary>
+        public async new virtual Task OpenAsync()
+        {
+            if (Connection.State == ConnectionState.Open) { return; }
+
+            await Connection.OpenAsync();
+            EnableDefaultExtensions();
         }
 
         /// <summary>
@@ -124,6 +139,15 @@
         public DbConnection OpenAndReturn()
         {
             Open();
+            return this;
+        }
+
+        /// <summary>
+        /// Asynchronously Opens and returns the connection using the parameters found in the <see cref="ConnectionString"/>. 
+        /// </summary>
+        public async Task<DbConnection> OpenAndReturnAsync()
+        {
+            await OpenAsync();
             return this;
         }
 
@@ -146,16 +170,6 @@
         }
 
         /// <summary>
-        /// Enables <c>Full Text Search</c> support.
-        /// </summary>
-        public void EnableFTS5() => LoadExtension("SQLite.Interop.dll", "sqlite3_fts5_init");
-
-        /// <summary>
-        /// Enables <c>JSON</c> support.
-        /// </summary>
-        public void EnableJSON() => LoadExtension("SQLite.Interop.dll", "sqlite3_json_init");
-
-        /// <summary>
         /// Loads a SQLite extension library from the named dynamic link library file.
         /// </summary>
         /// <param name="fileName">
@@ -165,21 +179,27 @@
         /// The name of the exported function used to initialize the extension.
         /// If null, the default <c>sqlite3_extension_init</c> will be used.
         /// </param>
-        public void LoadExtension(string fileName, string procName)
-        {
-            try
-            {
-                Connection.Open();
-                Connection.LoadExtension(fileName, procName);
-            } finally
-            {
-                Connection.Close();
-            }
-        }
+        public void LoadExtension(string fileName, string procName) => Connection.LoadExtension(fileName, procName);
 
         /// <summary>
         /// Disposes and finalizes the connection, if applicable.
         /// </summary>
         public new abstract void Dispose();
+
+        /// <summary>
+        /// Enables <c>Full Text Search</c> support.
+        /// </summary>
+        private void EnableFTS5() => LoadExtension(INTEROP_DLL, "sqlite3_fts5_init");
+
+        /// <summary>
+        /// Enables <c>JSON</c> support.
+        /// </summary>
+        private void EnableJSON() => LoadExtension(INTEROP_DLL, "sqlite3_json_init");
+
+        private void EnableDefaultExtensions()
+        {
+            EnableFTS5();
+            EnableJSON();
+        }
     }
 }
