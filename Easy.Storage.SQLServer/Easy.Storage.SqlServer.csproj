@@ -26,13 +26,10 @@
 	
 	<ItemGroup>    
     <PackageReference Include="Easy.Common" Version="3.5.0" />
+    <PackageReference Include="Easy.Storage.Common" Version="0.10.1" />
   </ItemGroup>
 	
-	<ItemGroup>
-	  <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj" />
-	</ItemGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
