@@ -18,7 +18,6 @@
     <AssemblyName>Easy.Storage.SQLServer</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>7.3</LangVersion>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2PAssets</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
   
   <ItemGroup>
@@ -30,15 +29,8 @@
   </ItemGroup>
 	
 	<ItemGroup>
-	  <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj" PrivateAssets="All" />
+	  <ProjectReference Include="..\Easy.Storage.Common\Easy.Storage.Common.csproj" />
 	</ItemGroup>
-
-  <Target Name="IncludeP2PAssets">
-    <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)Easy.Storage.Common.dll" />
-      <BuildOutputInPackage Include="$(OutputPath)Easy.Storage.Common.xml" />
-    </ItemGroup>
-  </Target>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

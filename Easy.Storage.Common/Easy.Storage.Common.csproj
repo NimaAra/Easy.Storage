@@ -27,7 +27,7 @@
 	<ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Dapper" Version="1.60.6" />
-    <PackageReference Include="Easy.Common" Version="3.4.0" />
+    <PackageReference Include="Easy.Common" Version="3.5.0" />
   </ItemGroup>
 	
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
